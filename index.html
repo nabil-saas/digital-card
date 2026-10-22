@@ -1,0 +1,2153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[NOM] — La carte de fidélité digitale pour les commerces de proximité</title>
+<meta name="description" content="Vos clients ajoutent votre carte de fidélité dans Google Wallet ou Apple Wallet en un scan, sans application. Vous les récompensez à chaque passage.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   [NOM] — Landing page
+   Jetons de design (section 2 du cahier des charges)
+   ============================================================ */
+:root{
+  --yellow:#FFF75C;
+  --yellow-light:#FFFCD6;
+  --ink:#1D1D1F;
+  --ink-2:#6E6E73;
+  --page:#FFFFFF;
+  --gray:#F5F5F7;
+  --border:#E5E5EA;
+  --success:#34C759;
+  --warning:#FF9F0A;
+  --error:#FF3B30;
+
+  --maxw:1200px;
+  --pad:24px;
+  --section-y:120px;
+  --r-card:20px;
+  --r-pill:980px;
+  --font:-apple-system,BlinkMacSystemFont,"Inter",sans-serif;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;font-family:var(--font);font-size:17px;line-height:1.5;
+  color:var(--ink);background:var(--page);
+  -webkit-font-smoothing:antialiased;
+}
+img,svg{display:block;max-width:100%}
+button{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px}
+
+/* ---------- Trame ---------- */
+.container{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad)}
+.section{padding:var(--section-y) 0}
+.section--gray{background:var(--gray)}
+.section--cream{background:var(--yellow-light)}
+.section--dark{background:var(--ink);color:#fff}
+.section--dark .eyebrow{color:var(--yellow)}
+.section--dark .lead,.section--dark .muted{color:rgba(255,255,255,.72)}
+
+/* ---------- Typographie ---------- */
+.h1{font-size:clamp(36px,5.2vw,64px);font-weight:700;line-height:1.04;letter-spacing:-.03em;margin:0}
+.h2{font-size:clamp(28px,3.6vw,40px);font-weight:700;line-height:1.1;letter-spacing:-.025em;margin:0}
+.h3{font-size:21px;font-weight:600;line-height:1.3;letter-spacing:-.01em;margin:0}
+.h4{font-size:17px;font-weight:600;margin:0}
+.lead{font-size:clamp(17px,1.5vw,21px);line-height:1.5;color:var(--ink-2);margin:0}
+.muted{color:var(--ink-2)}
+.caption{font-size:13px;line-height:1.45;color:var(--ink-2)}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 14px;
+  border-radius:var(--r-pill);background:var(--yellow-light);
+  box-shadow:inset 0 0 0 1px rgba(29,29,31,.14);
+  font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink);margin:0 0 20px
+}
+.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ink);flex:none}
+.section--dark .eyebrow{
+  background:rgba(255,247,92,.14);box-shadow:inset 0 0 0 1px rgba(255,247,92,.34);color:var(--yellow)
+}
+.section--dark .eyebrow::before{background:var(--yellow)}
+.section--cream .eyebrow{background:#fff;box-shadow:inset 0 0 0 1px rgba(29,29,31,.14)}
+.section-head{max-width:720px;margin:0 auto 64px;text-align:center}
+.section-head .lead{margin-top:20px}
+
+/* ---------- Boutons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:48px;padding:0 26px;border-radius:var(--r-pill);
+  font-size:16px;font-weight:600;letter-spacing:-.01em;
+  border:1px solid transparent;background:none;cursor:pointer;white-space:nowrap;
+  transition:transform .18s var(--ease),background .18s var(--ease),box-shadow .18s var(--ease);
+}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn--primary{background:var(--yellow);color:var(--ink);border-color:var(--ink)}
+.btn--primary:hover{background:#fffa8f}
+.btn--secondary{background:transparent;color:var(--ink);border-color:var(--ink)}
+.btn--secondary:hover{background:rgba(29,29,31,.06)}
+.btn--sm{height:40px;padding:0 20px;font-size:15px}
+.btn--lg{height:56px;padding:0 34px;font-size:17px}
+.btn--block{width:100%}
+.section--dark .btn--secondary{color:#fff;border-color:rgba(255,255,255,.45)}
+.section--dark .btn--secondary:hover{background:rgba(255,255,255,.1)}
+.btn [data-lucide]{width:18px;height:18px}
+
+/* ---------- Carte générique ---------- */
+.card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r-card);padding:28px;
+}
+.card--gray{background:var(--gray);border-color:transparent}
+
+/* ---------- Apparition au scroll ---------- */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .4s var(--ease),transform .4s var(--ease)}
+.reveal.is-in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  html,.biz-rail{scroll-behavior:auto}
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
+
+/* ============================================================
+   1. Barre de navigation
+   ============================================================ */
+.nav{
+  position:fixed;inset:0 0 auto;z-index:100;
+  background:rgba(255,255,255,0);border-bottom:1px solid transparent;
+  transition:background .3s var(--ease),border-color .3s var(--ease),backdrop-filter .3s var(--ease);
+}
+.nav.is-stuck{
+  background:rgba(255,255,255,.72);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom-color:var(--border);
+}
+.nav__inner{display:flex;align-items:center;gap:32px;height:64px}
+.nav__links{display:flex;align-items:center;gap:28px;margin-left:auto}
+.nav__links a{font-size:15px;font-weight:500;color:var(--ink-2);transition:color .15s}
+.nav__links a:hover{color:var(--ink)}
+.nav__actions{display:flex;align-items:center;gap:16px}
+.nav__login{font-size:15px;font-weight:500}
+.nav__burger{
+  display:none;width:40px;height:40px;align-items:center;justify-content:center;
+  border:1px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;margin-left:auto
+}
+.nav__mobile{
+  display:none;border-top:1px solid var(--border);background:rgba(255,255,255,.95);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:16px var(--pad) 28px
+}
+.nav__mobile.is-open{display:block}
+.nav__mobile a{display:block;padding:14px 0;font-size:19px;font-weight:600;border-bottom:1px solid var(--border)}
+.nav__mobile .btn{margin-top:20px}
+
+/* ---------- Logo provisoire ---------- */
+.logo{display:inline-flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.02em;font-size:19px}
+.logo__mark{
+  width:32px;height:32px;border-radius:9px;background:var(--yellow);border:1px solid var(--ink);
+  display:grid;place-items:center;font-size:17px;font-weight:700;line-height:1;flex:none;
+  color:var(--ink) /* la lettre reste foncée, y compris sur fond sombre */
+}
+.logo--lg .logo__mark{width:40px;height:40px;border-radius:12px;font-size:21px}
+.logo--lg{font-size:22px}
+.section--dark .logo__mark{border-color:transparent}
+
+/* ============================================================
+   2. Hero
+   ============================================================ */
+.hero{padding:140px 0 var(--section-y);overflow:hidden;position:relative}
+/* Voile jaune très diffus en haut à droite, pour sortir du blanc plat. */
+.hero::before{
+  content:"";position:absolute;top:-220px;right:-160px;width:720px;height:720px;
+  background:radial-gradient(circle,rgba(255,247,92,.5) 0%,rgba(255,247,92,0) 65%);
+  pointer-events:none;z-index:0
+}
+.hero__grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;position:relative;z-index:1}
+.hero__badge{
+  display:inline-flex;align-items:center;gap:9px;height:34px;padding:0 16px;margin:0 0 24px;
+  border-radius:var(--r-pill);background:#fff;border:1px solid var(--border);
+  font-size:14px;font-weight:500;color:var(--ink-2);
+  box-shadow:0 2px 10px -4px rgba(0,0,0,.12)
+}
+.hero__badge-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--success);flex:none;
+  box-shadow:0 0 0 3px rgba(52,199,89,.18)
+}
+.hero__title{margin-bottom:24px}
+
+/* ---------- Cartes flottantes du hero ---------- */
+.float-card{
+  position:absolute;z-index:3;display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid var(--border);border-radius:16px;padding:11px 15px 11px 11px;
+  box-shadow:0 16px 38px -18px rgba(0,0,0,.35);white-space:nowrap
+}
+/* Elles ne mordent que sur le bord du téléphone, jamais sur la carte. */
+.float-card--a{top:12%;left:-72px;animation:floaty 5.5s ease-in-out infinite}
+.float-card--b{bottom:15%;right:-40px;animation:floaty 6.5s ease-in-out .9s infinite}
+.float-card__ico{
+  width:32px;height:32px;border-radius:10px;background:var(--yellow);
+  box-shadow:inset 0 0 0 1px var(--ink);display:grid;place-items:center;flex:none
+}
+.float-card__ico--ok{background:var(--success);box-shadow:none;color:#fff}
+.float-card__ico [data-lucide]{width:17px;height:17px;stroke-width:2.4}
+.float-card__txt b{display:block;font-size:14px;font-weight:600;line-height:1.25}
+.float-card__txt span{display:block;font-size:12px;color:var(--ink-2)}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hero__cta{display:flex;flex-wrap:wrap;gap:12px;margin:36px 0 28px}
+.hero__checks{display:flex;flex-wrap:wrap;gap:12px 28px;list-style:none;margin:0;padding:0}
+.hero__checks li{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:500}
+.check-dot{
+  width:22px;height:22px;border-radius:50%;background:var(--yellow);border:1px solid var(--ink);
+  display:grid;place-items:center;flex:none
+}
+.check-dot [data-lucide]{width:13px;height:13px;stroke-width:3}
+.hero__visual{display:flex;justify-content:center;position:relative}
+.hero__glow{
+  position:absolute;width:460px;height:460px;border-radius:50%;
+  background:radial-gradient(circle,var(--yellow) 0%,rgba(255,247,92,0) 68%);
+  opacity:.5;filter:blur(10px);z-index:0;top:50%;left:50%;transform:translate(-50%,-50%)
+}
+
+/* ---------- Téléphone dessiné en CSS ---------- */
+.phone{
+  position:relative;width:320px;flex:none;border-radius:46px;background:var(--ink);
+  padding:11px;box-shadow:0 30px 70px -20px rgba(0,0,0,.3);z-index:1
+}
+.phone--sm{width:258px;border-radius:38px;padding:9px}
+.phone__screen{
+  position:relative;border-radius:36px;background:#fff;overflow:hidden;
+  aspect-ratio:9/19;display:flex;flex-direction:column
+}
+.phone--sm .phone__screen{border-radius:30px}
+.phone__notch{
+  position:absolute;top:9px;left:50%;transform:translateX(-50%);
+  width:86px;height:24px;border-radius:14px;background:var(--ink);z-index:5
+}
+.phone--sm .phone__notch{width:68px;height:20px;top:7px}
+.phone__status{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px 4px;font-size:12px;font-weight:600;flex:none
+}
+.phone__status span:first-child{min-width:40px}
+.phone__status .sig{display:flex;gap:4px;align-items:center;opacity:.85}
+.phone__status .sig [data-lucide]{width:13px;height:13px}
+
+/* ---------- Pile de cartes Wallet du hero ---------- */
+.wallet-stack{position:relative;flex:1;padding:16px 16px 0}
+.wallet-stack__head{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:0 4px}
+.wallet-stack__head [data-lucide]{width:16px;height:16px;color:var(--ink-2)}
+.wallet-stack__head span{font-size:13px;font-weight:600;color:var(--ink-2)}
+.wallet-stack__deck{position:relative;height:400px}
+.wcard{
+  position:absolute;inset:0 0 auto;border-radius:16px;padding:16px;color:#fff;
+  transition:transform .7s var(--ease),opacity .45s var(--ease);
+  box-shadow:0 10px 30px -12px rgba(0,0,0,.45);overflow:hidden
+}
+/* Les cartes restent opaques au repos : une carte de devant translucide
+   laisserait voir la pile en dessous. Seule la carte qui revient du fond
+   est brièvement fondue (voir setHeroCard). */
+.wcard[data-pos="0"]{transform:translateY(0) scale(1);z-index:3}
+.wcard[data-pos="1"]{transform:translateY(68px) scale(.95);z-index:2}
+.wcard[data-pos="2"]{transform:translateY(128px) scale(.9);z-index:1}
+.wcard__top{display:flex;align-items:center;gap:10px}
+.wcard__logo{
+  width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.9);color:var(--ink);
+  display:grid;place-items:center;font-size:13px;font-weight:700;flex:none
+}
+.wcard__name{font-size:14px;font-weight:700;line-height:1.2;letter-spacing:-.01em}
+.wcard__prog{font-size:11px;opacity:.75;line-height:1.2;margin-top:2px}
+.wcard__body{margin-top:16px}
+.wcard__label{font-size:10px;letter-spacing:.07em;text-transform:uppercase;opacity:.7}
+.wcard__value{font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-top:2px}
+.wcard__stamps{display:flex;gap:5px;margin-top:12px;flex-wrap:wrap}
+.stamp{
+  width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(255,255,255,.5);
+  display:grid;place-items:center
+}
+.stamp [data-lucide]{width:12px;height:12px;opacity:.45}
+.stamp.is-full{background:rgba(255,255,255,.95);border-color:transparent}
+.stamp.is-full [data-lucide]{opacity:1;color:var(--ink)}
+.wcard__bar{height:6px;border-radius:99px;background:rgba(255,255,255,.28);margin-top:14px;overflow:hidden}
+.wcard__bar i{display:block;height:100%;background:#fff;border-radius:99px}
+.wcard__qr{
+  width:62px;height:62px;border-radius:8px;background:#fff;padding:5px;margin:14px auto 0
+}
+/* Sur les cartes de l'arrière-plan, seul le bandeau du bas dépasse :
+   on masque le QR pour ne pas donner une pile confuse. */
+.wcard:not([data-pos="0"]) .wcard__qr{visibility:hidden}
+.wcard__foot{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:14px;font-size:10px;opacity:.8
+}
+.wallet-dots{display:flex;gap:6px;justify-content:center;padding:14px 0 18px;flex:none}
+.wallet-dots button{
+  width:7px;height:7px;padding:0;border:none;border-radius:50%;background:var(--border);cursor:pointer;
+  transition:background .2s,width .2s
+}
+.wallet-dots button[aria-current="true"]{background:var(--ink);width:20px;border-radius:99px}
+
+/* QR dessiné en CSS */
+.qr{display:grid;grid-template-columns:repeat(11,1fr);gap:1px;width:100%;height:100%}
+.qr i{background:transparent;border-radius:.5px}
+.qr i.on{background:var(--ink)}
+
+/* ============================================================
+   3. Bande de confiance
+   ============================================================ */
+.trust{padding:56px 0;border-bottom:1px solid var(--border)}
+.trust__label{text-align:center;margin-bottom:28px}
+.marquee{overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.marquee__track{display:flex;gap:64px;width:max-content;animation:slide 34s linear infinite}
+.marquee:hover .marquee__track{animation-play-state:paused}
+@keyframes slide{to{transform:translateX(-50%)}}
+.flogo{
+  display:flex;align-items:center;gap:10px;color:#AEAEB2;
+  font-size:19px;font-weight:700;letter-spacing:-.02em;white-space:nowrap
+}
+.flogo [data-lucide]{width:22px;height:22px;stroke-width:1.75}
+
+/* ============================================================
+   4. Avant / après
+   ============================================================ */
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.ba__col{border-radius:var(--r-card);padding:36px}
+.ba__col--before{background:var(--gray)}
+.ba__col--after{background:var(--yellow-light);border:1px solid rgba(29,29,31,.1)}
+.ba__tag{
+  display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 14px;
+  border-radius:var(--r-pill);font-size:14px;font-weight:600;margin-bottom:24px
+}
+.ba__col--before .ba__tag{background:#fff;color:var(--ink-2);border:1px solid var(--border)}
+.ba__col--after .ba__tag{background:var(--yellow);color:var(--ink);border:1px solid var(--ink)}
+.ba__list{list-style:none;margin:0;padding:0;display:grid;gap:20px}
+.ba__list li{display:flex;gap:14px;align-items:flex-start}
+.ba__list [data-lucide]{width:20px;height:20px;flex:none;margin-top:2px}
+.ba__col--before [data-lucide]{color:var(--ink-2)}
+.ba__col--after [data-lucide]{color:var(--ink)}
+.ba__list strong{display:block;font-weight:600;margin-bottom:3px}
+.ba__list span{font-size:15px;color:var(--ink-2);line-height:1.45}
+
+/* ============================================================
+   5. Comment ça marche
+   ============================================================ */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative}
+/* Trait pointillé entre les étapes : il n'apparaît que dans les
+   gouttières, les cartes étant opaques. */
+.steps::before{
+  content:"";position:absolute;left:0;right:0;top:45px;height:2px;z-index:0;
+  background:repeating-linear-gradient(90deg,var(--border) 0 7px,transparent 7px 14px)
+}
+.step{
+  position:relative;z-index:1;background:#fff;border:1px solid var(--border);
+  border-radius:var(--r-card);padding:28px;
+  transition:transform .25s var(--ease),box-shadow .25s var(--ease)
+}
+.step:hover{transform:translateY(-4px);box-shadow:0 18px 40px -26px rgba(0,0,0,.4)}
+.step__num{
+  width:34px;height:34px;border-radius:50%;background:var(--yellow);border:1px solid var(--ink);
+  display:grid;place-items:center;font-size:15px;font-weight:700;margin-bottom:22px
+}
+.step__art{
+  height:112px;border-radius:14px;background:var(--gray);margin-bottom:22px;
+  display:grid;place-items:center;overflow:hidden;position:relative
+}
+.step h3{margin-bottom:8px}
+.step p{margin:0;font-size:15px;color:var(--ink-2);line-height:1.5}
+
+/* mini-illustrations des étapes */
+.art-card{
+  width:92px;height:58px;border-radius:9px;background:var(--ink);position:relative;
+  display:flex;flex-direction:column;justify-content:space-between;padding:8px
+}
+.art-card::after{content:"";height:5px;width:38px;border-radius:99px;background:var(--yellow)}
+.art-card b{display:block;width:16px;height:16px;border-radius:5px;background:var(--yellow)}
+.art-scan{display:flex;align-items:center;gap:14px}
+.art-qr{width:52px;height:52px;background:#fff;border-radius:8px;padding:5px;border:1px solid var(--border)}
+.art-nfc{
+  width:42px;height:42px;border-radius:50%;background:var(--yellow);border:1px solid var(--ink);
+  display:grid;place-items:center
+}
+.art-pos{
+  width:104px;border-radius:12px;background:#fff;border:1px solid var(--border);padding:10px;
+  display:grid;gap:7px
+}
+.art-pos i{display:block;height:7px;border-radius:99px;background:var(--border)}
+.art-pos i:first-child{width:60%;background:var(--ink)}
+.art-pos i:nth-child(3){width:45%}
+.art-gift{
+  width:62px;height:62px;border-radius:16px;background:var(--yellow);border:1px solid var(--ink);
+  display:grid;place-items:center
+}
+.art-gift [data-lucide]{width:28px;height:28px;stroke-width:1.5}
+
+/* ============================================================
+   6. Fonctionnalités (onglets)
+   ============================================================ */
+.feat__families{
+  display:inline-flex;gap:4px;padding:4px;background:var(--gray);border-radius:var(--r-pill);
+  margin:0 auto 48px;max-width:100%;overflow-x:auto;
+}
+.feat__families-wrap{display:flex;justify-content:center}
+.fam-tab{
+  height:42px;padding:0 22px;border:none;border-radius:var(--r-pill);background:transparent;
+  font-size:15px;font-weight:600;color:var(--ink-2);cursor:pointer;white-space:nowrap;
+  transition:background .2s,color .2s
+}
+.fam-tab[aria-selected="true"]{background:var(--yellow);color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.feat__grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:56px;align-items:center}
+.feat__list{display:grid;gap:8px}
+.feat-item{
+  width:100%;text-align:left;border:1px solid transparent;border-radius:16px;background:transparent;
+  padding:16px 18px;cursor:pointer;display:flex;gap:14px;align-items:flex-start;
+  transition:background .2s,border-color .2s
+}
+.feat-item:hover{background:var(--gray)}
+.feat-item[aria-selected="true"]{background:#fff;border-color:var(--border);box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.feat-item__ico{
+  width:38px;height:38px;border-radius:11px;background:var(--gray);display:grid;place-items:center;flex:none;
+  transition:background .2s
+}
+.feat-item[aria-selected="true"] .feat-item__ico{background:var(--yellow);box-shadow:inset 0 0 0 1px var(--ink)}
+.feat-item__ico [data-lucide]{width:20px;height:20px;stroke-width:1.75}
+.feat-item__txt h4{margin-bottom:4px}
+.feat-item__txt p{margin:0;font-size:15px;color:var(--ink-2);line-height:1.45;display:none}
+.feat-item[aria-selected="true"] .feat-item__txt p{display:block}
+.feat__stage{
+  background:var(--gray);border-radius:28px;padding:40px;min-height:470px;
+  display:grid;place-items:center;overflow:hidden
+}
+.feat__stage>*{animation:fadeUp .4s var(--ease)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* ---------- Faux panneaux produit ---------- */
+.mock{
+  width:100%;max-width:420px;background:#fff;border-radius:18px;border:1px solid var(--border);
+  overflow:hidden;box-shadow:0 18px 40px -24px rgba(0,0,0,.25)
+}
+.mock__bar{
+  display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid var(--border);
+  background:#fff
+}
+.mock__bar i{width:9px;height:9px;border-radius:50%;background:var(--border);display:block}
+.mock__bar span{font-size:12px;font-weight:600;color:var(--ink-2);margin-left:6px}
+.mock__body{padding:18px}
+.mock-row{
+  display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;
+  border:1px solid var(--border);margin-bottom:8px;background:#fff
+}
+.mock-row:last-child{margin-bottom:0}
+.mock-row__ico{width:32px;height:32px;border-radius:9px;background:var(--gray);display:grid;place-items:center;flex:none}
+.mock-row__ico [data-lucide]{width:17px;height:17px;stroke-width:1.75}
+.mock-row__t{flex:1;min-width:0}
+.mock-row__t b{display:block;font-size:14px;font-weight:600}
+.mock-row__t span{font-size:12px;color:var(--ink-2)}
+.pill{
+  display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border-radius:var(--r-pill);
+  font-size:12px;font-weight:600;background:var(--gray);color:var(--ink-2);white-space:nowrap
+}
+.pill--yellow{background:var(--yellow);color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.pill--ok{background:rgba(52,199,89,.14);color:#1c7a36}
+.pill--warn{background:rgba(255,159,10,.16);color:#8a5200}
+.switch{
+  width:42px;height:26px;border-radius:99px;background:var(--border);position:relative;flex:none;
+  border:none;cursor:default;padding:0
+}
+.switch::after{
+  content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s var(--ease)
+}
+.switch.is-on{background:var(--success)}
+.switch.is-on::after{transform:translateX(16px)}
+.bars{display:grid;gap:12px}
+.bars__row{display:grid;grid-template-columns:96px 1fr 44px;gap:12px;align-items:center;font-size:13px}
+.bars__track{height:10px;border-radius:99px;background:var(--gray);overflow:hidden}
+.bars__track i{display:block;height:100%;border-radius:99px;background:var(--ink)}
+.bars__row:nth-child(1) .bars__track i{background:var(--ink)}
+.bars__row:nth-child(2) .bars__track i{background:var(--ink-2)}
+.bars__row:nth-child(3) .bars__track i{background:var(--border)}
+.spark{display:flex;align-items:flex-end;gap:5px;height:104px}
+.spark i{flex:1;border-radius:4px 4px 0 0;background:var(--yellow);box-shadow:inset 0 0 0 1px rgba(29,29,31,.22)}
+.lockscreen{
+  position:absolute;inset:0;background:linear-gradient(170deg,#2b2b30,#121214);
+  display:flex;flex-direction:column;align-items:center;padding:56px 14px 0;color:#fff
+}
+.lockscreen__time{font-size:46px;font-weight:600;letter-spacing:-.03em;line-height:1}
+.lockscreen__date{font-size:13px;opacity:.7;margin-top:4px}
+.notif{
+  width:100%;margin-top:28px;background:rgba(255,255,255,.14);backdrop-filter:blur(14px);
+  border-radius:16px;padding:12px;display:flex;gap:10px;text-align:left;
+  border:1px solid rgba(255,255,255,.14)
+}
+.notif__ico{
+  width:34px;height:34px;border-radius:9px;background:var(--yellow);color:var(--ink);
+  display:grid;place-items:center;font-size:14px;font-weight:700;flex:none
+}
+.notif__t{font-size:13px;font-weight:600;line-height:1.3}
+.notif__b{font-size:12px;opacity:.85;line-height:1.35;margin-top:2px}
+.notif__m{font-size:11px;opacity:.6;margin-top:4px}
+
+/* ============================================================
+   7. Pour quels commerces — carrousel photo
+   ============================================================ */
+.biz-section{overflow:hidden}
+.section-head--row{
+  max-width:none;text-align:left;display:flex;align-items:flex-end;gap:32px;margin-bottom:44px
+}
+.section-head--row>div{max-width:620px}
+.section-head--row .lead{margin-top:16px}
+.biz-nav{display:flex;gap:10px;margin-left:auto;flex:none}
+
+/* Rail à défilement avec accroche, débordant volontairement du conteneur */
+.biz-rail{
+  display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;
+  /* Les cartes s'alignent sur le conteneur mais débordent jusqu'au bord. */
+  padding:4px max(var(--pad), calc((100vw - var(--maxw)) / 2 + var(--pad))) 24px;
+  scrollbar-width:none;-ms-overflow-style:none;scroll-behavior:smooth
+}
+.biz-rail::-webkit-scrollbar{display:none}
+.biz-rail:focus-visible{outline:2px solid var(--ink);outline-offset:-4px;border-radius:8px}
+
+.biz-slide{
+  flex:0 0 340px;scroll-snap-align:center;background:#fff;border-radius:22px;
+  border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;
+  transition:transform .4s var(--ease),box-shadow .4s var(--ease),border-color .3s
+}
+.biz-slide.is-active{
+  transform:translateY(-6px);border-color:var(--ink);
+  box-shadow:0 24px 50px -28px rgba(0,0,0,.45)
+}
+.biz-slide__media{position:relative;aspect-ratio:4/3;background:var(--border);overflow:hidden}
+.biz-slide__media img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform .6s var(--ease);opacity:0
+}
+.biz-slide__media img.is-loaded{opacity:1}
+.biz-slide:hover .biz-slide__media img{transform:scale(1.04)}
+.biz-slide__media::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.18) 42%,transparent 70%)
+}
+.biz-slide__tag{
+  position:absolute;top:14px;left:14px;z-index:2;
+  display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;
+  border-radius:var(--r-pill);background:var(--yellow);border:1px solid var(--ink);
+  font-size:12px;font-weight:700;color:var(--ink)
+}
+.biz-slide__tag [data-lucide]{width:13px;height:13px}
+.biz-slide__title{
+  position:absolute;left:18px;right:18px;bottom:16px;z-index:2;color:#fff
+}
+.biz-slide__title b{display:block;font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.biz-slide__title span{display:block;font-size:13px;opacity:.85;margin-top:4px}
+.biz-slide__body{padding:20px;display:flex;flex-direction:column;flex:1;gap:16px}
+.biz-slide__reward{
+  display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;color:var(--ink)
+}
+.biz-slide__reward [data-lucide]{width:17px;height:17px;flex:none;margin-top:2px}
+.biz-figs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);
+  border-radius:14px;overflow:hidden;margin-top:auto}
+.fig{background:var(--gray);padding:12px 10px;text-align:center}
+.fig span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-2);line-height:1.2}
+.fig b{display:block;font-size:17px;font-weight:700;letter-spacing:-.02em;margin-top:6px;white-space:nowrap}
+
+.biz-dots{display:flex;gap:7px;justify-content:center;margin-top:4px}
+.biz-dots button{
+  width:8px;height:8px;border:none;border-radius:50%;background:#D8D8DC;padding:0;cursor:pointer;
+  transition:background .2s,width .2s
+}
+.biz-dots button[aria-selected="true"]{background:var(--ink);width:24px;border-radius:99px}
+.biz-credit{text-align:center;margin-top:20px;opacity:.75}
+
+/* ============================================================
+   8. Calculateur
+   ============================================================ */
+.calc{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:start}
+.calc__panel{background:#fff;border:1px solid var(--border);border-radius:var(--r-card);padding:32px}
+.slider{padding:18px 0;border-bottom:1px solid var(--border)}
+.slider:last-child{border-bottom:none;padding-bottom:0}
+.slider:first-child{padding-top:0}
+.slider__top{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:14px}
+.slider__top label{font-size:15px;font-weight:600}
+.slider__val{font-size:19px;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:99px;
+  background:var(--border);outline:none;margin:0;cursor:pointer
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--yellow);
+  border:1px solid var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.18);cursor:grab
+}
+input[type=range]::-moz-range-thumb{
+  width:24px;height:24px;border-radius:50%;background:var(--yellow);
+  border:1px solid var(--ink);cursor:grab
+}
+.calc__out{
+  background:var(--ink);color:#fff;border-radius:var(--r-card);padding:36px;position:sticky;top:88px
+}
+.calc__out .eyebrow{color:var(--yellow)}
+.calc__big{font-size:clamp(40px,5vw,56px);font-weight:700;letter-spacing:-.03em;line-height:1;color:var(--yellow)}
+.calc__sub{font-size:15px;color:rgba(255,255,255,.7);margin:8px 0 28px}
+.calc__split{display:grid;gap:1px;background:rgba(255,255,255,.16);border-radius:14px;overflow:hidden}
+.calc__split div{background:var(--ink);padding:18px}
+.calc__split span{display:block;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.calc__split b{display:block;font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:6px}
+.calc__note{font-size:12px;color:rgba(255,255,255,.55);margin:22px 0 0;display:flex;gap:8px}
+.calc__note [data-lucide]{width:15px;height:15px;flex:none;margin-top:1px}
+
+/* ============================================================
+   9. Chiffres clés
+   ============================================================ */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.16);border-radius:var(--r-card);overflow:hidden}
+.stat{background:var(--ink);padding:32px 26px}
+.stat b{display:block;font-size:clamp(34px,3.6vw,44px);font-weight:700;letter-spacing:-.03em;color:var(--yellow);line-height:1}
+.stat p{margin:12px 0 0;font-size:15px;line-height:1.45}
+.stat small{display:block;font-size:11px;color:rgba(255,255,255,.5);margin-top:12px}
+
+/* ============================================================
+   10. Témoignages
+   ============================================================ */
+.testi{position:relative}
+.testi__viewport{overflow:hidden;border-radius:var(--r-card)}
+.testi__track{display:flex;transition:transform .5s var(--ease)}
+.testi__slide{flex:0 0 100%;padding:4px}
+.testi-card{
+  position:relative;background:#fff;border:1px solid var(--border);border-radius:var(--r-card);
+  padding:48px;min-height:280px;display:flex;flex-direction:column;overflow:hidden
+}
+/* Guillemet d'ouverture en filigrane, posé derrière le texte. */
+.testi-card::before{
+  content:"\201C";position:absolute;top:-28px;right:36px;z-index:0;
+  font-family:Georgia,"Times New Roman",serif;font-size:190px;line-height:1;
+  color:var(--yellow);pointer-events:none
+}
+.testi-card>*{position:relative;z-index:1}
+/* Trait tireté : l'emplacement se lit comme un gabarit à remplir. */
+.testi-card--empty{border-style:dashed;border-color:#CFCFD4}
+.testi-card__stars{display:flex;gap:4px;margin-bottom:22px}
+/* Étoiles neutres : aucune note n'est affichée tant qu'un vrai
+   témoignage n'a pas été recueilli. */
+.testi-card__stars [data-lucide]{width:18px;height:18px;color:#C7C7CC}
+.testi-card blockquote{margin:0;font-size:clamp(19px,2vw,24px);line-height:1.45;letter-spacing:-.01em;font-weight:500}
+.testi-card__who{display:flex;align-items:center;gap:14px;margin-top:28px}
+.avatar{
+  width:46px;height:46px;border-radius:50%;background:var(--yellow);border:1px solid var(--ink);
+  display:grid;place-items:center;font-weight:700;font-size:16px;flex:none
+}
+.avatar--gray{background:var(--gray);border-color:var(--border)}
+.placeholder{
+  background:var(--yellow-light);box-shadow:inset 0 0 0 1px rgba(29,29,31,.25);
+  border-radius:6px;padding:0 5px
+}
+.testi__nav{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:28px}
+.icon-btn{
+  width:44px;height:44px;border-radius:50%;border:1px solid var(--ink);background:#fff;
+  display:grid;place-items:center;cursor:pointer;transition:background .2s
+}
+.icon-btn:hover{background:var(--yellow)}
+.icon-btn [data-lucide]{width:20px;height:20px}
+.testi__dots{display:flex;gap:7px}
+.testi__dots button{width:8px;height:8px;border:none;border-radius:50%;background:var(--border);padding:0;cursor:pointer;transition:background .2s,width .2s}
+.testi__dots button[aria-current="true"]{background:var(--ink);width:22px;border-radius:99px}
+
+/* ============================================================
+   11. Tarifs
+   ============================================================ */
+.price-toggle{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:48px}
+.seg{display:inline-flex;gap:4px;padding:4px;background:var(--gray);border-radius:var(--r-pill)}
+.seg button{
+  height:38px;padding:0 20px;border:none;border-radius:var(--r-pill);background:transparent;
+  font-size:15px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:background .2s,color .2s
+}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:900px;margin:0 auto}
+.plan{background:#fff;border:1px solid var(--border);border-radius:var(--r-card);padding:36px;display:flex;flex-direction:column}
+.plan{position:relative}
+.plan--hi{border:1px solid var(--ink);box-shadow:0 24px 60px -34px rgba(0,0,0,.45)}
+/* Halo jaune très doux en haut de l'offre mise en avant. */
+.plan--hi::after{
+  content:"";position:absolute;inset:0;border-radius:var(--r-card);z-index:0;pointer-events:none;
+  background:radial-gradient(120% 70% at 50% 0%,rgba(255,247,92,.4),transparent 58%)
+}
+.plan--hi>*{position:relative;z-index:1}
+.plan__badge{
+  position:absolute;top:-13px;left:36px;height:26px;padding:0 14px;border-radius:var(--r-pill);
+  background:var(--yellow);border:1px solid var(--ink);font-size:12px;font-weight:700;
+  display:flex;align-items:center
+}
+.plan h3{margin-bottom:6px}
+.plan__desc{font-size:15px;color:var(--ink-2);margin:0 0 24px;min-height:44px}
+.plan__price{display:flex;align-items:flex-end;gap:8px;margin-bottom:6px}
+.plan__price b{font-size:46px;font-weight:700;letter-spacing:-.03em;line-height:1}
+/* Enfant direct uniquement : le placeholder de prix vit dans le <b>. */
+.plan__price>span{font-size:15px;color:var(--ink-2);padding-bottom:5px}
+.plan__per{font-size:13px;color:var(--ink-2);margin:0 0 28px}
+.plan ul{list-style:none;margin:0 0 32px;padding:0;display:grid;gap:12px}
+.plan li{display:flex;gap:10px;align-items:flex-start;font-size:15px}
+.plan li [data-lucide]{width:18px;height:18px;flex:none;margin-top:3px;color:var(--success)}
+.plan .btn{margin-top:auto}
+.nfc-box{
+  max-width:900px;margin:24px auto 0;background:var(--gray);border-radius:var(--r-card);padding:28px;
+  display:flex;align-items:center;gap:28px;flex-wrap:wrap
+}
+.nfc-box__art{
+  width:112px;height:72px;border-radius:12px;background:var(--ink);flex:none;position:relative;
+  display:grid;place-items:center
+}
+.nfc-box__art .qr{width:36px;height:36px;background:#fff;padding:3px;border-radius:4px}
+.nfc-box__art::after{
+  content:"";position:absolute;top:8px;right:8px;width:16px;height:16px;border-radius:50%;
+  background:var(--yellow)
+}
+.nfc-box__txt{flex:1;min-width:220px}
+.nfc-box__txt p{margin:6px 0 0;font-size:15px;color:var(--ink-2)}
+.nfc-box__price{text-align:right}
+.nfc-box__price b{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em}
+
+/* ============================================================
+   12. FAQ, appel final, pied de page
+   ============================================================ */
+.faq{max-width:780px;margin:0 auto}
+.faq__item{border-bottom:1px solid var(--border)}
+.faq__q{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:24px 0;background:none;border:none;text-align:left;cursor:pointer;
+  font-size:19px;font-weight:600;letter-spacing:-.01em
+}
+.faq__q [data-lucide]{width:22px;height:22px;flex:none;transition:transform .3s var(--ease);color:var(--ink-2)}
+.faq__q[aria-expanded="true"] [data-lucide]{transform:rotate(45deg);color:var(--ink)}
+.faq__a{overflow:hidden;max-height:0;transition:max-height .35s var(--ease)}
+.faq__a p{margin:0 0 24px;color:var(--ink-2);max-width:62ch}
+
+.final{text-align:center}
+.final .h2{max-width:18ch;margin:0 auto 20px}
+.final .lead{max-width:52ch;margin:0 auto 36px}
+.final__cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+.footer{background:var(--ink);color:#fff;padding:72px 0 32px}
+.footer__grid{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:40px}
+.footer__about p{font-size:15px;color:rgba(255,255,255,.65);margin:18px 0 24px;max-width:30ch}
+.footer__social{display:flex;gap:10px}
+.footer__social a{
+  width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.22);
+  display:grid;place-items:center;transition:background .2s,border-color .2s
+}
+.footer__social a:hover{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.footer__social [data-lucide]{width:18px;height:18px}
+.footer__col h4{font-size:14px;margin-bottom:18px;color:var(--yellow)}
+.footer__col ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.footer__col a{font-size:15px;color:rgba(255,255,255,.65);transition:color .15s}
+.footer__col a:hover{color:#fff}
+.footer__bottom{
+  display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  margin-top:56px;padding-top:28px;border-top:1px solid rgba(255,255,255,.14)
+}
+.footer__legal{display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:rgba(255,255,255,.55)}
+.footer__selects{display:flex;gap:10px}
+.select-wrap{position:relative;display:inline-flex;align-items:center}
+.select-wrap [data-lucide]{position:absolute;right:10px;width:15px;height:15px;pointer-events:none;color:rgba(255,255,255,.6)}
+.footer select{
+  -webkit-appearance:none;appearance:none;height:38px;padding:0 32px 0 14px;border-radius:var(--r-pill);
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);color:#fff;
+  font-size:14px;font-weight:500;cursor:pointer
+}
+.footer select option{color:var(--ink)}
+
+/* ---------- Toast ---------- */
+.toasts{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:300;display:grid;gap:10px;width:max-content;max-width:calc(100vw - 32px)}
+.toast{
+  display:flex;align-items:center;gap:10px;background:var(--ink);color:#fff;
+  padding:13px 18px;border-radius:var(--r-pill);font-size:15px;font-weight:500;
+  box-shadow:0 12px 32px -10px rgba(0,0,0,.5);animation:toastIn .3s var(--ease)
+}
+.toast [data-lucide]{width:18px;height:18px;color:var(--yellow);flex:none}
+.toast.is-out{animation:toastOut .25s var(--ease) forwards}
+@keyframes toastIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(10px)}}
+
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0
+}
+.skip{
+  position:absolute;top:-60px;left:16px;z-index:200;background:var(--yellow);color:var(--ink);
+  border:1px solid var(--ink);border-radius:0 0 10px 10px;padding:10px 16px;font-weight:600;
+  transition:top .2s
+}
+.skip:focus{top:0}
+
+/* ============================================================
+   Responsive — 768 px (tablette)
+   ============================================================ */
+@media (max-width:1023px){
+  :root{--section-y:88px}
+  .nav__links,.nav__actions{display:none}
+  .nav__burger{display:flex}
+  .hero{padding:104px 0 var(--section-y)}
+  .hero__grid{grid-template-columns:1fr;gap:56px}
+  .hero__visual{order:2}
+  .ba,.calc{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr 1fr}
+  .feat__grid{grid-template-columns:1fr;gap:36px}
+  .feat__stage{min-height:0;padding:32px;order:2}
+  .feat-item__txt p{display:block}
+  .section-head--row{flex-direction:column;align-items:flex-start;gap:20px}
+  .biz-nav{margin-left:0}
+  /* Le téléphone est centré dans une colonne pleine largeur : les
+     cartes flottantes se retrouveraient loin de lui, dans le vide. */
+  .float-card{display:none}
+  .stats{grid-template-columns:1fr 1fr}
+  .calc__out{position:static}
+  .footer__grid{grid-template-columns:1fr 1fr}
+}
+
+/* ============================================================
+   Responsive — 375 px (mobile)
+   ============================================================ */
+@media (max-width:639px){
+  :root{--section-y:72px;--pad:20px}
+  body{font-size:16px}
+  .section-head{margin-bottom:44px;text-align:left}
+  .plans,.steps{grid-template-columns:1fr}
+  .steps::before{display:none}
+  .biz-rail{gap:14px}
+  .biz-slide{flex-basis:min(80vw,300px)}
+  .biz-slide__title b{font-size:19px}
+  .phone{width:270px}
+  .hero__glow{width:300px;height:300px}
+  .wallet-stack__deck{height:352px}
+  .mock-row__t b,.mock-row__t span{overflow-wrap:anywhere}
+  .ba__col,.card,.calc__panel,.calc__out,.testi-card,.plan{padding:24px}
+  .testi-card{padding:28px 24px}
+  .stats{grid-template-columns:1fr}
+  .footer__grid{grid-template-columns:1fr;gap:32px}
+  .footer__bottom{flex-direction:column;align-items:flex-start}
+  .nfc-box{flex-direction:column;align-items:flex-start}
+  .nfc-box__price{text-align:left}
+  .hero__cta .btn{flex:1}
+  .fig b{font-size:15px}
+  .faq__q{font-size:17px}
+  .plan__price b{font-size:38px}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Aller au contenu</a>
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
+<!-- ============================================================
+     1. Barre de navigation
+     ============================================================ -->
+<header class="nav" id="nav">
+  <div class="container nav__inner">
+    <a class="logo" href="#top" aria-label="Accueil">
+      <span class="logo__mark" aria-hidden="true" data-brand-letter>F</span>
+      <span data-brand>[NOM]</span>
+    </a>
+    <nav class="nav__links" aria-label="Navigation principale">
+      <a href="#fonctionnalites">Fonctionnalités</a>
+      <a href="#comment">Comment ça marche</a>
+      <a href="#calculateur">Calculateur</a>
+      <a href="#tarifs">Tarifs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="nav__login" href="#" data-toast="Connexion bientôt disponible">Se connecter</a>
+      <a class="btn btn--primary btn--sm" href="demo.html">Essayer la démo</a>
+    </div>
+    <button class="nav__burger" id="burger" aria-expanded="false" aria-controls="navMobile" aria-label="Ouvrir le menu">
+      <i data-lucide="menu"></i>
+    </button>
+  </div>
+  <div class="nav__mobile" id="navMobile">
+    <a href="#fonctionnalites">Fonctionnalités</a>
+    <a href="#comment">Comment ça marche</a>
+    <a href="#calculateur">Calculateur</a>
+    <a href="#tarifs">Tarifs</a>
+    <a href="#" data-toast="Connexion bientôt disponible">Se connecter</a>
+    <a class="btn btn--primary btn--block" href="demo.html">Essayer la démo</a>
+  </div>
+</header>
+
+<main id="main">
+<span id="top"></span>
+
+<!-- ============================================================
+     2. Hero
+     ============================================================ -->
+<section class="hero">
+  <div class="container hero__grid">
+    <div class="hero__text reveal">
+      <p class="hero__badge">
+        <span class="hero__badge-dot" aria-hidden="true"></span>
+        Pensé pour les commerces d'Afrique de l'Ouest
+      </p>
+      <h1 class="h1 hero__title">La carte de fidélité digitale qui fait revenir vos clients</h1>
+      <p class="lead">Vos clients l'ajoutent en un scan dans leur téléphone, sans application. Vous les récompensez à chaque passage.</p>
+      <div class="hero__cta">
+        <a class="btn btn--primary btn--lg" href="demo.html">Essayer la démo</a>
+        <a class="btn btn--secondary btn--lg" href="#tarifs">Voir les tarifs</a>
+      </div>
+      <ul class="hero__checks">
+        <li><span class="check-dot" aria-hidden="true"><i data-lucide="check"></i></span> Sans application</li>
+        <li><span class="check-dot" aria-hidden="true"><i data-lucide="check"></i></span> Prête en 5 minutes</li>
+        <li><span class="check-dot" aria-hidden="true"><i data-lucide="check"></i></span> Sans engagement</li>
+      </ul>
+    </div>
+
+    <div class="hero__visual reveal">
+      <div class="hero__glow" aria-hidden="true"></div>
+
+      <!-- Cartes flottantes : elles racontent le geste en caisse -->
+      <div class="float-card float-card--a" aria-hidden="true">
+        <span class="float-card__ico float-card__ico--ok"><i data-lucide="check"></i></span>
+        <span class="float-card__txt"><b>+ 1 tampon</b><span>Aminata M. · il y a 2 s</span></span>
+      </div>
+      <div class="float-card float-card--b" aria-hidden="true">
+        <span class="float-card__ico"><i data-lucide="gift"></i></span>
+        <span class="float-card__txt"><b>Récompense débloquée</b><span>Brushing offert</span></span>
+      </div>
+
+      <div class="phone">
+        <div class="phone__notch" aria-hidden="true"></div>
+        <div class="phone__screen">
+          <div class="phone__status" aria-hidden="true">
+            <span>9:41</span>
+            <span class="sig"><i data-lucide="signal"></i><i data-lucide="wifi"></i><i data-lucide="battery-full"></i></span>
+          </div>
+          <div class="wallet-stack">
+            <div class="wallet-stack__head">
+              <i data-lucide="wallet" aria-hidden="true"></i>
+              <span>Mes cartes de fidélité</span>
+            </div>
+            <div class="wallet-stack__deck" id="walletDeck" aria-live="off"></div>
+          </div>
+          <div class="wallet-dots" id="walletDots" role="tablist" aria-label="Cartes de fidélité"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     3. Bande de confiance
+     ============================================================ -->
+<section class="trust">
+  <p class="eyebrow trust__label">Ils nous font confiance</p>
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track" id="trustTrack"></div>
+  </div>
+  <p class="sr-only">Six commerces partenaires fictifs, à remplacer par de vraies références.</p>
+</section>
+
+<!-- ============================================================
+     4. Avant / après
+     ============================================================ -->
+<section class="section">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Avant / après</p>
+      <h2 class="h2">Vos meilleurs clients méritent mieux qu'une carte en carton</h2>
+      <p class="lead">La différence entre un commerce qui subit sa clientèle et un commerce qui la pilote.</p>
+    </div>
+    <div class="ba reveal">
+      <div class="ba__col ba__col--before">
+        <span class="ba__tag"><i data-lucide="x" aria-hidden="true"></i> Sans <span data-brand>[NOM]</span></span>
+        <ul class="ba__list">
+          <li><i data-lucide="users" aria-hidden="true"></i><div><strong>Les mêmes offres pour tout le monde</strong><span>Le client qui vient chaque semaine reçoit exactement la même chose que celui qui passe une fois par an.</span></div></li>
+          <li><i data-lucide="user-x" aria-hidden="true"></i><div><strong>Des clients oubliés après une visite</strong><span>Aucun moyen de reprendre contact : ni numéro, ni carte, ni souvenir du passage.</span></div></li>
+          <li><i data-lucide="help-circle" aria-hidden="true"></i><div><strong>Aucune idée de qui revient</strong><span>Vous devinez votre fréquentation au ressenti, sans jamais pouvoir la mesurer.</span></div></li>
+        </ul>
+      </div>
+      <div class="ba__col ba__col--after">
+        <span class="ba__tag"><i data-lucide="check" aria-hidden="true"></i> Avec <span data-brand>[NOM]</span></span>
+        <ul class="ba__list">
+          <li><i data-lucide="award" aria-hidden="true"></i><div><strong>Vos meilleurs clients reconnus</strong><span>Chaque passage est enregistré. Les plus fidèles débloquent les récompenses que vous avez choisies.</span></div></li>
+          <li><i data-lucide="bell-ring" aria-hidden="true"></i><div><strong>Des relances automatiques</strong><span>Un client absent depuis 30 jours reçoit une notification sur sa carte, sans que vous y pensiez.</span></div></li>
+          <li><i data-lucide="line-chart" aria-hidden="true"></i><div><strong>Une fréquence de visite visible</strong><span>Passages, taux de retour, récompenses distribuées : tout est chiffré, en temps réel.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     5. Comment ça marche
+     ============================================================ -->
+<section class="section section--gray" id="comment">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Comment ça marche</p>
+      <h2 class="h2">Quatre étapes, et c'est en place</h2>
+      <p class="lead">Pas de matériel à installer, pas d'application à faire télécharger. Une carte, un QR code, et vous démarrez.</p>
+    </div>
+    <ol class="steps reveal" style="list-style:none;margin:0;padding:0">
+      <li class="step">
+        <div class="step__num" aria-hidden="true">1</div>
+        <div class="step__art" aria-hidden="true"><div class="art-card"><b></b></div></div>
+        <h3 class="h3">Créez votre carte</h3>
+        <p>Choisissez tampons ou points, vos couleurs, votre logo et vos récompenses. Cinq minutes suffisent.</p>
+      </li>
+      <li class="step">
+        <div class="step__num" aria-hidden="true">2</div>
+        <div class="step__art" aria-hidden="true">
+          <div class="art-scan">
+            <div class="art-qr"><div class="qr" data-qr></div></div>
+            <div class="art-nfc"><i data-lucide="nfc"></i></div>
+          </div>
+        </div>
+        <h3 class="h3">Vos clients scannent</h3>
+        <p>Ils scannent le QR code ou approchent leur téléphone de la carte NFC posée au comptoir. La carte s'ajoute à leur Wallet.</p>
+      </li>
+      <li class="step">
+        <div class="step__num" aria-hidden="true">3</div>
+        <div class="step__art" aria-hidden="true"><div class="art-pos"><i></i><i></i><i></i></div></div>
+        <h3 class="h3">Vous scannez en caisse</h3>
+        <p>À chaque passage, votre équipe scanne la carte du client depuis un téléphone ou une tablette. Un tampon, ou des points.</p>
+      </li>
+      <li class="step">
+        <div class="step__num" aria-hidden="true">4</div>
+        <div class="step__art" aria-hidden="true"><div class="art-gift"><i data-lucide="gift"></i></div></div>
+        <h3 class="h3">Ils reviennent chercher leur récompense</h3>
+        <p>Palier atteint : le client est notifié sur son téléphone et revient l'utiliser chez vous.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================================
+     6. Fonctionnalités (onglets)
+     ============================================================ -->
+<section class="section" id="fonctionnalites">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Fonctionnalités</p>
+      <h2 class="h2">Tout ce qu'il faut pour fidéliser, rien de plus</h2>
+    </div>
+    <div class="feat__families-wrap reveal">
+      <div class="feat__families" id="famTabs" role="tablist" aria-label="Familles de fonctionnalités"></div>
+    </div>
+    <div class="feat__grid reveal">
+      <div class="feat__list" id="featList" role="tablist" aria-label="Fonctionnalités" aria-orientation="vertical"></div>
+      <div class="feat__stage" id="featStage" role="tabpanel" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     7. Pour quels commerces
+     ============================================================ -->
+<section class="section section--gray biz-section">
+  <div class="container">
+    <div class="section-head section-head--row reveal">
+      <div>
+        <p class="eyebrow">Pour quels commerces</p>
+        <h2 class="h2">Si vos clients reviennent, <span data-brand>[NOM]</span> est fait pour vous</h2>
+        <p class="lead">Huit activités, huit programmes. Faites défiler pour voir l'exemple chiffré de la vôtre.</p>
+      </div>
+      <div class="biz-nav">
+        <button class="icon-btn" id="bizPrev" aria-label="Commerce précédent"><i data-lucide="arrow-left"></i></button>
+        <button class="icon-btn" id="bizNext" aria-label="Commerce suivant"><i data-lucide="arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="biz-rail reveal" id="bizRail" role="group" aria-label="Exemples par type de commerce" tabindex="0"></div>
+
+  <div class="container">
+    <div class="biz-dots" id="bizDots" role="tablist" aria-label="Aller à un commerce"></div>
+    <p class="caption biz-credit">Photos d'illustration libres de droit (Unsplash), à remplacer par vos propres visuels.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     8. Calculateur
+     ============================================================ -->
+<section class="section" id="calculateur">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Calculateur</p>
+      <h2 class="h2">Combien peut vous rapporter un client qui revient ?</h2>
+      <p class="lead">Déplacez les curseurs selon votre activité. Le calcul se met à jour en direct.</p>
+    </div>
+    <div class="calc reveal">
+      <div class="calc__panel">
+        <div class="slider">
+          <div class="slider__top">
+            <label for="cClients">Clients par jour</label>
+            <span class="slider__val" id="cClientsVal">30</span>
+          </div>
+          <input type="range" id="cClients" min="5" max="300" step="5" value="30" aria-describedby="cClientsVal">
+        </div>
+        <div class="slider">
+          <div class="slider__top">
+            <label for="cPanier">Panier moyen</label>
+            <span class="slider__val" id="cPanierVal">15 €</span>
+          </div>
+          <input type="range" id="cPanier" min="2" max="150" step="1" value="15" aria-describedby="cPanierVal">
+        </div>
+        <div class="slider">
+          <div class="slider__top">
+            <label for="cJours">Jours d'ouverture par mois</label>
+            <span class="slider__val" id="cJoursVal">26</span>
+          </div>
+          <input type="range" id="cJours" min="10" max="31" step="1" value="26" aria-describedby="cJoursVal">
+        </div>
+        <div class="slider">
+          <div class="slider__top">
+            <label for="cGain">Gain de fréquentation</label>
+            <span class="slider__val" id="cGainVal">10 %</span>
+          </div>
+          <input type="range" id="cGain" min="1" max="40" step="1" value="10" aria-describedby="cGainVal">
+        </div>
+      </div>
+      <div class="calc__out">
+        <p class="eyebrow">Votre potentiel</p>
+        <div class="calc__big" id="cMois">0 €</div>
+        <p class="calc__sub">de chiffre d'affaires additionnel par mois</p>
+        <div class="calc__split">
+          <div><span>Par an</span><b id="cAn">0 €</b></div>
+          <div><span>Visites supplémentaires par mois</span><b id="cVisites">0</b></div>
+        </div>
+        <p class="calc__note">
+          <i data-lucide="info" aria-hidden="true"></i>
+          Estimation indicative, calculée à partir des valeurs que vous avez saisies. Elle ne constitue pas un engagement de résultat.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     9. Chiffres clés
+     ============================================================ -->
+<section class="section section--dark">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Chiffres clés</p>
+      <h2 class="h2">La fidélisation, c'est le levier le moins cher</h2>
+    </div>
+    <div class="stats reveal">
+      <div class="stat">
+        <b><span data-count="5" data-prefix="× ">× 5</span></b>
+        <p>Conquérir un nouveau client coûte jusqu'à cinq fois plus cher que de fidéliser un client existant.</p>
+      </div>
+      <div class="stat">
+        <b><span data-count="25" data-prefix="+ " data-suffix=" %">+ 25 %</span></b>
+        <p>Cinq points de rétention en plus peuvent augmenter les profits de 25 à 95 %.</p>
+      </div>
+      <div class="stat">
+        <b><span data-count="67" data-prefix="+ " data-suffix=" %">+ 67 %</span></b>
+        <p>Un client fidèle dépense en moyenne 67 % de plus qu'un nouveau client.</p>
+      </div>
+      <div class="stat">
+        <b><span data-count="65" data-suffix=" %">65 %</span></b>
+        <p>La part du chiffre d'affaires d'un commerce qui provient de ses clients déjà connus.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     10. Témoignages
+     ============================================================ -->
+<section class="section section--gray">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Témoignages</p>
+      <h2 class="h2">Ce qu'en disent les commerçants</h2>
+      <p class="caption" style="margin-top:12px">Emplacements réservés : aucun avis n'est publié avant d'avoir été recueilli auprès d'un commerçant réel.</p>
+    </div>
+    <div class="testi reveal">
+      <div class="testi__viewport">
+        <div class="testi__track" id="testiTrack"></div>
+      </div>
+      <div class="testi__nav">
+        <button class="icon-btn" id="testiPrev" aria-label="Témoignage précédent"><i data-lucide="arrow-left"></i></button>
+        <div class="testi__dots" id="testiDots"></div>
+        <button class="icon-btn" id="testiNext" aria-label="Témoignage suivant"><i data-lucide="arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     11. Tarifs
+     ============================================================ -->
+<section class="section" id="tarifs">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Tarifs</p>
+      <h2 class="h2">Un prix clair, par établissement</h2>
+      <p class="lead">Commencez gratuitement. Passez au Pro quand votre base de clients grandit.</p>
+    </div>
+    <div class="price-toggle reveal">
+      <div class="seg" role="group" aria-label="Période de facturation">
+        <button id="billMonth" aria-pressed="true">Mensuel</button>
+        <button id="billYear" aria-pressed="false">Annuel</button>
+      </div>
+      <span class="pill pill--yellow"><i data-lucide="tag" aria-hidden="true" style="width:13px;height:13px"></i> −20 % à l'année</span>
+    </div>
+    <div class="plans reveal">
+      <div class="plan">
+        <h3 class="h3">Découverte</h3>
+        <p class="plan__desc">Pour tester le programme sur votre comptoir, sans aucun frais.</p>
+        <div class="plan__price"><b>0 €</b><span>/ mois</span></div>
+        <p class="plan__per">Gratuit jusqu'à 30 clients inscrits</p>
+        <ul>
+          <li><i data-lucide="check" aria-hidden="true"></i> 1 établissement</li>
+          <li><i data-lucide="check" aria-hidden="true"></i> Jusqu'à 30 cartes clients</li>
+          <li><i data-lucide="check" aria-hidden="true"></i> Carte à tampons ou à points</li>
+          <li><i data-lucide="check" aria-hidden="true"></i> Google Wallet, Apple Wallet, carte web</li>
+          <li><i data-lucide="check" aria-hidden="true"></i> Scan en caisse illimité</li>
+        </ul>
+        <a class="btn btn--secondary btn--block" href="demo.html">Essayer la démo</a>
+      </div>
+      <div class="plan plan--hi">
+        <span class="plan__badge">Le plus choisi</span>
+        <h3 class="h3">Pro</h3>
+        <p class="plan__desc">Tout inclus, sans limite de clients ni de notifications.</p>
+        <div class="plan__price"><b><span class="placeholder" id="proPrice">[À DÉFINIR]</span> €</b><span id="proPeriod">/ mois</span></div>
+        <p class="plan__per">par établissement · sans engagement · <span id="proBilled">facturé chaque mois</span></p>
+        <ul>
+          <li><i data-lucide="check" aria-hidden="true"></i> Clients illimités</li>
+          <li><i data-lucide="check" aria-hidden="true"></i> Notifications et campagnes illimitées</li>
+          <li><i data-lucide="check" aria-hidden="true"></i> Relances automatiques et parrainage</li>
+          <li><i data-lucide="check" aria-hidden="true"></i> Rôles gérants et employés, droits réglables et révocables</li>
+          <li><i data-lucide="check" aria-hidden="true"></i> Statistiques en temps réel et conseiller IA</li>
+          <li><i data-lucide="check" aria-hidden="true"></i> Plusieurs établissements sur un même compte</li>
+        </ul>
+        <a class="btn btn--primary btn--block" href="demo.html">Essayer la démo</a>
+      </div>
+    </div>
+    <div class="nfc-box reveal">
+      <div class="nfc-box__art" aria-hidden="true"><div class="qr" data-qr></div></div>
+      <div class="nfc-box__txt">
+        <h3 class="h3">Carte NFC + QR code pour le comptoir</h3>
+        <p>La carte physique que vos clients approchent ou scannent pour s'inscrire. À commander une seule fois, en option.</p>
+      </div>
+      <div class="nfc-box__price">
+        <b><span class="placeholder">[À DÉFINIR]</span> €</b>
+        <span class="caption">paiement unique</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     12. FAQ
+     ============================================================ -->
+<section class="section section--gray">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Questions fréquentes</p>
+      <h2 class="h2">Vous vous demandez sûrement…</h2>
+    </div>
+    <div class="faq reveal" id="faq"></div>
+  </div>
+</section>
+
+<!-- Appel final -->
+<section class="section section--cream">
+  <div class="container final reveal">
+    <h2 class="h2">Votre carte de fidélité peut être prête ce soir</h2>
+    <p class="lead">Ouvrez le compte de démonstration : trois établissements, des clients, des campagnes. Tout est déjà rempli, vous n'avez qu'à cliquer.</p>
+    <div class="final__cta">
+      <a class="btn btn--primary btn--lg" href="demo.html">Essayer la démo</a>
+      <a class="btn btn--secondary btn--lg" href="#tarifs">Voir les tarifs</a>
+    </div>
+    <p class="caption" style="margin-top:24px">Aucune carte bancaire, aucune installation, aucun engagement.</p>
+  </div>
+</section>
+</main>
+
+<!-- ============================================================
+     Pied de page
+     ============================================================ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__about">
+        <a class="logo logo--lg" href="#top">
+          <span class="logo__mark" aria-hidden="true" data-brand-letter>F</span>
+          <span data-brand>[NOM]</span>
+        </a>
+        <p>La carte de fidélité digitale des commerces de proximité en Afrique de l'Ouest.</p>
+        <div class="footer__social">
+          <a href="#" data-toast="Page bientôt disponible" aria-label="Facebook"><i data-lucide="facebook"></i></a>
+          <a href="#" data-toast="Page bientôt disponible" aria-label="Instagram"><i data-lucide="instagram"></i></a>
+          <a href="#" data-toast="Page bientôt disponible" aria-label="LinkedIn"><i data-lucide="linkedin"></i></a>
+          <a href="#" data-toast="Page bientôt disponible" aria-label="WhatsApp"><i data-lucide="message-circle"></i></a>
+        </div>
+      </div>
+      <div class="footer__col">
+        <h4>Produit</h4>
+        <ul>
+          <li><a href="#fonctionnalites">Fonctionnalités</a></li>
+          <li><a href="#comment">Comment ça marche</a></li>
+          <li><a href="#calculateur">Calculateur</a></li>
+          <li><a href="#tarifs">Tarifs</a></li>
+          <li><a href="demo.html">Démo</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Commerces</h4>
+        <ul>
+          <li><a href="#" data-toast="Page bientôt disponible">Restaurants et maquis</a></li>
+          <li><a href="#" data-toast="Page bientôt disponible">Salons de coiffure</a></li>
+          <li><a href="#" data-toast="Page bientôt disponible">Boulangeries</a></li>
+          <li><a href="#" data-toast="Page bientôt disponible">Instituts de beauté</a></li>
+          <li><a href="#" data-toast="Page bientôt disponible">Boutiques</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Entreprise</h4>
+        <ul>
+          <li><a href="#" data-toast="Page bientôt disponible">À propos</a></li>
+          <li><a href="#" data-toast="Page bientôt disponible">Nous contacter</a></li>
+          <li><a href="#" data-toast="Page bientôt disponible">Centre d'aide</a></li>
+          <li><a href="#" data-toast="Page bientôt disponible">Devenir revendeur</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <div class="footer__legal">
+        <span>© <span id="year">2026</span> <span data-brand>[NOM]</span></span>
+        <a href="#" data-toast="Page bientôt disponible">Mentions légales</a>
+        <a href="#" data-toast="Page bientôt disponible">Conditions générales</a>
+        <a href="#" data-toast="Page bientôt disponible">Confidentialité</a>
+        <a href="#" data-toast="Page bientôt disponible">Cookies</a>
+      </div>
+      <div class="footer__selects">
+        <span class="select-wrap">
+          <select id="langSelect" aria-label="Langue">
+            <option value="fr" selected>Français</option>
+            <option value="en">English</option>
+          </select>
+          <i data-lucide="chevron-down" aria-hidden="true"></i>
+        </span>
+        <span class="select-wrap">
+          <select id="currSelect" aria-label="Devise">
+            <option value="EUR" selected>EUR €</option>
+            <option value="XOF">XOF CFA</option>
+            <option value="MAD">MAD DH</option>
+          </select>
+          <i data-lucide="chevron-down" aria-hidden="true"></i>
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/lucide@0.445.0/dist/umd/lucide.min.js"></script>
+<script>
+/* ============================================================
+   CONFIGURATION — un seul endroit à modifier
+   ============================================================ */
+
+/* Nom et logo provisoires : remplacer ici et nulle part ailleurs. */
+const BRAND = {
+  name: '[NOM]',   // ex. : 'Fidelio'
+  letter: 'F'      // lettre du logo provisoire (carré arrondi jaune)
+};
+
+/* Devise de la maquette. Le produit est multi-devise (chaque
+   établissement choisira la sienne) mais la maquette affiche l'euro
+   partout : c'est ce seul objet qui en décide. Tous les montants du
+   code sont exprimés en devise de base (euro) et passent par money().
+
+   `rate` ne sert qu'au sélecteur du pied de page, pour montrer qu'un
+   changement de devise se fait en un seul endroit. Taux indicatifs. */
+const CURRENCY_PRESETS = {
+  EUR: { code: 'EUR', locale: 'fr-FR', rate: 1,       step: 1 },
+  XOF: { code: 'XOF', locale: 'fr-FR', rate: 655.957, step: 5 },
+  MAD: { code: 'MAD', locale: 'fr-MA', rate: 10.8,    step: 1 }
+};
+const CURRENCY = { ...CURRENCY_PRESETS.EUR };
+
+const money = (v, opts = {}) => {
+  let amount = v * CURRENCY.rate;
+  if (CURRENCY.step > 1) amount = Math.round(amount / CURRENCY.step) * CURRENCY.step;
+  return new Intl.NumberFormat(CURRENCY.locale, {
+    style: 'currency', currency: CURRENCY.code,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: CURRENCY.rate === 1 ? 0 : 0,
+    ...(CURRENCY.rate === 1 ? opts : {})
+  }).format(amount);
+};
+
+const num = v => new Intl.NumberFormat(CURRENCY.locale).format(v);
+
+/* Un seul point d'entrée pour changer de devise : les vues concernées
+   se redessinent à partir des mêmes valeurs de base. */
+function setCurrency(key) {
+  Object.assign(CURRENCY, CURRENCY_PRESETS[key] || CURRENCY_PRESETS.EUR);
+  renderBiz();
+  renderCalc();
+}
+
+/* ============================================================
+   Utilitaires
+   ============================================================ */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const el = (tag, cls, html) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (html != null) n.innerHTML = html;
+  return n;
+};
+const icons = () => window.lucide && lucide.createIcons();
+
+function toast(msg, icon = 'check-circle-2') {
+  const t = el('div', 'toast', `<i data-lucide="${icon}"></i><span>${msg}</span>`);
+  $('#toasts').appendChild(t);
+  icons();
+  setTimeout(() => {
+    t.classList.add('is-out');
+    setTimeout(() => t.remove(), 260);
+  }, 2800);
+}
+
+/* ---------- Nom et logo ---------- */
+$$('[data-brand]').forEach(n => n.textContent = BRAND.name);
+$$('[data-brand-letter]').forEach(n => n.textContent = BRAND.letter);
+document.title = `${BRAND.name} — La carte de fidélité digitale pour les commerces de proximité`;
+$('#year').textContent = new Date().getFullYear();
+
+/* ---------- Faux QR codes dessinés en CSS ---------- */
+/* Motif déterministe : lisible visuellement, sans être un vrai QR. */
+function paintQr(node) {
+  const N = 11;
+  const corner = (r, c) => (r < 3 && c < 3) || (r < 3 && c > N - 4) || (r > N - 4 && c < 3);
+  let html = '';
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      let on;
+      if (corner(r, c)) {
+        const rr = r < 3 ? r : N - 1 - r, cc = c < 3 ? c : N - 1 - c;
+        on = !(rr === 1 && cc === 1);
+      } else {
+        on = ((r * 7 + c * 5 + ((r * c) % 3)) % 3) !== 0;
+      }
+      html += `<i class="${on ? 'on' : ''}"></i>`;
+    }
+  }
+  node.innerHTML = html;
+}
+$$('[data-qr]').forEach(paintQr);
+
+/* ---------- Apparition au scroll ---------- */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+  });
+}, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+$$('.reveal').forEach(n => io.observe(n));
+
+/* ---------- Chiffres qui s'incrémentent à l'apparition ---------- */
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const countIo = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    countIo.unobserve(e.target);
+    const n = e.target;
+    const target = +n.dataset.count;
+    const pre = n.dataset.prefix || '', suf = n.dataset.suffix || '';
+    const finish = () => n.textContent = `${pre}${num(target)}${suf}`;
+
+    if (reduceMotion || document.hidden) { finish(); return; }
+
+    const start = performance.now(), dur = 900;
+    const step = t => {
+      const p = Math.min(1, (t - start) / dur);
+      if (p >= 1) return finish();
+      /* easeOutCubic : rapide puis freine, comme un compteur mécanique. */
+      n.textContent = `${pre}${num(Math.round(target * (1 - Math.pow(1 - p, 3))))}${suf}`;
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+
+    /* requestAnimationFrame est suspendu quand l'onglet passe en
+       arrière-plan : sans ce filet, le compteur resterait figé en
+       chemin et afficherait un chiffre faux. */
+    setTimeout(finish, dur + 250);
+  });
+}, { threshold: 0.6 });
+$$('[data-count]').forEach(n => countIo.observe(n));
+
+/* ---------- Barre de navigation ---------- */
+const nav = $('#nav');
+const onScroll = () => nav.classList.toggle('is-stuck', window.scrollY > 12);
+onScroll();
+addEventListener('scroll', onScroll, { passive: true });
+
+const burger = $('#burger'), navMobile = $('#navMobile');
+burger.addEventListener('click', () => {
+  const open = navMobile.classList.toggle('is-open');
+  burger.setAttribute('aria-expanded', String(open));
+  burger.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+  burger.innerHTML = `<i data-lucide="${open ? 'x' : 'menu'}"></i>`;
+  icons();
+});
+$$('#navMobile a').forEach(a => a.addEventListener('click', () => {
+  navMobile.classList.remove('is-open');
+  burger.setAttribute('aria-expanded', 'false');
+  burger.innerHTML = '<i data-lucide="menu"></i>';
+  icons();
+}));
+
+/* ---------- Liens encore inactifs ---------- */
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-toast]');
+  if (!t) return;
+  e.preventDefault();
+  toast(t.dataset.toast, 'clock');
+});
+
+/* ============================================================
+   2. Hero — pile de cartes Wallet
+   ============================================================ */
+const HERO_CARDS = [
+  {
+    name: 'Salon Éclat', program: 'Carte Éclat', letter: 'S',
+    bg: 'linear-gradient(145deg,#2E2A4F,#171428)', kind: 'stamps',
+    filled: 6, total: 8, icon: 'scissors',
+    reward: 'Case 8 : brushing offert'
+  },
+  {
+    name: 'Le Petit Maquis', program: 'Club Maquis', letter: 'M',
+    bg: 'linear-gradient(145deg,#8C2F18,#4A1708)', kind: 'points',
+    points: 1240, next: 1500, unit: 'points',
+    reward: '1 500 pts : dessert offert'
+  },
+  {
+    name: 'Boutique Soleil', program: 'Soleil Privilège', letter: 'B',
+    bg: 'linear-gradient(145deg,#1B4D3E,#0B2A21)', kind: 'points',
+    points: 480, next: 500, unit: 'points',
+    reward: '500 pts : −10 % sur un article'
+  }
+];
+
+function heroCardHtml(c) {
+  let body;
+  if (c.kind === 'stamps') {
+    const stamps = Array.from({ length: c.total }, (_, i) =>
+      `<span class="stamp ${i < c.filled ? 'is-full' : ''}"><i data-lucide="${c.icon}"></i></span>`
+    ).join('');
+    body = `
+      <div class="wcard__body">
+        <div class="wcard__label">Tampons</div>
+        <div class="wcard__value">${c.filled} / ${c.total}</div>
+        <div class="wcard__stamps">${stamps}</div>
+      </div>`;
+  } else {
+    const pct = Math.min(100, Math.round(c.points / c.next * 100));
+    body = `
+      <div class="wcard__body">
+        <div class="wcard__label">Solde</div>
+        <div class="wcard__value">${num(c.points)} ${c.unit}</div>
+        <div class="wcard__bar"><i style="width:${pct}%"></i></div>
+        <div class="wcard__foot"><span>Prochain palier</span><span>${num(c.next)} ${c.unit}</span></div>
+      </div>`;
+  }
+  return `
+    <div class="wcard__top">
+      <span class="wcard__logo">${c.letter}</span>
+      <div>
+        <div class="wcard__name">${c.name}</div>
+        <div class="wcard__prog">${c.program}</div>
+      </div>
+    </div>
+    ${body}
+    <div class="wcard__qr"><div class="qr" data-qr></div></div>
+    <div class="wcard__foot"><span>${c.reward}</span></div>`;
+}
+
+const deck = $('#walletDeck'), dots = $('#walletDots');
+HERO_CARDS.forEach((c, i) => {
+  const card = el('div', 'wcard', heroCardHtml(c));
+  card.style.background = c.bg;
+  card.dataset.pos = i;
+  deck.appendChild(card);
+
+  const d = el('button');
+  d.setAttribute('role', 'tab');
+  d.setAttribute('aria-label', `Carte ${c.name}`);
+  d.addEventListener('click', () => setHeroCard(i));
+  dots.appendChild(d);
+});
+$$('[data-qr]', deck).forEach(paintQr);
+
+let heroIdx = 0;
+function setHeroCard(i) {
+  const n = HERO_CARDS.length;
+  heroIdx = (i + n) % n;
+  $$('.wcard', deck).forEach((card, k) => {
+    const next = (k - heroIdx + n) % n;
+    const prev = +card.dataset.pos;
+    /* La carte du fond qui revient devant ne doit pas traverser la pile :
+       on la replace instantanément, puis on la fait apparaître en fondu. */
+    if (prev === n - 1 && next === 0) {
+      card.style.transition = 'none';
+      card.style.opacity = '0';
+      card.dataset.pos = next;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        card.style.transition = '';
+        card.style.opacity = '';
+      }));
+    } else {
+      card.dataset.pos = next;
+    }
+  });
+  $$('button', dots).forEach((d, k) => d.setAttribute('aria-current', String(k === heroIdx)));
+}
+setHeroCard(0);
+let heroTimer = setInterval(() => setHeroCard(heroIdx + 1), 3800);
+deck.addEventListener('pointerenter', () => clearInterval(heroTimer));
+deck.addEventListener('pointerleave', () => { heroTimer = setInterval(() => setHeroCard(heroIdx + 1), 3800); });
+
+/* ============================================================
+   3. Bande de confiance — logos fictifs
+   ============================================================ */
+const TRUST = [
+  ['Salon Éclat', 'scissors'],
+  ['Le Petit Maquis', 'utensils'],
+  ['Boutique Soleil', 'shopping-bag'],
+  ['Pain & Cie', 'croissant'],
+  ['Studio Teranga', 'sparkles'],
+  ['Auto Net', 'car-front']
+];
+$('#trustTrack').innerHTML = [...TRUST, ...TRUST]
+  .map(([n, i]) => `<span class="flogo"><i data-lucide="${i}"></i>${n}</span>`).join('');
+
+/* ============================================================
+   6. Fonctionnalités — onglets et captures produit
+   ============================================================ */
+
+/* Briques réutilisables pour les fausses captures (HTML/CSS, aucune image). */
+const mock = (label, body) => `
+  <div class="mock">
+    <div class="mock__bar"><i></i><i></i><i></i><span>${label}</span></div>
+    <div class="mock__body">${body}</div>
+  </div>`;
+
+const row = (ico, title, sub, right = '') => `
+  <div class="mock-row">
+    <span class="mock-row__ico"><i data-lucide="${ico}"></i></span>
+    <span class="mock-row__t"><b>${title}</b><span>${sub}</span></span>
+    ${right}
+  </div>`;
+
+const phone = (inner, cls = '') => `
+  <div class="phone phone--sm ${cls}">
+    <div class="phone__notch" aria-hidden="true"></div>
+    <div class="phone__screen">${inner}</div>
+  </div>`;
+
+const miniWallet = (name, letter, bg, body) => `
+  <div class="wcard" style="position:relative;background:${bg}">
+    <div class="wcard__top">
+      <span class="wcard__logo">${letter}</span>
+      <div><div class="wcard__name">${name}</div><div class="wcard__prog">Programme fidélité</div></div>
+    </div>
+    ${body}
+  </div>`;
+
+const stampsRow = (filled, total, ico) => `
+  <div class="wcard__body">
+    <div class="wcard__label">Tampons</div>
+    <div class="wcard__value">${filled} / ${total}</div>
+    <div class="wcard__stamps">${Array.from({ length: total }, (_, i) =>
+      `<span class="stamp ${i < filled ? 'is-full' : ''}"><i data-lucide="${ico}"></i></span>`).join('')}</div>
+  </div>`;
+
+const FAMILIES = [
+  {
+    key: 'clients',
+    label: 'Pour vos clients',
+    items: [
+      {
+        icon: 'wallet', title: 'Google Wallet, Apple Wallet ou carte web',
+        text: 'La carte s’ajoute en un scan dans le Wallet du téléphone. Pour les téléphones sans Wallet, une carte web s’ouvre dans le navigateur et s’épingle à l’écran d’accueil.',
+        stage: () => mock('Supports de carte',
+          row('smartphone', 'Google Wallet', 'Android · support prioritaire', '<span class="pill pill--yellow">65 % des clients</span>') +
+          row('apple', 'Apple Wallet', 'iPhone · ajout en un geste', '<span class="pill">15 %</span>') +
+          row('globe', 'Carte web (PWA)', 'Téléphones sans Wallet · à épingler', '<span class="pill">20 %</span>') +
+          `<p class="caption" style="margin:14px 2px 0">Aucune application à installer, dans les trois cas.</p>`)
+      },
+      {
+        icon: 'palette', title: 'Une carte à vos couleurs',
+        text: 'Votre logo, votre fond, votre typographie de libellés et jusqu’à votre icône de tampon. La carte ressemble à votre commerce, pas à un outil générique.',
+        stage: () => `<div style="display:grid;gap:16px;width:100%;max-width:330px">
+          ${miniWallet('Salon Belle Allure', 'B', 'linear-gradient(145deg,#2E2A4F,#171428)', stampsRow(6, 8, 'scissors'))}
+          ${miniWallet('Pâtisserie Le Baobab', 'P', 'linear-gradient(145deg,#8A5A2B,#452A12)', stampsRow(4, 10, 'croissant'))}
+        </div>`
+      },
+      {
+        icon: 'gift', title: 'Un menu de récompenses par paliers',
+        text: 'Le client voit ce qu’il a débloqué et ce qui lui reste à atteindre. C’est cette visibilité qui déclenche le passage suivant.',
+        stage: () => mock('Récompenses — Chez Tantie Rose',
+          row('check-circle-2', 'Boisson offerte', '500 points', '<span class="pill pill--ok">Débloquée</span>') +
+          row('lock', 'Dessert offert', '1 500 points', '<span class="pill">Dans 260 pts</span>') +
+          row('lock', 'Repas offert', '3 000 points', '<span class="pill">Dans 1 760 pts</span>') +
+          `<div class="bars" style="margin-top:16px"><div class="bars__row"><span>Progression</span><span class="bars__track"><i style="width:83%"></i></span><span>83 %</span></div></div>`)
+      },
+      {
+        icon: 'map-pin', title: 'La notification à proximité sur iPhone',
+        text: 'Quand le client passe près de votre commerce, sa carte remonte sur l’écran verrouillé. Un rappel au bon endroit, au bon moment.',
+        stage: () => phone(`
+          <div class="lockscreen">
+            <div class="lockscreen__time">9:41</div>
+            <div class="lockscreen__date">jeudi 22 octobre</div>
+            <div class="notif">
+              <span class="notif__ico">B</span>
+              <div>
+                <div class="notif__t">Salon Belle Allure</div>
+                <div class="notif__b">Vous êtes à 2 tampons de votre brushing offert.</div>
+                <div class="notif__m">à proximité · maintenant</div>
+              </div>
+            </div>
+          </div>`)
+      }
+    ]
+  },
+  {
+    key: 'comptoir',
+    label: 'Au comptoir',
+    items: [
+      {
+        icon: 'scan-line', title: 'Le scan en caisse, illimité et même sans internet',
+        text: 'Un téléphone ou une tablette suffit. En cas de coupure réseau, les scans s’empilent et se synchronisent dès le retour de la connexion.',
+        stage: () => phone(`
+          <div style="position:absolute;inset:0;background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px">
+            <div style="width:140px;height:140px;border-radius:18px;border:2px solid var(--yellow);position:relative">
+              <div style="position:absolute;left:8px;right:8px;top:50%;height:2px;background:var(--yellow);box-shadow:0 0 12px var(--yellow)"></div>
+            </div>
+            <div style="font-size:13px;opacity:.75;text-align:center">Placez la carte du client dans le cadre</div>
+            <span class="pill pill--warn"><i data-lucide="cloud-off" style="width:13px;height:13px"></i> 3 scans en attente</span>
+          </div>`)
+      },
+      {
+        icon: 'user-cog', title: 'Trois rôles, des droits que vous réglez',
+        text: 'Le super gérant voit tous les établissements et décide de ce que chacun peut faire. Le gérant pilote le sien. L’employé scanne, utilise les récompenses et corrige ses erreurs — sans voir vos statistiques. Un départ ? Vous révoquez l’accès en un clic.',
+        stage: () => mock('Équipe — droits par membre',
+          row('crown', 'Aïssatou Ndiaye', 'Super gérant · 3 établissements', '<span class="pill pill--yellow">Tous droits</span>') +
+          row('briefcase', 'Fatou Sow', 'Gérante · Salon Belle Allure', '<span class="pill">11 droits sur 13</span>') +
+          row('user', 'Moussa Diop', 'Employé · comptoir uniquement', '<span class="pill">3 droits sur 13</span>') +
+          row('user', 'Awa Camara', 'Employée · accès révoqué', '<button class="switch" aria-hidden="true"></button>') +
+          `<p class="caption" style="margin:14px 2px 0">Chaque droit s’ouvre ou se ferme membre par membre.</p>`)
+      },
+      {
+        icon: 'graduation-cap', title: 'La formation de vos équipes',
+        text: 'Une fiche d’une page et trois minutes de prise en main. Vos employés savent quoi dire au client et comment scanner.',
+        stage: () => mock('Prise en main',
+          row('check-circle-2', 'Proposer la carte au client', '« Vous avez notre carte de fidélité ? »', '<span class="pill pill--ok">Fait</span>') +
+          row('check-circle-2', 'Faire scanner le QR du comptoir', 'Le client reste sur son téléphone', '<span class="pill pill--ok">Fait</span>') +
+          row('check-circle-2', 'Scanner la carte à chaque passage', 'Un tampon, ou le montant en points', '<span class="pill pill--ok">Fait</span>') +
+          row('circle', 'Annoncer la récompense disponible', 'Le moment qui fait revenir', '<span class="pill">À voir</span>'))
+      },
+      {
+        icon: 'store', title: 'Plusieurs établissements sur un même compte',
+        text: 'Chaque point de vente garde son programme, ses clients et sa devise. Vous basculez d’un établissement à l’autre, ou vous consultez le total consolidé.',
+        stage: () => mock('Mes établissements',
+          row('scissors', 'Salon Belle Allure', 'Dakar · 60 clients', '<span class="pill pill--yellow">Actif</span>') +
+          row('utensils', 'Chez Tantie Rose', 'Abidjan · 55 clients') +
+          row('croissant', 'Pâtisserie Le Baobab', 'Dakar · 35 clients') +
+          row('layers', 'Tous les établissements', 'Vue consolidée · 150 clients') +
+          `<p class="caption" style="margin:14px 2px 0">L’ouverture d’un établissement se fait avec notre équipe : elle ajuste votre abonnement au passage.</p>`)
+      }
+    ]
+  },
+  {
+    key: 'retour',
+    label: 'Pour qu’ils reviennent',
+    items: [
+      {
+        icon: 'repeat', title: 'Des relances automatiques, et les vôtres',
+        text: 'Bienvenue, client absent depuis 30 jours, récompense non utilisée, anniversaire : les règles prêtes à l’emploi tournent seules. Et vous créez les vôtres — choisissez le déclencheur, le message, l’avantage éventuel et les établissements concernés.',
+        stage: () => mock('Automatisations',
+          row('hand-heart', 'Bienvenue à l’inscription', '38 envois · 12 clients revenus', '<button class="switch is-on" aria-hidden="true"></button>') +
+          row('user-minus', 'Absent depuis 30 jours', '64 envois · 19 clients revenus', '<button class="switch is-on" aria-hidden="true"></button>') +
+          row('footprints', 'Merci pour la 5ᵉ visite', 'Votre règle · 1 tampon offert', '<span class="pill pill--yellow">Personnalisée</span>') +
+          row('plus', 'Créer une règle', 'Huit déclencheurs au choix', '<span class="pill">Nouvelle</span>'))
+      },
+      {
+        icon: 'megaphone', title: 'Des campagnes de notifications',
+        text: 'Un titre, un texte, une audience. La notification arrive sur la carte du client, dans son Wallet. Une campagne par jour au maximum, pour ne pas lasser.',
+        stage: () => phone(`
+          <div class="lockscreen">
+            <div class="lockscreen__time">18:30</div>
+            <div class="lockscreen__date">vendredi 23 octobre</div>
+            <div class="notif">
+              <span class="notif__ico">R</span>
+              <div>
+                <div class="notif__t">Chez Tantie Rose</div>
+                <div class="notif__b">Ce soir, le thiéboudienne est offert à partir de 1 500 points.</div>
+                <div class="notif__m">Wallet · il y a 2 min</div>
+              </div>
+            </div>
+          </div>`)
+      },
+      {
+        icon: 'users-round', title: 'Le parrainage',
+        text: 'Un client qui amène un ami gagne un tampon ou des points. Votre meilleure publicité, c’est votre clientèle actuelle.',
+        stage: () => mock('Parrainage',
+          row('share-2', 'Lien de parrainage partagé', '47 partages ce mois', '<span class="pill">47</span>') +
+          row('user-plus', 'Nouveaux clients parrainés', '18 inscriptions', '<span class="pill pill--ok">+18</span>') +
+          row('gift', 'Récompense du parrain', '1 tampon offert par filleul', '<span class="pill pill--yellow">Actif</span>') +
+          `<p class="caption" style="margin:14px 2px 0">Le filleul démarre avec un tampon de bienvenue.</p>`)
+      },
+      {
+        icon: 'star', title: 'La demande d’avis Google',
+        text: 'Après la troisième visite, le client reçoit une invitation à laisser un avis. Sans contrepartie : les règles de Google interdisent de récompenser un avis.',
+        stage: () => mock('Avis Google',
+          row('star', 'Déclencheur', 'Après la 3ᵉ visite du client', '<span class="pill pill--yellow">Actif</span>') +
+          row('send', 'Invitations envoyées', '52 sur 30 jours', '<span class="pill">52</span>') +
+          row('message-square', 'Avis déposés', '11 nouveaux avis', '<span class="pill pill--ok">+11</span>') +
+          `<p class="caption" style="margin:14px 2px 0"><i data-lucide="info" style="width:13px;height:13px;display:inline-block;vertical-align:-2px"></i> Aucune récompense n’est associée à un avis.</p>`)
+      },
+      {
+        icon: 'bar-chart-3', title: 'Des statistiques en temps réel',
+        text: 'Passages, clients inscrits, récompenses distribuées, taux de retour à 30 jours. Et la répartition des supports de carte.',
+        stage: () => mock('Tableau de bord',
+          `<div class="spark" aria-hidden="true">${[38,52,44,61,78,96,70,45,58,66,84,99].map(h => `<i style="height:${h}%"></i>`).join('')}</div>
+           <p class="caption" style="margin:12px 2px 18px">Passages sur 30 jours · pic le week-end</p>
+           <div class="bars">
+             <div class="bars__row"><span>Google Wallet</span><span class="bars__track"><i style="width:65%"></i></span><span>65 %</span></div>
+             <div class="bars__row"><span>Carte web</span><span class="bars__track"><i style="width:20%"></i></span><span>20 %</span></div>
+             <div class="bars__row"><span>Apple Wallet</span><span class="bars__track"><i style="width:15%"></i></span><span>15 %</span></div>
+           </div>`)
+      },
+      {
+        icon: 'sparkles', title: 'Un conseiller IA',
+        text: 'Chaque semaine, trois suggestions concrètes tirées de vos données : qui relancer, quand, et avec quel message.',
+        stage: () => mock('Conseiller IA — cette semaine',
+          row('target', '42 clients à 1 tampon de leur récompense', 'Un rappel suffirait à les faire revenir', '<span class="pill pill--yellow">Envoyer</span>') +
+          row('calendar-clock', 'Vos samedis sont saturés', 'Proposez un bonus en semaine', '<span class="pill pill--yellow">Créer</span>') +
+          row('user-minus', '23 clients absents depuis 45 jours', 'Relance avec un tampon offert', '<span class="pill pill--yellow">Relancer</span>'))
+      }
+    ]
+  }
+];
+
+const famTabs = $('#famTabs'), featList = $('#featList'), featStage = $('#featStage');
+let famIdx = 0, itemIdx = 0;
+
+FAMILIES.forEach((f, i) => {
+  const b = el('button', 'fam-tab', f.label);
+  b.type = 'button';
+  b.setAttribute('role', 'tab');
+  b.addEventListener('click', () => { famIdx = i; itemIdx = 0; renderFeatures(); });
+  famTabs.appendChild(b);
+});
+
+function renderFeatures() {
+  $$('.fam-tab', famTabs).forEach((b, i) => b.setAttribute('aria-selected', String(i === famIdx)));
+
+  const items = FAMILIES[famIdx].items;
+  featList.innerHTML = '';
+  items.forEach((it, i) => {
+    const b = el('button', 'feat-item', `
+      <span class="feat-item__ico"><i data-lucide="${it.icon}"></i></span>
+      <span class="feat-item__txt"><h4 class="h4">${it.title}</h4><p>${it.text}</p></span>`);
+    b.type = 'button';
+    b.setAttribute('role', 'tab');
+    b.setAttribute('aria-selected', String(i === itemIdx));
+    b.addEventListener('click', () => { itemIdx = i; renderFeatures(); });
+    featList.appendChild(b);
+  });
+
+  featStage.innerHTML = items[itemIdx].stage();
+  icons();
+}
+renderFeatures();
+
+/* Flèches haut / bas dans la liste de fonctionnalités */
+featList.addEventListener('keydown', e => {
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  e.preventDefault();
+  const n = FAMILIES[famIdx].items.length;
+  itemIdx = (itemIdx + (e.key === 'ArrowDown' ? 1 : -1) + n) % n;
+  renderFeatures();
+  $$('.feat-item', featList)[itemIdx].focus();
+});
+
+/* ============================================================
+   7. Pour quels commerces
+   ============================================================ */
+/* Tous les montants sont exprimés dans la devise de base de la
+   configuration (euro). Aucun encaissement n'est évoqué : il s'agit
+   du ticket moyen observé et du coût de revient de la récompense. */
+/* Photos d'illustration Unsplash (licence libre, usage commercial autorisé,
+   sans attribution obligatoire). À remplacer par les visuels du client :
+   seul l'identifiant `photo` change. */
+const UNSPLASH = id => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=720&q=72`;
+
+const BIZ = [
+  { icon:'utensils',     name:'Restaurant',             type:'Points',  rule:'1 point par euro dépensé',   ticket:18, reward:'Dessert offert au bout de 1 500 points',  cost:3.5,
+    photo:'photo-1508424757105-b6d5ad9329d0', alt:'Salle de restaurant animée aux grandes tables en bois' },
+  { icon:'beer',         name:'Maquis',                 type:'Points',  rule:'1 point par euro dépensé',   ticket:9,  reward:'Boisson offerte au bout de 600 points',   cost:1.5,
+    photo:'photo-1517248135467-4c7edcad34c4', alt:'Salle de bar avec tables dressées et éclairage tamisé' },
+  { icon:'scissors',     name:'Salon de coiffure',      type:'Tampons', rule:'8 passages = 1 récompense',  ticket:22, reward:'Brushing offert à la 8ᵉ visite',          cost:6,
+    photo:'photo-1605497788044-5a32c7078486', alt:'Coiffeur en train de sécher les cheveux d’un client' },
+  { icon:'sparkles',     name:'Institut de beauté',     type:'Tampons', rule:'6 passages = 1 récompense',  ticket:35, reward:'Soin du visage offert à la 6ᵉ visite',    cost:12,
+    photo:'photo-1616394584738-fc6e612e71b9', alt:'Cliente recevant un soin du visage' },
+  { icon:'croissant',    name:'Boulangerie-pâtisserie', type:'Tampons', rule:'10 passages = 1 récompense', ticket:5,  reward:'Gâteau offert à la 10ᵉ visite',           cost:2,
+    photo:'photo-1568254183919-78a4f43a2877', alt:'Vitrine de boulangerie garnie de viennoiseries' },
+  { icon:'shirt',        name:'Pressing',               type:'Tampons', rule:'10 passages = 1 récompense', ticket:12, reward:'Une pièce nettoyée offerte',              cost:3,
+    photo:'photo-1604335398980-ededcadcc37d', alt:'Rangée de machines à laver dans une laverie' },
+  { icon:'shopping-bag', name:'Boutique',               type:'Points',  rule:'1 point par euro dépensé',   ticket:28, reward:'−10 % au bout de 500 points',             cost:2.8,
+    photo:'photo-1441986300917-64674bd600d8', alt:'Intérieur d’une boutique de vêtements' },
+  { icon:'car-front',    name:'Lavage auto',            type:'Tampons', rule:'5 passages = 1 récompense',  ticket:8,  reward:'Lavage offert à la 5ᵉ visite',            cost:2.5,
+    photo:'photo-1608506375591-b90e1f955e4b', alt:'Voiture couverte de mousse pendant un lavage' }
+];
+
+const bizRail = $('#bizRail'), bizDots = $('#bizDots');
+let bizIdx = 0;
+
+function renderBiz() {
+  bizRail.innerHTML = BIZ.map((b, i) => `
+    <article class="biz-slide" data-biz="${i}">
+      <div class="biz-slide__media">
+        <span class="biz-slide__tag"><i data-lucide="${b.icon}"></i> ${b.type}</span>
+        <img src="${UNSPLASH(b.photo)}" alt="${b.alt}" loading="lazy" decoding="async" width="720" height="540">
+        <div class="biz-slide__title">
+          <b>${b.name}</b>
+          <span>${b.rule}</span>
+        </div>
+      </div>
+      <div class="biz-slide__body">
+        <p class="biz-slide__reward">
+          <i data-lucide="gift" aria-hidden="true"></i>
+          <span>${b.reward}</span>
+        </p>
+        <div class="biz-figs">
+          <div class="fig"><span>Ticket moyen</span><b>${money(b.ticket, { maximumFractionDigits: b.ticket < 10 ? 2 : 0 })}</b></div>
+          <div class="fig"><span>Récompense</span><b>${money(b.cost, { maximumFractionDigits: 2 })}</b></div>
+          <div class="fig"><span>Du ticket</span><b>${Math.round(b.cost / b.ticket * 100)} %</b></div>
+        </div>
+      </div>
+    </article>`).join('');
+
+  bizDots.innerHTML = BIZ.map((b, i) =>
+    `<button type="button" role="tab" aria-label="${b.name}" data-dot="${i}"></button>`).join('');
+
+  /* Le fondu d'apparition évite le clignotement gris pendant le chargement. */
+  $$('img', bizRail).forEach(img => {
+    if (img.complete) img.classList.add('is-loaded');
+    else img.addEventListener('load', () => img.classList.add('is-loaded'), { once: true });
+    img.addEventListener('error', () => img.closest('.biz-slide__media').classList.add('is-fallback'), { once: true });
+  });
+
+  $$('[data-dot]', bizDots).forEach(d =>
+    d.addEventListener('click', () => scrollBizTo(+d.dataset.dot)));
+
+  icons();
+  syncBiz();
+}
+
+function scrollBizTo(i) {
+  const slide = $$('.biz-slide', bizRail)[Math.max(0, Math.min(BIZ.length - 1, i))];
+  if (!slide) return;
+  /* On centre la carte sans faire défiler la page verticalement. */
+  bizRail.scrollTo({ left: slide.offsetLeft - (bizRail.clientWidth - slide.offsetWidth) / 2, behavior: 'smooth' });
+}
+
+/* La carte active est celle dont le centre est le plus proche de celui du rail. */
+function syncBiz() {
+  const mid = bizRail.scrollLeft + bizRail.clientWidth / 2;
+  let best = 0, bestDist = Infinity;
+  $$('.biz-slide', bizRail).forEach((s, i) => {
+    const d = Math.abs(s.offsetLeft + s.offsetWidth / 2 - mid);
+    if (d < bestDist) { bestDist = d; best = i; }
+  });
+  bizIdx = best;
+  $$('.biz-slide', bizRail).forEach((s, i) => s.classList.toggle('is-active', i === best));
+  $$('[data-dot]', bizDots).forEach((d, i) => d.setAttribute('aria-selected', String(i === best)));
+}
+
+renderBiz();
+
+let bizTick = null;
+const stopBizAuto = () => { clearInterval(bizTick); bizTick = null; };
+const startBizAuto = () => {
+  if (bizTick || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  bizTick = setInterval(() => scrollBizTo((bizIdx + 1) % BIZ.length), 4200);
+};
+
+bizRail.addEventListener('scroll', () => {
+  clearTimeout(bizRail._t);
+  bizRail._t = setTimeout(syncBiz, 60);
+}, { passive: true });
+
+['pointerenter', 'pointerdown', 'focusin'].forEach(ev => bizRail.addEventListener(ev, stopBizAuto));
+bizRail.addEventListener('pointerleave', startBizAuto);
+$('#bizPrev').addEventListener('click', () => { stopBizAuto(); scrollBizTo(bizIdx - 1); });
+$('#bizNext').addEventListener('click', () => { stopBizAuto(); scrollBizTo(bizIdx + 1); });
+bizRail.addEventListener('keydown', e => {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  e.preventDefault();
+  stopBizAuto();
+  scrollBizTo(bizIdx + (e.key === 'ArrowRight' ? 1 : -1));
+});
+
+/* Le défilement automatique ne tourne que lorsque la section est à l'écran. */
+new IntersectionObserver(entries => {
+  entries.forEach(e => e.isIntersecting ? startBizAuto() : stopBizAuto());
+}, { threshold: 0.35 }).observe(bizRail);
+
+/* ============================================================
+   8. Calculateur
+   ============================================================ */
+const calcInputs = {
+  clients: $('#cClients'), panier: $('#cPanier'), jours: $('#cJours'), gain: $('#cGain')
+};
+
+function renderCalc() {
+  const clients = +calcInputs.clients.value;
+  const panier  = +calcInputs.panier.value;
+  const jours   = +calcInputs.jours.value;
+  const gain    = +calcInputs.gain.value;
+
+  const visites = Math.round(clients * jours * gain / 100);
+  const mois = visites * panier;
+
+  $('#cClientsVal').textContent = num(clients);
+  $('#cPanierVal').textContent  = money(panier);
+  $('#cJoursVal').textContent   = num(jours);
+  $('#cGainVal').textContent    = `${gain} %`;
+
+  $('#cMois').textContent    = money(mois);
+  $('#cAn').textContent      = money(mois * 12);
+  $('#cVisites').textContent = `+ ${num(visites)}`;
+}
+Object.values(calcInputs).forEach(i => i.addEventListener('input', renderCalc));
+renderCalc();
+
+/* ============================================================
+   10. Témoignages — emplacements réservés
+   ============================================================ */
+/* Aucun avis réel n'est inventé : les trois cartes sont des gabarits. */
+const TESTI = [
+  { quote: '[Témoignage à remplacer]', who: '[Prénom Nom]', role: '[Activité, ville]', letter: '?' },
+  { quote: '[Témoignage à remplacer]', who: '[Prénom Nom]', role: '[Activité, ville]', letter: '?' },
+  { quote: '[Témoignage à remplacer]', who: '[Prénom Nom]', role: '[Activité, ville]', letter: '?' }
+];
+
+const testiTrack = $('#testiTrack'), testiDots = $('#testiDots');
+testiTrack.innerHTML = TESTI.map((t, i) => `
+  <div class="testi__slide" role="group" aria-roledescription="diapositive" aria-label="Témoignage ${i + 1} sur ${TESTI.length}">
+    <div class="testi-card testi-card--empty">
+      <div class="testi-card__stars" aria-label="Note à recueillir">
+        ${'<i data-lucide="star"></i>'.repeat(5)}
+      </div>
+      <blockquote><span class="placeholder">${t.quote}</span></blockquote>
+      <div class="testi-card__who" style="margin-top:auto">
+        <span class="avatar avatar--gray" aria-hidden="true">${t.letter}</span>
+        <div>
+          <b><span class="placeholder">${t.who}</span></b>
+          <div class="caption"><span class="placeholder">${t.role}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>`).join('');
+
+TESTI.forEach((_, i) => {
+  const d = el('button');
+  d.type = 'button';
+  d.setAttribute('aria-label', `Témoignage ${i + 1}`);
+  d.addEventListener('click', () => setTesti(i));
+  testiDots.appendChild(d);
+});
+
+let testiIdx = 0;
+function setTesti(i) {
+  testiIdx = (i + TESTI.length) % TESTI.length;
+  testiTrack.style.transform = `translateX(-${testiIdx * 100}%)`;
+  $$('button', testiDots).forEach((d, k) => d.setAttribute('aria-current', String(k === testiIdx)));
+}
+setTesti(0);
+$('#testiPrev').addEventListener('click', () => setTesti(testiIdx - 1));
+$('#testiNext').addEventListener('click', () => setTesti(testiIdx + 1));
+
+/* ============================================================
+   11. Tarifs — interrupteur mensuel / annuel
+   ============================================================ */
+const billMonth = $('#billMonth'), billYear = $('#billYear');
+function setBilling(annual) {
+  billMonth.setAttribute('aria-pressed', String(!annual));
+  billYear.setAttribute('aria-pressed', String(annual));
+  $('#proPeriod').textContent = annual ? '/ mois' : '/ mois';
+  $('#proBilled').textContent = annual
+    ? 'facturé chaque année, 20 % de remise incluse'
+    : 'facturé chaque mois';
+}
+billMonth.addEventListener('click', () => setBilling(false));
+billYear.addEventListener('click', () => setBilling(true));
+setBilling(false);
+
+/* ============================================================
+   12. FAQ en accordéon
+   ============================================================ */
+const FAQ = [
+  ['Faut-il une application pour mes clients ?',
+   'Non, et c’est le principe. Le client scanne votre QR code ou approche son téléphone de la carte NFC : la carte s’ajoute directement dans Google Wallet ou Apple Wallet, qui sont déjà installés sur son téléphone. Rien à télécharger, rien à mettre à jour.'],
+  ['Est-ce compatible avec tous les téléphones ?',
+   'Oui. Android reçoit la carte dans Google Wallet, iPhone dans Apple Wallet. Pour les téléphones plus anciens ou sans Wallet, nous générons une carte web : elle s’ouvre dans le navigateur et le client peut l’épingler sur son écran d’accueil. Les trois supports fonctionnent avec le même scan en caisse.'],
+  ['Comment le client ajoute-t-il la carte, concrètement ?',
+   'Vous posez au comptoir une carte qui porte votre QR code et une puce NFC. Le client scanne le QR avec son appareil photo, ou pose son téléphone sur la carte. Une page s’ouvre, il saisit son prénom et son numéro, il valide : la carte est dans son Wallet. Comptez une vingtaine de secondes.'],
+  ['Et si je n’ai pas internet au comptoir ?',
+   'Le scan continue de fonctionner. L’application de caisse enregistre les passages en local et affiche le nombre de scans en attente. Dès que la connexion revient, tout se synchronise automatiquement. Aucun passage n’est perdu.'],
+  ['Combien d’établissements puis-je gérer, et avec quelle équipe ?',
+   'Autant d’établissements que vous le souhaitez, depuis un seul compte. Chacun a son propre programme, ses clients, sa devise et son équipe. Un sélecteur en haut de l’écran vous fait passer de l’un à l’autre, et une vue consolidée additionne les chiffres de tous vos points de vente. L’ouverture d’un nouvel établissement ou le lancement d’une nouvelle carte se fait avec nous : votre abonnement étant facturé par établissement, nous mettons le programme en place et ajustons votre formule au passage. Côté équipe, trois rôles : le super gérant accède à tout et règle les droits de chacun, le gérant pilote le ou les établissements qui lui sont confiés, l’employé se limite au comptoir. Chaque droit s’ouvre ou se ferme membre par membre, et un accès se révoque en un clic.'],
+  ['À qui appartiennent mes données clients ?',
+   'À vous. Votre base de clients reste la vôtre : vous pouvez l’exporter en CSV à tout moment, en un clic. Nous ne revendons aucune donnée et nous ne contactons jamais vos clients pour notre propre compte. Le consentement marketing est demandé à l’inscription et reste révocable par le client.']
+];
+
+$('#faq').innerHTML = FAQ.map(([q, a], i) => `
+  <div class="faq__item">
+    <h3 style="margin:0">
+      <button class="faq__q" id="faqQ${i}" aria-expanded="false" aria-controls="faqA${i}">
+        <span>${q}</span><i data-lucide="plus" aria-hidden="true"></i>
+      </button>
+    </h3>
+    <div class="faq__a" id="faqA${i}" role="region" aria-labelledby="faqQ${i}"><p>${a}</p></div>
+  </div>`).join('');
+
+$$('.faq__q').forEach(btn => btn.addEventListener('click', () => {
+  const panel = document.getElementById(btn.getAttribute('aria-controls'));
+  const open = btn.getAttribute('aria-expanded') === 'true';
+  $$('.faq__q').forEach(b => {
+    b.setAttribute('aria-expanded', 'false');
+    document.getElementById(b.getAttribute('aria-controls')).style.maxHeight = '0px';
+  });
+  if (!open) {
+    btn.setAttribute('aria-expanded', 'true');
+    panel.style.maxHeight = panel.scrollHeight + 'px';
+  }
+}));
+
+/* ============================================================
+   Pied de page — langue et devise
+   ============================================================ */
+$('#langSelect').addEventListener('change', e => {
+  if (e.target.value === 'fr') return;
+  toast('La version anglaise arrive bientôt', 'languages');
+  e.target.value = 'fr';
+});
+
+$('#currSelect').addEventListener('change', e => {
+  setCurrency(e.target.value);
+  toast(`Montants affichés en ${CURRENCY.code}`, 'coins');
+});
+
+icons();
+</script>
+</body>
+</html>
