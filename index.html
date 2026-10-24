@@ -611,52 +611,6 @@ input[type=range]::-moz-range-thumb{
 .stat small{display:block;font-size:11px;color:rgba(255,255,255,.5);margin-top:12px}
 
 /* ============================================================
-   10. Témoignages
-   ============================================================ */
-.testi{position:relative}
-.testi__viewport{overflow:hidden;border-radius:var(--r-card)}
-.testi__track{display:flex;transition:transform .5s var(--ease)}
-.testi__slide{flex:0 0 100%;padding:4px}
-.testi-card{
-  position:relative;background:#fff;border:1px solid var(--border);border-radius:var(--r-card);
-  padding:48px;min-height:280px;display:flex;flex-direction:column;overflow:hidden
-}
-/* Guillemet d'ouverture en filigrane, posé derrière le texte. */
-.testi-card::before{
-  content:"\201C";position:absolute;top:-28px;right:36px;z-index:0;
-  font-family:Georgia,"Times New Roman",serif;font-size:190px;line-height:1;
-  color:var(--yellow);pointer-events:none
-}
-.testi-card>*{position:relative;z-index:1}
-/* Trait tireté : l'emplacement se lit comme un gabarit à remplir. */
-.testi-card--empty{border-style:dashed;border-color:#CFCFD4}
-.testi-card__stars{display:flex;gap:4px;margin-bottom:22px}
-/* Étoiles neutres : aucune note n'est affichée tant qu'un vrai
-   témoignage n'a pas été recueilli. */
-.testi-card__stars [data-lucide]{width:18px;height:18px;color:#C7C7CC}
-.testi-card blockquote{margin:0;font-size:clamp(19px,2vw,24px);line-height:1.45;letter-spacing:-.01em;font-weight:500}
-.testi-card__who{display:flex;align-items:center;gap:14px;margin-top:28px}
-.avatar{
-  width:46px;height:46px;border-radius:50%;background:var(--yellow);border:1px solid var(--ink);
-  display:grid;place-items:center;font-weight:700;font-size:16px;flex:none
-}
-.avatar--gray{background:var(--gray);border-color:var(--border)}
-.placeholder{
-  background:var(--yellow-light);box-shadow:inset 0 0 0 1px rgba(29,29,31,.25);
-  border-radius:6px;padding:0 5px
-}
-.testi__nav{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:28px}
-.icon-btn{
-  width:44px;height:44px;border-radius:50%;border:1px solid var(--ink);background:#fff;
-  display:grid;place-items:center;cursor:pointer;transition:background .2s
-}
-.icon-btn:hover{background:var(--yellow)}
-.icon-btn [data-lucide]{width:20px;height:20px}
-.testi__dots{display:flex;gap:7px}
-.testi__dots button{width:8px;height:8px;border:none;border-radius:50%;background:var(--border);padding:0;cursor:pointer;transition:background .2s,width .2s}
-.testi__dots button[aria-current="true"]{background:var(--ink);width:22px;border-radius:99px}
-
-/* ============================================================
    11. Tarifs
    ============================================================ */
 .price-toggle{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:48px}
