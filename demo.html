@@ -158,6 +158,9 @@ h1,h2,h3,h4,p{margin:0}
   padding:0 16px;font-size:13px
 }
 .demo-banner__dot{width:7px;height:7px;border-radius:50%;background:var(--yellow);flex:none}
+.demo-banner__logo{display:flex;align-items:center;flex:none}
+.demo-banner__logo img{height:20px;width:auto;display:block}
+@media (max-width:639px){.demo-banner__logo{display:none}}
 .demo-banner__txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.82)}
 .demo-banner .btn{height:28px;font-size:12px;padding:0 13px}
 .narrow-only{display:none}
@@ -283,6 +286,10 @@ h1,h2,h3,h4,p{margin:0}
   border-top:1px solid var(--border);padding:11px 10px 4px;margin-top:4px
 }
 .shop-menu__note [data-lucide]{width:14px;height:14px;flex:none;margin-top:2px}
+.shop-menu__out{color:var(--error);border-top:none;margin-top:0}
+.shop-menu__out:hover{background:rgba(255,59,48,.08)}
+#logoutSide{color:var(--error)}
+#logoutSide:hover{background:rgba(255,59,48,.08);color:var(--error)}
 
 /* Transition de contenu au changement d'établissement */
 .view.is-swapping{opacity:0;transition:opacity .16s var(--ease)}
@@ -1104,6 +1111,7 @@ input[type=range]::-moz-range-thumb{
 <!-- Bandeau démo permanent -->
 <div class="demo-banner">
   <span class="demo-banner__dot" aria-hidden="true"></span>
+  <span class="demo-banner__logo" data-logo="dark" aria-hidden="true"></span>
   <span class="demo-banner__txt">
     <span class="wide-only">Vous êtes sur le compte de démonstration · Données fictives</span>
     <span class="narrow-only">Démonstration · Données fictives</span>
@@ -1119,6 +1127,9 @@ input[type=range]::-moz-range-thumb{
     <div class="sidebar__foot">
       <button class="nav-item" id="settingsBtn">
         <i data-lucide="settings" aria-hidden="true"></i> Paramètres
+      </button>
+      <button class="nav-item" id="logoutSide">
+        <i data-lucide="log-out" aria-hidden="true"></i> Se déconnecter
       </button>
       <button class="sidebar__me" id="meBtnDesktop" aria-haspopup="listbox" aria-expanded="false"></button>
     </div>
@@ -1161,6 +1172,9 @@ input[type=range]::-moz-range-thumb{
     <i data-lucide="info" aria-hidden="true"></i>
     Dans le produit réel, chacun ouvre sa propre session. Ce sélecteur n’existe que pour la démonstration.
   </p>
+  <button class="shop-menu__add shop-menu__out" id="logoutBtn">
+    <i data-lucide="log-out" aria-hidden="true"></i> Se déconnecter
+  </button>
 </div>
 
 <aside class="panel" id="panel" role="dialog" aria-modal="true" aria-label="Fiche client">
@@ -1200,7 +1214,14 @@ input[type=range]::-moz-range-thumb{
    ============================================================ */
 
 /* Nom et logo provisoires. */
-const BRAND = { name: '[NOM]', letter: 'F' };
+/* Déposez vos fichiers dans assets/marque/ en gardant ces noms, ou
+   videz les deux champs pour revenir au carré jaune à lettre. */
+const BRAND = {
+  name: '[NOM]',
+  letter: 'F',
+  logo: 'assets/marque/logo.svg',
+  logoDark: 'assets/marque/logo-sombre.svg'
+};
 
 /* Devise de la maquette. Le produit est multi-devise : chaque
    établissement porte un champ `currency`, mais la maquette affiche
@@ -1803,6 +1824,15 @@ const shopLabel = () => currentShop() ? currentShop().name : 'Tous les établiss
    ============================================================ */
 $$('[data-brand]').forEach(n => n.textContent = BRAND.name);
 $$('[data-brand-letter]').forEach(n => n.textContent = BRAND.letter);
+
+/* Logo depuis un fichier, avec repli silencieux si le fichier manque. */
+$$('[data-logo]').forEach(holder => {
+  const src = holder.dataset.logo === 'dark' ? BRAND.logoDark : BRAND.logo;
+  if (!src) return;
+  const img = new Image();
+  img.onload = () => holder.innerHTML = `<img src="${src}" alt="${esc(BRAND.name)}">`;
+  img.src = src;
+});
 document.title = `${BRAND.name} — Compte de démonstration`;
 
 /* ============================================================
@@ -1987,6 +2017,19 @@ addEventListener('hashchange', () => {
 });
 
 $('#settingsBtn').addEventListener('click', () => go('parametres'));
+
+/* Déconnexion : on oublie l'accès et l'établissement mémorisés, pour que
+   la prochaine ouverture de la démo reparte du compte de la gérante. */
+function logout() {
+  closeMenus();
+  try {
+    localStorage.removeItem('demo.user');
+    localStorage.removeItem('demo.shop');
+  } catch { /* navigation privée : rien à nettoyer */ }
+  location.href = 'index.html';
+}
+$('#logoutSide').addEventListener('click', logout);
+$('#logoutBtn').addEventListener('click', logout);
 
 /* ---------- Sélecteur d'établissement ---------- */
 const backdrop = $('#backdrop');

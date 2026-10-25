@@ -32,6 +32,8 @@
   --r-pill:980px;
   --font:-apple-system,BlinkMacSystemFont,"Inter",sans-serif;
   --ease:cubic-bezier(.4,0,.2,1);
+  /* Décélération franche : tout arrive vite puis se pose. */
+  --out:cubic-bezier(.16,1,.3,1);
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -87,10 +89,24 @@ a{color:inherit;text-decoration:none}
   border:1px solid transparent;background:none;cursor:pointer;white-space:nowrap;
   transition:transform .18s var(--ease),background .18s var(--ease),box-shadow .18s var(--ease);
 }
-.btn:hover{transform:translateY(-1px)}
-.btn:active{transform:translateY(0)}
-.btn--primary{background:var(--yellow);color:var(--ink);border-color:var(--ink)}
-.btn--primary:hover{background:#fffa8f}
+.btn{position:relative;overflow:hidden;isolation:isolate}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(0) scale(.98)}
+/* Éclat qui balaie le bouton au survol. */
+.btn::after{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.75) 50%,transparent 70%);
+  transform:translateX(-120%);transition:transform .7s var(--out)
+}
+.btn:hover::after{transform:translateX(120%)}
+.btn--primary{
+  background:var(--yellow);color:var(--ink);border-color:var(--ink);
+  box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 8px 20px -10px rgba(29,29,31,.55)
+}
+.btn--primary:hover{background:#fffa8f;box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 14px 28px -12px rgba(29,29,31,.6)}
+/* La flèche avance d'un cheveu quand on survole. */
+.btn [data-lucide="arrow-right"]{transition:transform .3s var(--out)}
+.btn:hover [data-lucide="arrow-right"]{transform:translateX(3px)}
 .btn--secondary{background:transparent;color:var(--ink);border-color:var(--ink)}
 .btn--secondary:hover{background:rgba(29,29,31,.06)}
 .btn--sm{height:40px;padding:0 20px;font-size:15px}
@@ -106,13 +122,40 @@ a{color:inherit;text-decoration:none}
 }
 .card--gray{background:var(--gray);border-color:transparent}
 
-/* ---------- Apparition au scroll ---------- */
-.reveal{opacity:0;transform:translateY(16px);transition:opacity .4s var(--ease),transform .4s var(--ease)}
-.reveal.is-in{opacity:1;transform:none}
+/* ============================================================
+   Apparition au scroll
+   Fondu + montée + léger flou : le flou donne l'impression que
+   l'élément « se pose », bien plus que la seule opacité.
+   ============================================================ */
+.reveal{
+  opacity:0;transform:translateY(26px) scale(.985);filter:blur(7px);
+  transition:opacity .7s var(--out),transform .7s var(--out),filter .7s var(--out);
+  transition-delay:var(--d,0ms)
+}
+.reveal.is-in{opacity:1;transform:none;filter:none}
+
+/* Les enfants d'un conteneur échelonné entrent l'un après l'autre. */
+[data-stagger]>*{
+  opacity:0;transform:translateY(22px);
+  transition:opacity .6s var(--out) var(--d,0ms),transform .6s var(--out) var(--d,0ms)
+}
+[data-stagger].is-in>*{opacity:1;transform:none}
+
+/* Titre révélé mot à mot, derrière un masque. */
+.word{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .04em;margin:0 -.04em}
+.word>span{
+  display:inline-block;transform:translateY(105%);
+  transition:transform .9s cubic-bezier(.19,1,.22,1) var(--d,0ms)
+}
+.is-in .word>span{transform:none}
+
 @media (prefers-reduced-motion:reduce){
-  .reveal{opacity:1;transform:none;transition:none}
+  .reveal,[data-stagger]>*{opacity:1;transform:none;filter:none;transition:none}
+  .word>span{transform:none;transition:none}
   html,.biz-rail{scroll-behavior:auto}
-  *{animation-duration:.01ms!important;animation-iteration-count:1!important}
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important}
+  .parallax{transform:none!important}
 }
 
 /* ============================================================
@@ -129,6 +172,14 @@ a{color:inherit;text-decoration:none}
   -webkit-backdrop-filter:saturate(180%) blur(20px);
   border-bottom-color:var(--border);
 }
+.nav.is-stuck .nav__inner{height:58px}
+.nav__inner{transition:height .35s var(--out)}
+/* Jauge de lecture collée sous la barre. */
+.nav__progress{
+  position:absolute;left:0;bottom:-1px;height:2px;width:100%;transform:scaleX(var(--p,0));
+  transform-origin:0 50%;background:var(--ink);opacity:0;transition:opacity .3s
+}
+.nav.is-stuck .nav__progress{opacity:1}
 .nav__inner{display:flex;align-items:center;gap:32px;height:64px}
 .nav__links{display:flex;align-items:center;gap:28px;margin-left:auto}
 .nav__links a{font-size:15px;font-weight:500;color:var(--ink-2);transition:color .15s}
@@ -156,23 +207,44 @@ a{color:inherit;text-decoration:none}
 }
 .logo--lg .logo__mark{width:40px;height:40px;border-radius:12px;font-size:21px}
 .logo--lg{font-size:22px}
+/* Logo chargé depuis un fichier : il remplace la pastille et le texte. */
+.logo--file img{height:34px;width:auto;display:block}
+.logo--lg.logo--file img{height:40px}
 .section--dark .logo__mark{border-color:transparent}
 
 /* ============================================================
    2. Hero
    ============================================================ */
-.hero{padding:140px 0 var(--section-y);overflow:hidden;position:relative}
-/* Voile jaune très diffus en haut à droite, pour sortir du blanc plat. */
+.hero{padding:150px 0 var(--section-y);overflow:hidden;position:relative;isolation:isolate}
+/* Deux voiles colorés qui respirent lentement : le blanc plat disparaît
+   sans jamais attirer l'œil plus que le titre. */
+.hero::before,.hero::after{content:"";position:absolute;pointer-events:none;z-index:-1}
 .hero::before{
-  content:"";position:absolute;top:-220px;right:-160px;width:720px;height:720px;
-  background:radial-gradient(circle,rgba(255,247,92,.5) 0%,rgba(255,247,92,0) 65%);
-  pointer-events:none;z-index:0
+  top:-280px;right:-180px;width:860px;height:860px;
+  background:radial-gradient(circle,rgba(255,247,92,.62) 0%,rgba(255,247,92,0) 64%);
+  animation:breathe 14s ease-in-out infinite
+}
+.hero::after{
+  bottom:-320px;left:-240px;width:760px;height:760px;
+  background:radial-gradient(circle,rgba(255,228,170,.45) 0%,rgba(255,228,170,0) 66%);
+  animation:breathe 18s ease-in-out -6s infinite
+}
+@keyframes breathe{
+  0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.9}
+  50%{transform:translate3d(-24px,26px,0) scale(1.09);opacity:1}
+}
+
+/* Grain très fin : casse les aplats de dégradé. */
+.hero__grain{
+  position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(rgba(29,29,31,.055) 1px,transparent 1px);
+  background-size:3px 3px
 }
 .hero__grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;position:relative;z-index:1}
 .hero__badge{
-  display:inline-flex;align-items:center;gap:9px;height:34px;padding:0 16px;margin:0 0 24px;
+  display:inline-flex;align-items:center;gap:9px;min-height:34px;padding:6px 16px;margin:0 0 24px;
   border-radius:var(--r-pill);background:#fff;border:1px solid var(--border);
-  font-size:14px;font-weight:500;color:var(--ink-2);
+  font-size:14px;font-weight:500;color:var(--ink-2);line-height:1.35;
   box-shadow:0 2px 10px -4px rgba(0,0,0,.12)
 }
 .hero__badge-dot{
@@ -199,7 +271,11 @@ a{color:inherit;text-decoration:none}
 .float-card__ico [data-lucide]{width:17px;height:17px;stroke-width:2.4}
 .float-card__txt b{display:block;font-size:14px;font-weight:600;line-height:1.25}
 .float-card__txt span{display:block;font-size:12px;color:var(--ink-2)}
-@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+/* --py vient de la parallaxe ; l'animation s'ajoute par-dessus. */
+@keyframes floaty{
+  0%,100%{transform:translate3d(0,var(--py,0px),0)}
+  50%{transform:translate3d(0,calc(var(--py,0px) - 10px),0)}
+}
 .hero__cta{display:flex;flex-wrap:wrap;gap:12px;margin:36px 0 28px}
 .hero__checks{display:flex;flex-wrap:wrap;gap:12px 28px;list-style:none;margin:0;padding:0}
 .hero__checks li{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:500}
@@ -208,7 +284,18 @@ a{color:inherit;text-decoration:none}
   display:grid;place-items:center;flex:none
 }
 .check-dot [data-lucide]{width:13px;height:13px;stroke-width:3}
-.hero__visual{display:flex;justify-content:center;position:relative}
+.hero__visual{
+  display:flex;justify-content:center;position:relative;
+  perspective:1400px;transform-style:preserve-3d
+}
+/* Inclinaison pilotée par la souris, amortie en JS. */
+/* Une seule déclaration de transform : la parallaxe écrit --py,
+   l'inclinaison --rx/--ry. Deux règles concurrentes s'écraseraient. */
+.hero__tilt{
+  transform:translate3d(0,var(--py,0px),0) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  transition:transform .5s var(--out);will-change:transform
+}
+.hero__visual.is-tilting .hero__tilt{transition:transform .12s linear}
 .hero__glow{
   position:absolute;width:460px;height:460px;border-radius:50%;
   background:radial-gradient(circle,var(--yellow) 0%,rgba(255,247,92,0) 68%);
@@ -217,8 +304,19 @@ a{color:inherit;text-decoration:none}
 
 /* ---------- Téléphone dessiné en CSS ---------- */
 .phone{
-  position:relative;width:320px;flex:none;border-radius:46px;background:var(--ink);
-  padding:11px;box-shadow:0 30px 70px -20px rgba(0,0,0,.3);z-index:1
+  position:relative;width:320px;flex:none;border-radius:46px;z-index:1;padding:11px;
+  /* Tranche métallique : un dégradé sur le cadre suffit à donner
+     l'épaisseur que n'a pas un aplat noir. */
+  background:linear-gradient(145deg,#4a4a4f 0%,#1d1d1f 22%,#101013 55%,#38383d 100%);
+  box-shadow:
+    0 2px 2px rgba(255,255,255,.22) inset,
+    0 50px 90px -34px rgba(0,0,0,.55),
+    0 18px 36px -22px rgba(0,0,0,.4)
+}
+/* Reflet oblique qui glisse sur la vitre. */
+.hero__visual .phone::after,.pin__phone .phone::after{
+  content:"";position:absolute;inset:0;border-radius:46px;pointer-events:none;z-index:6;
+  background:linear-gradient(118deg,transparent 38%,rgba(255,255,255,.16) 46%,transparent 56%)
 }
 .phone--sm{width:258px;border-radius:38px;padding:9px}
 .phone__screen{
@@ -300,18 +398,23 @@ a{color:inherit;text-decoration:none}
 
 /* ============================================================
    3. Bande de confiance
-   ============================================================ 
-.trust{padding:56px 0;border-bottom:1px solid var(--border)}
-.trust__label{text-align:center;margin-bottom:28px}
+   ============================================================ */
+/* text-align sur le parent : la pastille est en inline-flex, elle ne
+   peut pas se centrer elle-même. */
+.trust{padding:56px 0;border-bottom:1px solid var(--border);text-align:center}
+.trust__label{margin-bottom:30px}
 .marquee{overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
 .marquee__track{display:flex;gap:64px;width:max-content;animation:slide 34s linear infinite}
 .marquee:hover .marquee__track{animation-play-state:paused}
 @keyframes slide{to{transform:translateX(-50%)}}
 .flogo{
-  display:flex;align-items:center;gap:10px;color:#AEAEB2;
-  font-size:19px;font-weight:700;letter-spacing:-.02em;white-space:nowrap
+  display:flex;align-items:center;color:#AEAEB2;flex:none;
+  transition:color .3s var(--ease),filter .3s var(--ease)
 }
-.flogo [data-lucide]{width:22px;height:22px;stroke-width:1.75}*/
+.flogo svg{height:30px;width:auto;display:block}
+/* Repli si le fichier de logo manque. */
+.flogo--text{font-size:19px;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
+.marquee:hover .flogo{color:#8E8E93}
 
 /* ============================================================
    4. Avant / après
@@ -335,8 +438,69 @@ a{color:inherit;text-decoration:none}
 .ba__list span{font-size:15px;color:var(--ink-2);line-height:1.45}
 
 /* ============================================================
-   5. Comment ça marche
+   5. Comment ça marche — scène épinglée
    ============================================================ */
+.pin{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:72px;align-items:start}
+.pin__stage{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center}
+.pin__phone{position:relative;display:flex;flex-direction:column;align-items:center;gap:22px}
+.pin__phone .phone{width:300px}
+.pin__screens{position:relative;flex:1;overflow:hidden}
+.pin__screen{
+  position:absolute;inset:0;padding:18px;display:flex;flex-direction:column;
+  opacity:0;transform:translateY(14px) scale(.97);
+  transition:opacity .5s var(--out),transform .5s var(--out);pointer-events:none
+}
+.pin__screen.is-on{opacity:1;transform:none}
+.pin__dots{display:flex;gap:7px}
+.pin__dots i{
+  display:block;width:7px;height:7px;border-radius:50%;background:#D6D6DB;
+  transition:width .35s var(--out),background .35s
+}
+.pin__dots i.is-on{width:26px;border-radius:99px;background:var(--ink)}
+
+.pin__steps{display:grid}
+.pin-step{
+  min-height:82vh;display:flex;flex-direction:column;justify-content:center;
+  opacity:.3;transition:opacity .5s var(--out)
+}
+.pin-step.is-on{opacity:1}
+.pin-step__num{
+  display:inline-flex;align-items:center;gap:10px;margin-bottom:20px;
+  font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)
+}
+.pin-step__num b{
+  width:36px;height:36px;border-radius:50%;background:var(--yellow);border:1px solid var(--ink);
+  display:grid;place-items:center;font-size:15px;color:var(--ink);
+  transition:transform .4s var(--out),box-shadow .4s var(--out)
+}
+.pin-step.is-on .pin-step__num b{transform:scale(1.08);box-shadow:0 0 0 7px rgba(255,247,92,.4)}
+.pin-step h3{font-size:clamp(26px,2.8vw,34px);font-weight:700;letter-spacing:-.025em;line-height:1.15;margin-bottom:14px}
+.pin-step p{font-size:17px;line-height:1.55;color:var(--ink-2);max-width:40ch;margin:0}
+
+/* Contenus d'écran de la scène */
+.pin-art{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;height:100%;text-align:center}
+.pin-art__label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.pin-art__big{font-size:34px;font-weight:700;letter-spacing:-.03em}
+.pin-art__qr{width:120px;height:120px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:10px}
+.pin-art__nfc{
+  width:74px;height:74px;border-radius:50%;background:var(--yellow);border:1px solid var(--ink);
+  display:grid;place-items:center;animation:ping 2.4s var(--ease) infinite
+}
+.pin-art__nfc [data-lucide]{width:34px;height:34px}
+@keyframes ping{
+  0%{box-shadow:0 0 0 0 rgba(255,247,92,.9)}
+  70%{box-shadow:0 0 0 26px rgba(255,247,92,0)}
+  100%{box-shadow:0 0 0 0 rgba(255,247,92,0)}
+}
+.pin-art__gift{
+  width:92px;height:92px;border-radius:26px;background:var(--yellow);border:1px solid var(--ink);
+  display:grid;place-items:center;animation:pop-in .7s var(--out) both
+}
+.pin-art__gift [data-lucide]{width:42px;height:42px;stroke-width:1.6}
+@keyframes pop-in{from{transform:scale(.7) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
+.pin-art .wcard{position:relative;width:100%;border-radius:16px}
+
+/* Cartes d'étapes, repli mobile */
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative}
 /* Trait pointillé entre les étapes : il n'apparaît que dans les
    gouttières, les cartes étant opaques. */
@@ -524,12 +688,15 @@ a{color:inherit;text-decoration:none}
   box-shadow:0 24px 50px -28px rgba(0,0,0,.45)
 }
 .biz-slide__media{position:relative;aspect-ratio:4/3;background:var(--border);overflow:hidden}
+/* L'image est plus large que son cadre : elle glisse à l'intérieur
+   pendant le défilement horizontal, ce qui donne de la profondeur. */
 .biz-slide__media img{
-  width:100%;height:100%;object-fit:cover;display:block;
-  transition:transform .6s var(--ease);opacity:0
+  width:118%;height:100%;object-fit:cover;display:block;
+  transform:translateX(calc(var(--px,0) * 1%)) scale(var(--s,1));
+  transition:opacity .5s var(--ease),transform .5s var(--out);opacity:0
 }
 .biz-slide__media img.is-loaded{opacity:1}
-.biz-slide:hover .biz-slide__media img{transform:scale(1.04)}
+.biz-slide:hover .biz-slide__media img{--s:1.05}
 .biz-slide__media::after{
   content:"";position:absolute;inset:0;
   background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.18) 42%,transparent 70%)
@@ -589,10 +756,23 @@ input[type=range]::-moz-range-thumb{
   border:1px solid var(--ink);cursor:grab
 }
 .calc__out{
-  background:var(--ink);color:#fff;border-radius:var(--r-card);padding:36px;position:sticky;top:88px
+  position:sticky;top:88px;overflow:hidden;isolation:isolate;
+  background:var(--ink);color:#fff;border-radius:var(--r-card);padding:36px;
+  box-shadow:0 30px 60px -32px rgba(29,29,31,.7)
 }
+/* Lueur jaune derrière le chiffre : c'est le point d'arrivée du bloc. */
+.calc__out::before{
+  content:"";position:absolute;top:-120px;left:-80px;width:460px;height:460px;z-index:-1;
+  background:radial-gradient(circle,rgba(255,247,92,.22) 0%,rgba(255,247,92,0) 66%);
+  pointer-events:none
+}
+.calc__big{
+  transition:transform .35s var(--out);transform-origin:0 50%;
+  font-variant-numeric:tabular-nums
+}
+.calc__out.is-bump .calc__big{transform:scale(1.045)}
 .calc__out .eyebrow{color:var(--yellow)}
-.calc__big{font-size:clamp(40px,5vw,56px);font-weight:700;letter-spacing:-.03em;line-height:1;color:var(--yellow)}
+.calc__big{font-size:clamp(44px,5.4vw,62px);font-weight:700;letter-spacing:-.035em;line-height:1;color:var(--yellow)}
 .calc__sub{font-size:15px;color:rgba(255,255,255,.7);margin:8px 0 28px}
 .calc__split{display:grid;gap:1px;background:rgba(255,255,255,.16);border-radius:14px;overflow:hidden}
 .calc__split div{background:var(--ink);padding:18px}
@@ -604,11 +784,81 @@ input[type=range]::-moz-range-thumb{
 /* ============================================================
    9. Chiffres clés
    ============================================================ */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.16);border-radius:var(--r-card);overflow:hidden}
-.stat{background:var(--ink);padding:32px 26px}
-.stat b{display:block;font-size:clamp(34px,3.6vw,44px);font-weight:700;letter-spacing:-.03em;color:var(--yellow);line-height:1}
-.stat p{margin:12px 0 0;font-size:15px;line-height:1.45}
-.stat small{display:block;font-size:11px;color:rgba(255,255,255,.5);margin-top:12px}
+/* Section sombre : deux halos colorés très diffus + une trame fine,
+   pour que le noir ne soit pas un simple aplat. */
+.section--dark{position:relative;overflow:hidden;isolation:isolate}
+.section--dark::before,.section--dark::after{content:"";position:absolute;z-index:-1;pointer-events:none}
+.section--dark::before{
+  top:-30%;left:-10%;width:760px;height:760px;
+  background:radial-gradient(circle,rgba(255,247,92,.17) 0%,rgba(255,247,92,0) 68%);
+  animation:breathe 20s ease-in-out infinite
+}
+.section--dark::after{
+  bottom:-35%;right:-8%;width:680px;height:680px;
+  background:radial-gradient(circle,rgba(120,160,255,.14) 0%,rgba(120,160,255,0) 68%);
+  animation:breathe 26s ease-in-out -9s infinite
+}
+.section--dark .container{position:relative;z-index:1}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat{
+  position:relative;padding:34px 28px;border-radius:var(--r-card);
+  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  transition:transform .45s var(--out),background .45s,border-color .45s
+}
+.stat:hover{transform:translateY(-6px);background:rgba(255,255,255,.08);border-color:rgba(255,247,92,.4)}
+.stat b{
+  display:block;font-size:clamp(40px,4.4vw,56px);font-weight:700;letter-spacing:-.04em;
+  line-height:1;color:var(--yellow);font-variant-numeric:tabular-nums
+}
+.stat p{margin:16px 0 0;font-size:15px;line-height:1.5;color:rgba(255,255,255,.78)}
+
+/* ============================================================
+   10. Témoignages
+   ============================================================ */
+.testi{position:relative}
+.testi__viewport{overflow:hidden;border-radius:var(--r-card)}
+.testi__track{display:flex;transition:transform .5s var(--ease)}
+.testi__slide{flex:0 0 100%;padding:4px}
+.testi-card{
+  position:relative;background:#fff;border:1px solid var(--border);border-radius:var(--r-card);
+  padding:48px;min-height:280px;display:flex;flex-direction:column;overflow:hidden
+}
+/* Guillemet d'ouverture en filigrane, posé derrière le texte. */
+.testi-card::before{
+  content:"\201C";position:absolute;top:-28px;right:36px;z-index:0;
+  font-family:Georgia,"Times New Roman",serif;font-size:190px;line-height:1;
+  color:var(--yellow);pointer-events:none
+}
+.testi-card>*{position:relative;z-index:1}
+/* Trait tireté : l'emplacement se lit comme un gabarit à remplir. */
+.testi-card--empty{border-style:dashed;border-color:#CFCFD4}
+.testi-card__stars{display:flex;gap:4px;margin-bottom:22px}
+/* Étoiles neutres : aucune note n'est affichée tant qu'un vrai
+   témoignage n'a pas été recueilli. */
+.testi-card__stars [data-lucide]{width:18px;height:18px;color:#C7C7CC}
+.testi-card blockquote{margin:0;font-size:clamp(19px,2vw,24px);line-height:1.45;letter-spacing:-.01em;font-weight:500}
+.testi-card__who{display:flex;align-items:center;gap:14px;margin-top:28px}
+.avatar{
+  width:46px;height:46px;border-radius:50%;background:var(--yellow);border:1px solid var(--ink);
+  display:grid;place-items:center;font-weight:700;font-size:16px;flex:none
+}
+.avatar--gray{background:var(--gray);border-color:var(--border)}
+.placeholder{
+  background:var(--yellow-light);box-shadow:inset 0 0 0 1px rgba(29,29,31,.25);
+  border-radius:6px;padding:0 5px
+}
+.testi__nav{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:28px}
+.icon-btn{
+  width:44px;height:44px;border-radius:50%;border:1px solid var(--ink);background:#fff;
+  display:grid;place-items:center;cursor:pointer;transition:background .2s
+}
+.icon-btn:hover{background:var(--yellow)}
+.icon-btn [data-lucide]{width:20px;height:20px}
+.testi__dots{display:flex;gap:7px}
+.testi__dots button{width:8px;height:8px;border:none;border-radius:50%;background:var(--border);padding:0;cursor:pointer;transition:background .2s,width .2s}
+.testi__dots button[aria-current="true"]{background:var(--ink);width:22px;border-radius:99px}
 
 /* ============================================================
    11. Tarifs
@@ -751,6 +1001,15 @@ input[type=range]::-moz-range-thumb{
   .feat__grid{grid-template-columns:1fr;gap:36px}
   .feat__stage{min-height:0;padding:32px;order:2}
   .feat-item__txt p{display:block}
+  /* Pas d'épinglage sous 1024 px : la scène deviendrait illisible. */
+  .pin{grid-template-columns:1fr;gap:0}
+  .pin__stage{display:none}
+  .pin-step{min-height:0;opacity:1;padding:26px;background:#fff;border:1px solid var(--border);
+    border-radius:var(--r-card);margin-bottom:16px}
+  .pin-step p{max-width:none}
+  /* Sans scène épinglée, la notion d'étape active n'a plus de sens. */
+  .pin-step.is-on .pin-step__num b{transform:none;box-shadow:none}
+  .pin-step__num{margin-bottom:14px}
   .section-head--row{flex-direction:column;align-items:flex-start;gap:20px}
   .biz-nav{margin-left:0}
   /* Le téléphone est centré dans une colonne pleine largeur : les
@@ -774,6 +1033,9 @@ input[type=range]::-moz-range-thumb{
   .biz-slide{flex-basis:min(80vw,300px)}
   .biz-slide__title b{font-size:19px}
   .phone{width:270px}
+  /* Des voiles taillés pour 1280 px noieraient un écran de 375. */
+  .hero::before{top:-180px;right:-180px;width:460px;height:460px}
+  .hero::after{bottom:-200px;left:-200px;width:420px;height:420px}
   .hero__glow{width:300px;height:300px}
   .wallet-stack__deck{height:352px}
   .mock-row__t b,.mock-row__t span{overflow-wrap:anywhere}
@@ -800,7 +1062,7 @@ input[type=range]::-moz-range-thumb{
      ============================================================ -->
 <header class="nav" id="nav">
   <div class="container nav__inner">
-    <a class="logo" href="#top" aria-label="Accueil">
+    <a class="logo" href="#top" aria-label="Accueil" data-logo="light">
       <span class="logo__mark" aria-hidden="true" data-brand-letter>F</span>
       <span data-brand>[NOM]</span>
     </a>
@@ -826,6 +1088,7 @@ input[type=range]::-moz-range-thumb{
     <a href="#" data-toast="Connexion bientôt disponible">Se connecter</a>
     <a class="btn btn--primary btn--block" href="demo.html">Essayer la démo</a>
   </div>
+  <span class="nav__progress" id="navProgress" aria-hidden="true"></span>
 </header>
 
 <main id="main">
@@ -835,19 +1098,20 @@ input[type=range]::-moz-range-thumb{
      2. Hero
      ============================================================ -->
 <section class="hero">
+  <span class="hero__grain" aria-hidden="true"></span>
   <div class="container hero__grid">
-    <div class="hero__text reveal">
-      <p class="hero__badge">
+    <div class="hero__text">
+      <p class="hero__badge reveal">
         <span class="hero__badge-dot" aria-hidden="true"></span>
         Pensé pour les commerces d'Afrique de l'Ouest
       </p>
-      <h1 class="h1 hero__title">La carte de fidélité digitale qui fait revenir vos clients</h1>
-      <p class="lead">Vos clients l'ajoutent en un scan dans leur téléphone, sans application. Vous les récompensez à chaque passage.</p>
-      <div class="hero__cta">
-        <a class="btn btn--primary btn--lg" href="demo.html">Essayer la démo</a>
+      <h1 class="h1 hero__title" data-split>La carte de fidélité digitale qui fait revenir vos clients</h1>
+      <p class="lead reveal" style="--d:420ms">Vos clients l'ajoutent en un scan dans leur téléphone, sans application. Vous les récompensez à chaque passage.</p>
+      <div class="hero__cta reveal" style="--d:540ms">
+        <a class="btn btn--primary btn--lg" href="demo.html">Essayer la démo <i data-lucide="arrow-right"></i></a>
         <a class="btn btn--secondary btn--lg" href="#tarifs">Voir les tarifs</a>
       </div>
-      <ul class="hero__checks">
+      <ul class="hero__checks" data-stagger="90" style="--d:660ms">
         <li><span class="check-dot" aria-hidden="true"><i data-lucide="check"></i></span> Sans application</li>
         <li><span class="check-dot" aria-hidden="true"><i data-lucide="check"></i></span> Prête en 5 minutes</li>
         <li><span class="check-dot" aria-hidden="true"><i data-lucide="check"></i></span> Sans engagement</li>
@@ -858,16 +1122,16 @@ input[type=range]::-moz-range-thumb{
       <div class="hero__glow" aria-hidden="true"></div>
 
       <!-- Cartes flottantes : elles racontent le geste en caisse -->
-      <div class="float-card float-card--a" aria-hidden="true">
+      <div class="float-card float-card--a parallax" data-speed=".14" aria-hidden="true">
         <span class="float-card__ico float-card__ico--ok"><i data-lucide="check"></i></span>
         <span class="float-card__txt"><b>+ 1 tampon</b><span>Aminata M. · il y a 2 s</span></span>
       </div>
-      <div class="float-card float-card--b" aria-hidden="true">
+      <div class="float-card float-card--b parallax" data-speed=".2" aria-hidden="true">
         <span class="float-card__ico"><i data-lucide="gift"></i></span>
         <span class="float-card__txt"><b>Récompense débloquée</b><span>Brushing offert</span></span>
       </div>
 
-      <div class="phone">
+      <div class="phone hero__tilt parallax" data-speed="-.07">
         <div class="phone__notch" aria-hidden="true"></div>
         <div class="phone__screen">
           <div class="phone__status" aria-hidden="true">
@@ -890,14 +1154,14 @@ input[type=range]::-moz-range-thumb{
 
 <!-- ============================================================
      3. Bande de confiance
-     ============================================================ 
+     ============================================================ -->
 <section class="trust">
   <p class="eyebrow trust__label">Ils nous font confiance</p>
   <div class="marquee" aria-hidden="true">
     <div class="marquee__track" id="trustTrack"></div>
   </div>
   <p class="sr-only">Six commerces partenaires fictifs, à remplacer par de vraies références.</p>
-</section> -->
+</section>
 
 <!-- ============================================================
      4. Avant / après
@@ -940,37 +1204,27 @@ input[type=range]::-moz-range-thumb{
       <h2 class="h2">Quatre étapes, et c'est en place</h2>
       <p class="lead">Pas de matériel à installer, pas d'application à faire télécharger. Une carte, un QR code, et vous démarrez.</p>
     </div>
-    <ol class="steps reveal" style="list-style:none;margin:0;padding:0">
-      <li class="step">
-        <div class="step__num" aria-hidden="true">1</div>
-        <div class="step__art" aria-hidden="true"><div class="art-card"><b></b></div></div>
-        <h3 class="h3">Créez votre carte</h3>
-        <p>Choisissez tampons ou points, vos couleurs, votre logo et vos récompenses. Cinq minutes suffisent.</p>
-      </li>
-      <li class="step">
-        <div class="step__num" aria-hidden="true">2</div>
-        <div class="step__art" aria-hidden="true">
-          <div class="art-scan">
-            <div class="art-qr"><div class="qr" data-qr></div></div>
-            <div class="art-nfc"><i data-lucide="nfc"></i></div>
+    <!-- Desktop : la scène reste épinglée, le texte défile à côté.
+         Mobile : les quatre étapes redeviennent de simples cartes. -->
+    <div class="pin">
+      <div class="pin__stage">
+        <div class="pin__phone">
+          <div class="phone">
+            <div class="phone__notch" aria-hidden="true"></div>
+            <div class="phone__screen">
+              <div class="phone__status" aria-hidden="true">
+                <span>9:41</span>
+                <span class="sig"><i data-lucide="signal"></i><i data-lucide="wifi"></i><i data-lucide="battery-full"></i></span>
+              </div>
+              <div class="pin__screens" id="pinScreens"></div>
+            </div>
           </div>
+          <div class="pin__dots" id="pinDots" aria-hidden="true"></div>
         </div>
-        <h3 class="h3">Vos clients scannent</h3>
-        <p>Ils scannent le QR code ou approchent leur téléphone de la carte NFC posée au comptoir. La carte s'ajoute à leur Wallet.</p>
-      </li>
-      <li class="step">
-        <div class="step__num" aria-hidden="true">3</div>
-        <div class="step__art" aria-hidden="true"><div class="art-pos"><i></i><i></i><i></i></div></div>
-        <h3 class="h3">Vous scannez en caisse</h3>
-        <p>À chaque passage, votre équipe scanne la carte du client depuis un téléphone ou une tablette. Un tampon, ou des points.</p>
-      </li>
-      <li class="step">
-        <div class="step__num" aria-hidden="true">4</div>
-        <div class="step__art" aria-hidden="true"><div class="art-gift"><i data-lucide="gift"></i></div></div>
-        <h3 class="h3">Ils reviennent chercher leur récompense</h3>
-        <p>Palier atteint : le client est notifié sur son téléphone et revient l'utiliser chez vous.</p>
-      </li>
-    </ol>
+      </div>
+
+      <ol class="pin__steps" id="pinSteps" style="list-style:none;margin:0;padding:0"></ol>
+    </div>
   </div>
 </section>
 
@@ -1015,6 +1269,7 @@ input[type=range]::-moz-range-thumb{
 
   <div class="container">
     <div class="biz-dots" id="bizDots" role="tablist" aria-label="Aller à un commerce"></div>
+    <p class="caption biz-credit">Photos d'illustration libres de droit, à remplacer dans <code>assets/commerces/</code>.</p>
   </div>
 </section>
 
@@ -1085,7 +1340,7 @@ input[type=range]::-moz-range-thumb{
       <p class="eyebrow">Chiffres clés</p>
       <h2 class="h2">La fidélisation, c'est le levier le moins cher</h2>
     </div>
-    <div class="stats reveal">
+    <div class="stats" data-stagger="110">
       <div class="stat">
         <b><span data-count="5" data-prefix="× ">× 5</span></b>
         <p>Conquérir un nouveau client coûte jusqu'à cinq fois plus cher que de fidéliser un client existant.</p>
@@ -1226,7 +1481,7 @@ input[type=range]::-moz-range-thumb{
   <div class="container">
     <div class="footer__grid">
       <div class="footer__about">
-        <a class="logo logo--lg" href="#top">
+        <a class="logo logo--lg" href="#top" data-logo="dark">
           <span class="logo__mark" aria-hidden="true" data-brand-letter>F</span>
           <span data-brand>[NOM]</span>
         </a>
@@ -1303,10 +1558,17 @@ input[type=range]::-moz-range-thumb{
    CONFIGURATION — un seul endroit à modifier
    ============================================================ */
 
-/* Nom et logo provisoires : remplacer ici et nulle part ailleurs. */
+/* Nom et logo : à remplacer ici et nulle part ailleurs.
+
+   `logo` / `logoDark` pointent vers assets/marque/. Déposez-y vos
+   fichiers (SVG de préférence, sinon PNG à 2x) en gardant les mêmes
+   noms, et le logo change partout — barre de navigation et pied de page.
+   Laissez les deux champs vides pour revenir au carré jaune à lettre. */
 const BRAND = {
-  name: '[NOM]',   // ex. : 'Fidelio'
-  letter: 'F'      // lettre du logo provisoire (carré arrondi jaune)
+  name: '[NOM]',                            // ex. : 'Fidelio'
+  letter: 'F',                              // repli si aucun fichier de logo
+  logo: 'assets/marque/logo.svg',           // sur fond clair
+  logoDark: 'assets/marque/logo-sombre.svg' // sur fond foncé (pied de page)
 };
 
 /* Devise de la maquette. Le produit est multi-devise (chaque
@@ -1356,6 +1618,7 @@ const el = (tag, cls, html) => {
   return n;
 };
 const icons = () => window.lucide && lucide.createIcons();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 function toast(msg, icon = 'check-circle-2') {
   const t = el('div', 'toast', `<i data-lucide="${icon}"></i><span>${msg}</span>`);
@@ -1370,6 +1633,19 @@ function toast(msg, icon = 'check-circle-2') {
 /* ---------- Nom et logo ---------- */
 $$('[data-brand]').forEach(n => n.textContent = BRAND.name);
 $$('[data-brand-letter]').forEach(n => n.textContent = BRAND.letter);
+
+/* Si un fichier de logo est fourni et se charge, il remplace le carré
+   jaune à lettre. Sinon on garde le repli, et la page reste correcte. */
+$$('[data-logo]').forEach(holder => {
+  const src = holder.dataset.logo === 'dark' ? BRAND.logoDark : BRAND.logo;
+  if (!src) return;
+  const img = new Image();
+  img.onload = () => {
+    holder.classList.add('logo--file');
+    holder.innerHTML = `<img src="${src}" alt="${esc(BRAND.name)}" height="34">`;
+  };
+  img.src = src;
+});
 document.title = `${BRAND.name} — La carte de fidélité digitale pour les commerces de proximité`;
 $('#year').textContent = new Date().getFullYear();
 
@@ -1395,13 +1671,49 @@ function paintQr(node) {
 }
 $$('[data-qr]').forEach(paintQr);
 
-/* ---------- Apparition au scroll ---------- */
+/* ============================================================
+   Mise en scène au scroll
+   ============================================================ */
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Titre découpé en mots : chacun monte derrière son masque. */
+$$('[data-split]').forEach(node => {
+  const words = node.textContent.trim().split(/\s+/);
+  node.innerHTML = words
+    .map((w, i) => `<span class="word"><span style="--d:${80 + i * 45}ms">${esc(w)}</span></span>`)
+    .join(' ');
+  node.classList.add('reveal-split');
+});
+
+/* Décalage automatique des enfants d'un conteneur échelonné. */
+$$('[data-stagger]').forEach(c => {
+  const gap = +c.dataset.stagger || 80;
+  const base = parseInt(getComputedStyle(c).getPropertyValue('--d')) || 0;
+  [...c.children].forEach((n, i) => n.style.setProperty('--d', `${base + i * gap}ms`));
+});
+
+const animated = () => $$('.reveal:not(.is-in), [data-stagger]:not(.is-in), .reveal-split:not(.is-in)');
+
 const io = new IntersectionObserver(entries => {
   entries.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+    if (!e.isIntersecting) return;
+    e.target.classList.add('is-in');
+    io.unobserve(e.target);
   });
-}, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-$$('.reveal').forEach(n => io.observe(n));
+}, { rootMargin: '0px 0px -10% 0px', threshold: 0.06 });
+
+animated().forEach(n => io.observe(n));
+
+/* Filet de sécurité. L'observateur dépend du cycle de rendu : s'il est
+   suspendu (onglet en arrière-plan au chargement), rien n'apparaîtrait
+   et la page resterait blanche. Passé un délai, tout ce qui est à
+   l'écran s'affiche, animation ou non. */
+setTimeout(() => {
+  animated().forEach(n => {
+    const r = n.getBoundingClientRect();
+    if (r.top < innerHeight && r.bottom > 0) { n.classList.add('is-in'); io.unobserve(n); }
+  });
+}, 1200);
 
 /* ---------- Chiffres qui s'incrémentent à l'apparition ---------- */
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1434,11 +1746,53 @@ const countIo = new IntersectionObserver(entries => {
 }, { threshold: 0.6 });
 $$('[data-count]').forEach(n => countIo.observe(n));
 
-/* ---------- Barre de navigation ---------- */
+/* ---------- Barre de navigation, parallaxe, jauge de lecture ---------- */
 const nav = $('#nav');
-const onScroll = () => nav.classList.toggle('is-stuck', window.scrollY > 12);
-onScroll();
+const navProgress = $('#navProgress');
+const parallaxNodes = $$('.parallax');
+
+/* Un seul passage par image : lire puis écrire, sans provoquer
+   de recalcul de mise en page à chaque pixel. */
+let ticking = false;
+function onFrame() {
+  ticking = false;
+  const y = scrollY;
+  nav.classList.toggle('is-stuck', y > 12);
+
+  const h = document.documentElement.scrollHeight - innerHeight;
+  navProgress.style.setProperty('--p', h > 0 ? Math.min(1, y / h) : 0);
+
+  if (REDUCED) return;
+  parallaxNodes.forEach(n => {
+    const r = n.getBoundingClientRect();
+    if (r.bottom < -200 || r.top > innerHeight + 200) return;
+    /* Décalage relatif au centre de l'écran : nul au milieu. */
+    const d = (r.top + r.height / 2 - innerHeight / 2) * (+n.dataset.speed || 0);
+    n.style.setProperty('--py', `${d.toFixed(1)}px`);
+  });
+}
+const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(onFrame); } };
+onFrame();
 addEventListener('scroll', onScroll, { passive: true });
+addEventListener('resize', onScroll, { passive: true });
+
+/* ---------- Inclinaison du téléphone au survol ---------- */
+const heroVisual = $('.hero__visual'), heroTilt = $('.hero__tilt');
+if (heroTilt && !REDUCED && matchMedia('(hover: hover)').matches) {
+  heroVisual.addEventListener('pointermove', e => {
+    const r = heroVisual.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - .5;
+    const py = (e.clientY - r.top) / r.height - .5;
+    heroVisual.classList.add('is-tilting');
+    heroTilt.style.setProperty('--ry', `${(px * 13).toFixed(2)}deg`);
+    heroTilt.style.setProperty('--rx', `${(-py * 9).toFixed(2)}deg`);
+  });
+  heroVisual.addEventListener('pointerleave', () => {
+    heroVisual.classList.remove('is-tilting');
+    heroTilt.style.setProperty('--ry', '0deg');
+    heroTilt.style.setProperty('--rx', '0deg');
+  });
+}
 
 const burger = $('#burger'), navMobile = $('#navMobile');
 burger.addEventListener('click', () => {
@@ -1566,18 +1920,121 @@ deck.addEventListener('pointerenter', () => clearInterval(heroTimer));
 deck.addEventListener('pointerleave', () => { heroTimer = setInterval(() => setHeroCard(heroIdx + 1), 3800); });
 
 /* ============================================================
+   5. Comment ça marche — scène épinglée
+   ============================================================ */
+const STEPS = [
+  {
+    title: 'Créez votre carte',
+    text: 'Choisissez tampons ou points, vos couleurs, votre logo et vos récompenses. Cinq minutes suffisent.',
+    art: () => `
+      <div class="pin-art">
+        <span class="pin-art__label">Votre carte</span>
+        ${miniWallet('Salon Belle Allure', 'B', 'linear-gradient(145deg,#2E2A4F,#171428)', stampsRow(0, 8, 'scissors'))}
+        <span class="caption">Tampons, couleurs, récompenses</span>
+      </div>`
+  },
+  {
+    title: 'Vos clients scannent',
+    text: 'Ils scannent le QR code ou approchent leur téléphone de la carte NFC posée au comptoir. La carte s’ajoute à leur Wallet.',
+    art: () => `
+      <div class="pin-art">
+        <span class="pin-art__label">Au comptoir</span>
+        <div class="pin-art__qr">${'<div class="qr" data-qr></div>'}</div>
+        <div class="pin-art__nfc"><i data-lucide="nfc"></i></div>
+        <span class="caption">QR code ou puce NFC</span>
+      </div>`
+  },
+  {
+    title: 'Vous scannez en caisse',
+    text: 'À chaque passage, votre équipe scanne la carte du client depuis un téléphone ou une tablette. Un tampon, ou des points.',
+    art: () => `
+      <div class="pin-art">
+        <span class="pin-art__label">Passage enregistré</span>
+        <span class="pin-art__big">+ 1 tampon</span>
+        ${miniWallet('Salon Belle Allure', 'B', 'linear-gradient(145deg,#2E2A4F,#171428)', stampsRow(7, 8, 'scissors'))}
+        <span class="caption">Même sans internet</span>
+      </div>`
+  },
+  {
+    title: 'Ils reviennent chercher leur récompense',
+    text: 'Palier atteint : le client est notifié sur son téléphone et revient l’utiliser chez vous.',
+    art: () => `
+      <div class="pin-art">
+        <span class="pin-art__label">Palier atteint</span>
+        <div class="pin-art__gift"><i data-lucide="gift"></i></div>
+        <span class="pin-art__big">Brushing offert</span>
+        <span class="caption">Notifié sur son téléphone</span>
+      </div>`
+  }
+];
+
+const pinSteps = $('#pinSteps'), pinScreens = $('#pinScreens'), pinDots = $('#pinDots');
+
+pinSteps.innerHTML = STEPS.map((s, i) => `
+  <li class="pin-step" data-step="${i}">
+    <span class="pin-step__num"><b>${i + 1}</b> Étape ${i + 1} sur ${STEPS.length}</span>
+    <h3>${s.title}</h3>
+    <p>${s.text}</p>
+  </li>`).join('');
+
+pinScreens.innerHTML = STEPS.map((s, i) =>
+  `<div class="pin__screen" data-screen="${i}">${s.art()}</div>`).join('');
+
+pinDots.innerHTML = STEPS.map(() => '<i></i>').join('');
+$$('[data-qr]', pinScreens).forEach(paintQr);
+
+function setStep(i) {
+  $$('.pin-step', pinSteps).forEach((n, k) => n.classList.toggle('is-on', k === i));
+  $$('.pin__screen', pinScreens).forEach((n, k) => n.classList.toggle('is-on', k === i));
+  $$('i', pinDots).forEach((n, k) => n.classList.toggle('is-on', k === i));
+}
+setStep(0);
+
+/* L'étape active est celle qui croise le milieu de l'écran. */
+const stepIo = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) setStep(+e.target.dataset.step); });
+}, { rootMargin: '-50% 0px -50% 0px' });
+$$('.pin-step', pinSteps).forEach(n => stepIo.observe(n));
+
+/* ============================================================
    3. Bande de confiance — logos fictifs
    ============================================================ */
+/* Logos des commerces partenaires.
+   Les fichiers vivent dans assets/logos-clients/ : déposez-y vos SVG
+   (ou PNG) et mettez à jour cette liste. Un SVG monochrome prend
+   automatiquement la teinte grise de la bande grâce à currentColor.
+   Hauteur de rendu : 30 px, largeur libre. */
+const LOGOS = 'assets/logos-clients/';
+
 const TRUST = [
-  ['Salon Éclat', 'scissors'],
-  ['Le Petit Maquis', 'utensils'],
-  ['Boutique Soleil', 'shopping-bag'],
-  ['Pain & Cie', 'croissant'],
-  ['Studio Teranga', 'sparkles'],
-  ['Auto Net', 'car-front']
+  { name: 'Salon Éclat',      file: '01-salon-eclat.svg' },
+  { name: 'Le Petit Maquis',  file: '02-le-petit-maquis.svg' },
+  { name: 'Boutique Soleil',  file: '03-boutique-soleil.svg' },
+  { name: 'Pain & Cie',       file: '04-pain-et-cie.svg' },
+  { name: 'Studio Teranga',   file: '05-studio-teranga.svg' },
+  { name: 'Auto Net',         file: '06-auto-net.svg' }
 ];
-$('#trustTrack').innerHTML = [...TRUST, ...TRUST]
-  .map(([n, i]) => `<span class="flogo"><i data-lucide="${i}"></i>${n}</span>`).join('');
+
+/* Le SVG est injecté en ligne plutôt que via <img> : c'est ce qui
+   permet à currentColor de fonctionner et au logo de rester gris. */
+async function paintTrust() {
+  const track = $('#trustTrack');
+  const marks = await Promise.all(TRUST.map(async t => {
+    try {
+      const r = await fetch(LOGOS + t.file);
+      if (!r.ok) throw 0;
+      const svg = await r.text();
+      if (!svg.trim().startsWith('<svg')) throw 0;
+      return `<span class="flogo" title="${esc(t.name)}">${svg}</span>`;
+    } catch {
+      /* Fichier absent ou illisible : on retombe sur le nom écrit. */
+      return `<span class="flogo flogo--text">${esc(t.name)}</span>`;
+    }
+  }));
+  /* Doublé pour que la boucle de défilement soit continue. */
+  track.innerHTML = marks.join('') + marks.join('');
+}
+paintTrust();
 
 /* ============================================================
    6. Fonctionnalités — onglets et captures produit
@@ -1603,7 +2060,10 @@ const phone = (inner, cls = '') => `
     <div class="phone__screen">${inner}</div>
   </div>`;
 
-const miniWallet = (name, letter, bg, body) => `
+/* Déclarations de fonctions, et non des const : la scène épinglée les
+   appelle plus haut dans le script. */
+function miniWallet(name, letter, bg, body) {
+  return `
   <div class="wcard" style="position:relative;background:${bg}">
     <div class="wcard__top">
       <span class="wcard__logo">${letter}</span>
@@ -1611,14 +2071,17 @@ const miniWallet = (name, letter, bg, body) => `
     </div>
     ${body}
   </div>`;
+}
 
-const stampsRow = (filled, total, ico) => `
+function stampsRow(filled, total, ico) {
+  return `
   <div class="wcard__body">
     <div class="wcard__label">Tampons</div>
     <div class="wcard__value">${filled} / ${total}</div>
     <div class="wcard__stamps">${Array.from({ length: total }, (_, i) =>
       `<span class="stamp ${i < filled ? 'is-full' : ''}"><i data-lucide="${ico}"></i></span>`).join('')}</div>
   </div>`;
+}
 
 const FAMILIES = [
   {
@@ -1837,28 +2300,29 @@ featList.addEventListener('keydown', e => {
 /* Tous les montants sont exprimés dans la devise de base de la
    configuration (euro). Aucun encaissement n'est évoqué : il s'agit
    du ticket moyen observé et du coût de revient de la récompense. */
-/* Photos d'illustration Unsplash (licence libre, usage commercial autorisé,
-   sans attribution obligatoire). À remplacer par les visuels du client :
-   seul l'identifiant `photo` change. */
-const UNSPLASH = id => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=720&q=72`;
+/* Visuels des commerces.
+   Les fichiers vivent dans assets/commerces/ : pour changer une photo,
+   remplacez le fichier en gardant son nom, rien à toucher ici.
+   Format conseillé : 4/3, 1000 px de large, JPEG. */
+const PHOTOS = 'assets/commerces/';
 
 const BIZ = [
   { icon:'utensils',     name:'Restaurant',             type:'Points',  rule:'1 point par euro dépensé',   ticket:18, reward:'Dessert offert au bout de 1 500 points',  cost:3.5,
-    photo:'photo-1508424757105-b6d5ad9329d0', alt:'Salle de restaurant animée aux grandes tables en bois' },
+    photo:'restaurant.jpg',         alt:'Salle de restaurant animée aux grandes tables en bois' },
   { icon:'beer',         name:'Maquis',                 type:'Points',  rule:'1 point par euro dépensé',   ticket:9,  reward:'Boisson offerte au bout de 600 points',   cost:1.5,
-    photo:'photo-1517248135467-4c7edcad34c4', alt:'Salle de bar avec tables dressées et éclairage tamisé' },
+    photo:'maquis.jpg',             alt:'Salle de bar avec tables dressées et éclairage tamisé' },
   { icon:'scissors',     name:'Salon de coiffure',      type:'Tampons', rule:'8 passages = 1 récompense',  ticket:22, reward:'Brushing offert à la 8ᵉ visite',          cost:6,
-    photo:'photo-1605497788044-5a32c7078486', alt:'Coiffeur en train de sécher les cheveux d’un client' },
+    photo:'salon-de-coiffure.jpg',  alt:'Coiffeur en train de sécher les cheveux d’un client' },
   { icon:'sparkles',     name:'Institut de beauté',     type:'Tampons', rule:'6 passages = 1 récompense',  ticket:35, reward:'Soin du visage offert à la 6ᵉ visite',    cost:12,
-    photo:'photo-1616394584738-fc6e612e71b9', alt:'Cliente recevant un soin du visage' },
+    photo:'institut-de-beaute.jpg', alt:'Cliente recevant un soin du visage' },
   { icon:'croissant',    name:'Boulangerie-pâtisserie', type:'Tampons', rule:'10 passages = 1 récompense', ticket:5,  reward:'Gâteau offert à la 10ᵉ visite',           cost:2,
-    photo:'photo-1568254183919-78a4f43a2877', alt:'Vitrine de boulangerie garnie de viennoiseries' },
+    photo:'boulangerie.jpg',        alt:'Vitrine de boulangerie garnie de viennoiseries' },
   { icon:'shirt',        name:'Pressing',               type:'Tampons', rule:'10 passages = 1 récompense', ticket:12, reward:'Une pièce nettoyée offerte',              cost:3,
-    photo:'photo-1604335398980-ededcadcc37d', alt:'Rangée de machines à laver dans une laverie' },
+    photo:'pressing.jpg',           alt:'Rangée de machines à laver dans une laverie' },
   { icon:'shopping-bag', name:'Boutique',               type:'Points',  rule:'1 point par euro dépensé',   ticket:28, reward:'−10 % au bout de 500 points',             cost:2.8,
-    photo:'photo-1441986300917-64674bd600d8', alt:'Intérieur d’une boutique de vêtements' },
+    photo:'boutique.jpg',           alt:'Intérieur d’une boutique de vêtements' },
   { icon:'car-front',    name:'Lavage auto',            type:'Tampons', rule:'5 passages = 1 récompense',  ticket:8,  reward:'Lavage offert à la 5ᵉ visite',            cost:2.5,
-    photo:'photo-1608506375591-b90e1f955e4b', alt:'Voiture couverte de mousse pendant un lavage' }
+    photo:'lavage-auto.jpg',        alt:'Voiture couverte de mousse pendant un lavage' }
 ];
 
 const bizRail = $('#bizRail'), bizDots = $('#bizDots');
@@ -1869,7 +2333,7 @@ function renderBiz() {
     <article class="biz-slide" data-biz="${i}">
       <div class="biz-slide__media">
         <span class="biz-slide__tag"><i data-lucide="${b.icon}"></i> ${b.type}</span>
-        <img src="${UNSPLASH(b.photo)}" alt="${b.alt}" loading="lazy" decoding="async" width="720" height="540">
+        <img src="${PHOTOS}${b.photo}" alt="${b.alt}" loading="lazy" decoding="async" width="1000" height="750">
         <div class="biz-slide__title">
           <b>${b.name}</b>
           <span>${b.rule}</span>
@@ -1919,6 +2383,12 @@ function syncBiz() {
   $$('.biz-slide', bizRail).forEach((s, i) => {
     const d = Math.abs(s.offsetLeft + s.offsetWidth / 2 - mid);
     if (d < bestDist) { bestDist = d; best = i; }
+    /* Décalage de l'image dans son cadre, −7 % à +7 % selon la position. */
+    if (!REDUCED) {
+      const rel = (s.offsetLeft + s.offsetWidth / 2 - mid) / bizRail.clientWidth;
+      const img = $('img', s);
+      if (img) img.style.setProperty('--px', (-Math.max(-1, Math.min(1, rel)) * 7).toFixed(2));
+    }
   });
   bizIdx = best;
   $$('.biz-slide', bizRail).forEach((s, i) => s.classList.toggle('is-active', i === best));
@@ -1980,7 +2450,17 @@ function renderCalc() {
   $('#cAn').textContent      = money(mois * 12);
   $('#cVisites').textContent = `+ ${num(visites)}`;
 }
-Object.values(calcInputs).forEach(i => i.addEventListener('input', renderCalc));
+/* Petit sursaut du résultat à chaque mouvement de curseur : l'œil
+   comprend que le chiffre vient de changer. */
+const calcOut = $('.calc__out');
+let bumpTimer = null;
+Object.values(calcInputs).forEach(i => i.addEventListener('input', () => {
+  renderCalc();
+  if (REDUCED) return;
+  calcOut.classList.add('is-bump');
+  clearTimeout(bumpTimer);
+  bumpTimer = setTimeout(() => calcOut.classList.remove('is-bump'), 180);
+}));
 renderCalc();
 
 /* ============================================================
