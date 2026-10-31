@@ -1,9 +1,16 @@
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Backino — La carte de fidélité digitale pour les commerces de proximité</title>
 <meta name="description" content="Vos clients ajoutent votre carte de fidélité dans Google Wallet ou Apple Wallet en un scan, sans application. Vous les récompensez à chaque passage.">
+<meta name="theme-color" content="#151F28">
+
+<!-- Le symbole clair sert sur les onglets clairs, le jaune sur les sombres. -->
+<link rel="icon" type="image/svg+xml" href="assets/marque/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="assets/marque/favicon-sombre.svg" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="assets/marque/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -862,7 +869,13 @@ input[type=range]::-moz-range-thumb{
 /* ============================================================
    11. Tarifs
    ============================================================ */
-.price-toggle{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:48px}
+.price-toggle{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:48px;flex-wrap:wrap}
+.seg--curr button{font-size:13px;padding:0 14px}
+.price-note{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  max-width:900px;margin:18px auto 0;text-align:center
+}
+.price-note [data-lucide]{width:14px;height:14px;flex:none}
 .seg{display:inline-flex;gap:4px;padding:4px;background:var(--gray);border-radius:var(--r-pill)}
 .seg button{
   height:38px;padding:0 20px;border:none;border-radius:var(--r-pill);background:transparent;
@@ -1028,6 +1041,9 @@ input[type=range]::-moz-range-thumb{
   .section-head{margin-bottom:44px;text-align:left}
   .plans,.steps{grid-template-columns:1fr}
   .steps::before{display:none}
+  /* Un mot-symbole seul pèse plus lourd à l'œil qu'un carré à lettre. */
+  .logo--file img{height:26px}
+  .logo--lg.logo--file img{height:32px}
   .biz-rail{gap:14px}
   .biz-slide{flex-basis:min(80vw,300px)}
   .biz-slide__title b{font-size:19px}
@@ -1102,7 +1118,7 @@ input[type=range]::-moz-range-thumb{
     <div class="hero__text">
       <p class="hero__badge reveal">
         <span class="hero__badge-dot" aria-hidden="true"></span>
-        Encaissez - Fidélisez - Récompensez
+        Pensé pour les commerces d'Afrique de l'Ouest
       </p>
       <h1 class="h1 hero__title" data-split>La carte de fidélité digitale qui fait revenir vos clients</h1>
       <p class="lead reveal" style="--d:420ms">Vos clients l'ajoutent en un scan dans leur téléphone, sans application. Vous les récompensez à chaque passage.</p>
@@ -1268,6 +1284,7 @@ input[type=range]::-moz-range-thumb{
 
   <div class="container">
     <div class="biz-dots" id="bizDots" role="tablist" aria-label="Aller à un commerce"></div>
+    <p class="caption biz-credit">Photos d'illustration libres de droit, à remplacer dans <code>assets/commerces/</code>.</p>
   </div>
 </section>
 
@@ -1398,12 +1415,13 @@ input[type=range]::-moz-range-thumb{
         <button id="billYear" aria-pressed="false">Annuel</button>
       </div>
       <span class="pill pill--yellow"><i data-lucide="tag" aria-hidden="true" style="width:13px;height:13px"></i> −20 % à l'année</span>
+      <div class="seg seg--curr" id="priceCurr" role="group" aria-label="Devise d'affichage"></div>
     </div>
     <div class="plans reveal">
       <div class="plan">
         <h3 class="h3">Découverte</h3>
         <p class="plan__desc">Pour tester le programme sur votre comptoir, sans aucun frais.</p>
-        <div class="plan__price"><b>0 €</b><span>/ mois</span></div>
+        <div class="plan__price"><b id="freePrice">0 €</b><span>/ mois</span></div>
         <p class="plan__per">Gratuit jusqu'à 30 clients inscrits</p>
         <ul>
           <li><i data-lucide="check" aria-hidden="true"></i> 1 établissement</li>
@@ -1418,7 +1436,7 @@ input[type=range]::-moz-range-thumb{
         <span class="plan__badge">Le plus choisi</span>
         <h3 class="h3">Pro</h3>
         <p class="plan__desc">Tout inclus, sans limite de clients ni de notifications.</p>
-        <div class="plan__price"><b><span class="placeholder" id="proPrice">30</span> €</b><span id="proPeriod">/ mois</span></div>
+        <div class="plan__price"><b id="proPrice">30 €</b><span>/ mois</span></div>
         <p class="plan__per">par établissement · sans engagement · <span id="proBilled">facturé chaque mois</span></p>
         <ul>
           <li><i data-lucide="check" aria-hidden="true"></i> Clients illimités</li>
@@ -1438,10 +1456,15 @@ input[type=range]::-moz-range-thumb{
         <p>La carte physique que vos clients approchent ou scannent pour s'inscrire. À commander une seule fois, en option.</p>
       </div>
       <div class="nfc-box__price">
-        <b><span class="placeholder">15</span> €</b>
-        <span class="caption">paiement en une seule fois</span>
+        <b id="cardPrice">15 €</b>
+        <span class="caption">paiement unique</span>
       </div>
     </div>
+
+    <p class="caption price-note" id="priceNote" hidden>
+      <i data-lucide="info" aria-hidden="true"></i>
+      Montants convertis depuis l'euro à titre indicatif. La facturation est établie en euros.
+    </p>
   </div>
 </section>
 
@@ -1538,11 +1561,7 @@ input[type=range]::-moz-range-thumb{
           <i data-lucide="chevron-down" aria-hidden="true"></i>
         </span>
         <span class="select-wrap">
-          <select id="currSelect" aria-label="Devise">
-            <option value="EUR" selected>EUR €</option>
-            <option value="XOF">XOF CFA</option>
-            <option value="MAD">MAD DH</option>
-          </select>
+          <select id="currSelect" aria-label="Devise"></select>
           <i data-lucide="chevron-down" aria-hidden="true"></i>
         </span>
       </div>
@@ -1558,15 +1577,15 @@ input[type=range]::-moz-range-thumb{
 
 /* Nom et logo : à remplacer ici et nulle part ailleurs.
 
-   `logo` / `logoDark` pointent vers assets/marque/. Déposez-y vos
-   fichiers (SVG de préférence, sinon PNG à 2x) en gardant les mêmes
-   noms, et le logo change partout — barre de navigation et pied de page.
-   Laissez les deux champs vides pour revenir au carré jaune à lettre. */
+   Les fichiers vivent dans assets/marque/. Déposez-y vos versions en
+   gardant les mêmes noms et le logo change partout — barre de
+   navigation, pied de page, compte démo. Videz `logo` et `logoDark`
+   pour revenir au carré jaune à lettre. */
 const BRAND = {
-  name: 'Backino',                            // ex. : 'Fidelio'
-  letter: 'F',                              // repli si aucun fichier de logo
-  logo: 'assets/marque/logo.svg',           // sur fond clair
-  logoDark: 'assets/marque/logo-sombre.svg' // sur fond foncé (pied de page)
+  name: 'Backino',
+  letter: 'B',                                  // repli si aucun fichier
+  logo: 'assets/marque/logo-sur-clair.svg',     // mot-symbole foncé
+  logoDark: 'assets/marque/logo-sur-fonce.svg'  // mot-symbole jaune
 };
 
 /* Devise de la maquette. Le produit est multi-devise (chaque
@@ -1577,19 +1596,30 @@ const BRAND = {
    `rate` ne sert qu'au sélecteur du pied de page, pour montrer qu'un
    changement de devise se fait en un seul endroit. Taux indicatifs. */
 const CURRENCY_PRESETS = {
-  EUR: { code: 'EUR', locale: 'fr-FR', rate: 1,       step: 1 },
-  XOF: { code: 'XOF', locale: 'fr-FR', rate: 655.957, step: 5 },
-  MAD: { code: 'MAD', locale: 'fr-MA', rate: 10.8,    step: 1 }
+  /* Même locale partout : on garde la mise en forme française des
+     nombres, seul le symbole change (narrowSymbol évite « 32 $US »). */
+  EUR: { code: 'EUR', locale: 'fr-FR', label: 'EUR €',  rate: 1,       step: 1 },
+  USD: { code: 'USD', locale: 'fr-FR', label: 'USD $',  rate: 1.08,    step: 1 },
+  GBP: { code: 'GBP', locale: 'fr-FR', label: 'GBP £',  rate: 0.85,    step: 1 },
+  MAD: { code: 'MAD', locale: 'fr-FR', label: 'MAD DH', rate: 10.8,    step: 1 },
+  XOF: { code: 'XOF', locale: 'fr-FR', label: 'FCFA',   rate: 655.957, step: 100 }
 };
 const CURRENCY = { ...CURRENCY_PRESETS.EUR };
+
+/* Tarifs, exprimés en devise de base (euro) et convertis à l'affichage.
+   Un seul endroit à modifier pour changer les prix. */
+const PRICING = {
+  pro: 30,            // par mois et par établissement
+  card: 15,           // carte NFC + QR, paiement unique
+  annualOff: 0.20     // remise appliquée au paiement annuel
+};
 
 const money = (v, opts = {}) => {
   let amount = v * CURRENCY.rate;
   if (CURRENCY.step > 1) amount = Math.round(amount / CURRENCY.step) * CURRENCY.step;
   return new Intl.NumberFormat(CURRENCY.locale, {
-    style: 'currency', currency: CURRENCY.code,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: CURRENCY.rate === 1 ? 0 : 0,
+    style: 'currency', currency: CURRENCY.code, currencyDisplay: 'narrowSymbol',
+    minimumFractionDigits: 0, maximumFractionDigits: 0,
     ...(CURRENCY.rate === 1 ? opts : {})
   }).format(amount);
 };
@@ -1602,6 +1632,7 @@ function setCurrency(key) {
   Object.assign(CURRENCY, CURRENCY_PRESETS[key] || CURRENCY_PRESETS.EUR);
   renderBiz();
   renderCalc();
+  renderPricing();
 }
 
 /* ============================================================
@@ -2508,20 +2539,46 @@ $('#testiPrev').addEventListener('click', () => setTesti(testiIdx - 1));
 $('#testiNext').addEventListener('click', () => setTesti(testiIdx + 1));
 
 /* ============================================================
-   11. Tarifs — interrupteur mensuel / annuel
+   11. Tarifs — période et devise
    ============================================================ */
 const billMonth = $('#billMonth'), billYear = $('#billYear');
-function setBilling(annual) {
-  billMonth.setAttribute('aria-pressed', String(!annual));
-  billYear.setAttribute('aria-pressed', String(annual));
-  $('#proPeriod').textContent = annual ? '/ mois' : '/ mois';
-  $('#proBilled').textContent = annual
-    ? 'facturé chaque année, 20 % de remise incluse'
+let annualBilling = false;
+
+/* Sélecteur de devise propre à la section Tarifs. */
+$('#priceCurr').innerHTML = Object.entries(CURRENCY_PRESETS)
+  .map(([k, c]) => `<button data-curr="${k}" aria-pressed="${k === CURRENCY.code}">${c.label}</button>`)
+  .join('');
+
+function renderPricing() {
+  const perMonth = annualBilling ? PRICING.pro * (1 - PRICING.annualOff) : PRICING.pro;
+
+  $('#freePrice').textContent = money(0);
+  $('#proPrice').textContent = money(perMonth);
+  $('#cardPrice').textContent = money(PRICING.card);
+
+  $('#proBilled').textContent = annualBilling
+    ? `facturé ${money(perMonth * 12)} par an, remise incluse`
     : 'facturé chaque mois';
+
+  billMonth.setAttribute('aria-pressed', String(!annualBilling));
+  billYear.setAttribute('aria-pressed', String(annualBilling));
+  $$('#priceCurr button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.curr === CURRENCY.code)));
+
+  /* Le choix d'une autre devise que l'euro reste une conversion. */
+  $('#priceNote').hidden = CURRENCY.code === 'EUR';
 }
+
+const setBilling = annual => { annualBilling = annual; renderPricing(); };
 billMonth.addEventListener('click', () => setBilling(false));
 billYear.addEventListener('click', () => setBilling(true));
-setBilling(false);
+
+$$('#priceCurr button').forEach(b => b.addEventListener('click', () => {
+  setCurrency(b.dataset.curr);
+  $('#currSelect').value = b.dataset.curr;
+}));
+
+renderPricing();
 
 /* ============================================================
    12. FAQ en accordéon
@@ -2572,6 +2629,11 @@ $('#langSelect').addEventListener('change', e => {
   toast('La version anglaise arrive bientôt', 'languages');
   e.target.value = 'fr';
 });
+
+/* Le pied de page et la section Tarifs pilotent la même devise. */
+$('#currSelect').innerHTML = Object.entries(CURRENCY_PRESETS)
+  .map(([k, c]) => `<option value="${k}"${k === CURRENCY.code ? ' selected' : ''}>${c.label}</option>`)
+  .join('');
 
 $('#currSelect').addEventListener('change', e => {
   setCurrency(e.target.value);

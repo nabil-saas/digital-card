@@ -3,15 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>[NOM] — Compte de démonstration</title>
+<title>Backino — Compte de démonstration</title>
 <meta name="description" content="Compte de démonstration : trois établissements, cent cinquante clients fictifs, quatre-vingt-dix jours d'historique.">
 <meta name="robots" content="noindex">
+<meta name="theme-color" content="#151F28">
+
+<link rel="icon" type="image/svg+xml" href="assets/marque/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="assets/marque/favicon-sombre.svg" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="assets/marque/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   [NOM] — Compte de démonstration
+   Backino — Compte de démonstration
    Mêmes jetons de design que la landing page.
    ============================================================ */
 :root{
@@ -1217,10 +1222,10 @@ input[type=range]::-moz-range-thumb{
 /* Déposez vos fichiers dans assets/marque/ en gardant ces noms, ou
    videz les deux champs pour revenir au carré jaune à lettre. */
 const BRAND = {
-  name: '[NOM]',
-  letter: 'F',
-  logo: 'assets/marque/logo.svg',
-  logoDark: 'assets/marque/logo-sombre.svg'
+  name: 'Backino',
+  letter: 'B',
+  logo: 'assets/marque/logo-sur-clair.svg',
+  logoDark: 'assets/marque/logo-sur-fonce.svg'
 };
 
 /* Devise de la maquette. Le produit est multi-devise : chaque
@@ -4874,7 +4879,7 @@ function downloadQrSvg(code) {
 
 /* ---------- Demande d'ouverture (carte ou établissement) ----------
    La création n'est pas self-service : elle modifie l'abonnement,
-   c'est l'équipe [NOM] qui la met en place avec le commerçant. */
+   c'est l'équipe Backino qui la met en place avec le commerçant. */
 function openRequest() {
   openModal(`
     <h2>Demander une carte ou un établissement</h2>
@@ -4944,7 +4949,7 @@ const REWARD_KINDS = [
 const VALIDITIES = [[7, '7 jours'], [30, '30 jours'], [90, '90 jours'], [0, 'Illimitée']];
 
 /* L'éditeur ne sert qu'à modifier un programme existant : la création
-   passe par l'équipe [NOM], elle engage l'abonnement. */
+   passe par l'équipe Backino, elle engage l'abonnement. */
 const EDIT = { open: false, step: 1, maxStep: 5, cfg: null, errors: {},
                preview: { variant: 'google', side: 'front', sim: null }, template: null };
 

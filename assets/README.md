@@ -14,25 +14,50 @@ assets/
 
 ## 1. Votre logo — `marque/`
 
-| Fichier | Où il apparaît |
-| --- | --- |
-| `logo.svg` | barre de navigation de la landing (fond clair) |
-| `logo-sombre.svg` | pied de page de la landing, bandeau du compte démo (fond foncé) |
+Le nom de fichier dit **sur quel fond** le logo doit être posé.
 
-**Pour le remplacer :** déposez vos deux fichiers sous ces noms exacts. Ils
+| Fichier | Contenu | Où il apparaît |
+| --- | --- | --- |
+| `logo-sur-clair.svg` | mot-symbole foncé | barre de navigation de la landing |
+| `logo-sur-fonce.svg` | mot-symbole jaune | pied de page, bandeau du compte démo |
+| `symbole-sur-clair.svg` | pictogramme foncé | réserve (réseaux, documents) |
+| `symbole-sur-fonce.svg` | pictogramme jaune | réserve |
+| `favicon.svg` | pictogramme foncé | onglet du navigateur, thème clair |
+| `favicon-sombre.svg` | pictogramme jaune | onglet du navigateur, thème sombre |
+| `apple-touch-icon.png` | pictogramme sur fond foncé, 180 × 180 | écran d'accueil iOS |
+
+**Pour remplacer le logo :** déposez vos fichiers sous ces noms exacts. Ils
 s'afficheront partout, dans `index.html` comme dans `demo.html`.
 
 - Format conseillé : **SVG**. Sinon PNG à deux fois la taille d'affichage
   (le logo est rendu à 34 px de haut dans la nav, 40 px dans le pied de page).
-- Prévoyez bien **deux versions** : la version sombre doit rester lisible sur
-  le fond noir du pied de page.
-- Le fichier peut contenir le symbole seul ou le symbole + le nom, au choix :
-  il remplace l'ensemble du bloc logo.
+- Prévoyez bien **les deux versions** : celle sur fond foncé doit rester
+  lisible sur le noir du pied de page.
+- Le fichier peut contenir le symbole seul ou le symbole + le nom : il
+  remplace l'ensemble du bloc logo.
+- `apple-touch-icon.png` doit avoir un **fond opaque** : iOS n'accepte pas la
+  transparence et la remplacerait par du noir.
 
-**Si les fichiers sont absents ou illisibles**, la maquette revient d'elle-même
-au carré jaune avec une lettre — rien ne casse. Vous pouvez aussi forcer ce
-repli en vidant les champs `logo` et `logoDark` en haut du script des deux
-fichiers HTML.
+**Si un fichier est absent ou illisible**, la maquette revient d'elle-même au
+carré jaune avec une lettre — rien ne casse. Vous pouvez aussi forcer ce repli
+en vidant les champs `logo` et `logoDark` en haut du script des deux fichiers
+HTML.
+
+### Changer le nom de la marque
+
+Le nom est défini au même endroit, dans l'objet `BRAND` en tête du script de
+chaque fichier HTML :
+
+```js
+const BRAND = {
+  name: 'Backino',
+  letter: 'B',
+  logo: 'assets/marque/logo-sur-clair.svg',
+  logoDark: 'assets/marque/logo-sur-fonce.svg'
+};
+```
+
+Il se propage automatiquement à tous les textes de la page.
 
 ---
 
@@ -89,6 +114,28 @@ ouvrez `index.html` et mettez à jour la liste `TRUST` (recherchez
 
 Si un fichier manque, la maquette affiche simplement le nom du partenaire en
 toutes lettres — la bande reste présentable.
+
+---
+
+---
+
+## 4. Et les tarifs ?
+
+Ils ne sont pas dans ce dossier mais se changent tout aussi simplement, dans
+`index.html`, juste sous la configuration de devise :
+
+```js
+const PRICING = {
+  pro: 30,          // par mois et par établissement, en euros
+  card: 15,         // carte NFC + QR, paiement unique
+  annualOff: 0.20   // remise au paiement annuel
+};
+```
+
+Les montants sont saisis **en euros** et convertis à l'affichage dans les
+cinq devises proposées (EUR, USD, GBP, MAD, FCFA). Les taux de conversion
+sont dans `CURRENCY_PRESETS`, juste au-dessus — pensez à les rafraîchir de
+temps en temps, sauf pour le franc CFA qui est arrimé à l'euro à taux fixe.
 
 ---
 
