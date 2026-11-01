@@ -27,7 +27,9 @@ Le nom de fichier dit **sur quel fond** le logo doit être posé.
 | `apple-touch-icon.png` | pictogramme sur fond foncé, 180 × 180 | écran d'accueil iOS |
 
 **Pour remplacer le logo :** déposez vos fichiers sous ces noms exacts. Ils
-s'afficheront partout, dans `index.html` comme dans `demo.html`.
+s'afficheront partout : `index.html` (la landing), `demo.html` (le compte de
+démonstration) et `carte.html` (la page que voit le client qui scanne le QR
+code).
 
 - Format conseillé : **SVG**. Sinon PNG à deux fois la taille d'affichage
   (le logo est rendu à 34 px de haut dans la nav, 40 px dans le pied de page).

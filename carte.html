@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Votre carte de fidélité</title>
+<meta name="description" content="Votre carte de fidélité en trente secondes. Gratuite, sans application à installer, sans donnée personnelle.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#151F28">
+
+<link rel="icon" type="image/svg+xml" href="assets/marque/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="assets/marque/favicon-sombre.svg" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="assets/marque/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Backino — Page client
+   Ce que voit la personne qui scanne le QR code au comptoir.
+   La page porte les couleurs de l'établissement ; Backino ne
+   signe qu'en pied de page.
+
+   Principe : on ne demande rien. Ni nom, ni e-mail, ni
+   téléphone. La carte est identifiée par un code unique. Seule
+   la date de naissance est proposée, et elle reste facultative.
+   ============================================================ */
+:root{
+  --yellow:#FFF75C;
+  --ink:#1D1D1F;
+  --ink-2:#6E6E73;
+  --gray:#F5F5F7;
+  --border:#E5E5EA;
+  --error:#FF3B30;
+  --r-card:22px;
+  --r-pill:980px;
+  --font:-apple-system,BlinkMacSystemFont,"Inter",sans-serif;
+  --ease:cubic-bezier(.4,0,.2,1);
+
+  /* Posées par le script, d'après l'établissement appelé. */
+  --shop:#1D1D1F;
+  --on-shop:#FFFFFF;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;font-family:var(--font);font-size:15px;line-height:1.5;
+  color:var(--ink);background:var(--gray);-webkit-font-smoothing:antialiased
+}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:6px}
+h1,h2,h3,p{margin:0}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ---------- Bandeau de l'établissement ---------- */
+.hero{
+  background:var(--shop);color:var(--on-shop);
+  padding:26px 20px 64px;text-align:center
+}
+.hero__logo{
+  width:60px;height:60px;border-radius:17px;background:rgba(255,255,255,.95);color:var(--shop);
+  display:grid;place-items:center;font-size:25px;font-weight:700;margin:0 auto 12px;
+  box-shadow:0 6px 18px rgba(0,0,0,.18)
+}
+.hero h1{font-size:23px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.hero__sub{font-size:13.5px;opacity:.78;margin-top:4px}
+.hero__claim{
+  display:inline-flex;align-items:center;gap:7px;margin-top:14px;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);
+  border-radius:var(--r-pill);padding:7px 15px;font-size:13.5px;font-weight:600
+}
+.hero__claim [data-lucide]{width:15px;height:15px}
+
+.wrap{max-width:440px;margin:-46px auto 0;padding:0 18px 36px;position:relative}
+
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r-card);padding:20px}
+.card+.card{margin-top:14px}
+.card--card{padding:16px}
+
+.section-label{
+  font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-2);margin-bottom:12px
+}
+
+/* ---------- Boutons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  height:50px;padding:0 20px;border-radius:var(--r-pill);
+  font-size:15.5px;font-weight:600;letter-spacing:-.01em;
+  border:1px solid transparent;background:none;cursor:pointer;white-space:nowrap;
+  transition:background .18s var(--ease),transform .18s var(--ease),opacity .18s
+}
+.btn:active{transform:scale(.985)}
+.btn--shop{background:var(--shop);color:var(--on-shop);border-color:var(--shop)}
+.btn--shop:hover{filter:brightness(1.12)}
+.btn--secondary{background:#fff;color:var(--ink);border-color:var(--border)}
+.btn--secondary:hover{background:var(--gray)}
+.btn--dark{background:#000;color:#fff;border-color:#000}
+.btn--block{width:100%}
+.btn [data-lucide]{width:19px;height:19px;flex:none}
+.btn[disabled]{opacity:.42;pointer-events:none}
+
+/* ---------- Carte Wallet, en grand ---------- */
+.wcard{border-radius:18px;padding:20px;color:#fff;position:relative;overflow:hidden}
+.wcard__top{display:flex;align-items:center;gap:12px}
+.wcard__logo{
+  width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.95);
+  display:grid;place-items:center;font-size:16px;font-weight:700;flex:none
+}
+.wcard__name{font-size:16.5px;font-weight:700;line-height:1.2;letter-spacing:-.01em;display:block}
+.wcard__prog{font-size:12px;opacity:.75;line-height:1.2;margin-top:3px;display:block}
+.wcard__label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.7;margin-top:20px}
+.wcard__value{font-size:29px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-top:3px}
+/* Huit cases tiennent sur une ligne à 375 px ; au-delà, le rail passe
+   sagement à la ligne plutôt que de rétrécir jusqu'à l'illisible. */
+.wcard__stamps{display:flex;gap:6px;margin-top:15px;flex-wrap:wrap}
+.wstamp{
+  width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;
+  border:1.5px solid rgba(255,255,255,.5)
+}
+.wstamp--dashed{border-style:dashed}
+.wstamp [data-lucide]{width:13px;height:13px;opacity:.45}
+.wstamp.is-full{background:rgba(255,255,255,.95);border-color:transparent}
+.wstamp.is-full [data-lucide]{opacity:1;color:#1D1D1F}
+.wcard__bar{height:7px;border-radius:99px;background:rgba(255,255,255,.28);margin-top:16px;overflow:hidden}
+.wcard__bar i{display:block;height:100%;background:#fff;border-radius:99px}
+.wcard__foot{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-top:16px;padding-top:13px;border-top:1px solid rgba(255,255,255,.22);
+  font-size:11.5px;opacity:.85
+}
+.wcard__code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em;font-weight:600}
+
+/* ---------- Formulaire ---------- */
+.field{display:grid;gap:8px}
+.field>label{font-size:14px;font-weight:600;display:flex;align-items:baseline;gap:7px}
+.field>label em{font-style:normal;font-size:12.5px;font-weight:500;color:var(--ink-2)}
+.input{
+  width:100%;height:50px;padding:0 14px;border:1px solid var(--border);border-radius:13px;
+  background:#fff;font-size:16px;transition:border-color .15s;-webkit-appearance:none;appearance:none
+}
+.input:focus{border-color:var(--ink);outline:none}
+.field__hint{font-size:12.5px;color:var(--ink-2);line-height:1.5}
+.field__err{font-size:12.5px;color:var(--error);display:none}
+.field.is-err .input{border-color:var(--error)}
+.field.is-err .field__err{display:block}
+
+/* ---------- Conditions générales ---------- */
+.consent{
+  display:flex;gap:12px;align-items:flex-start;margin-top:18px;cursor:pointer;
+  border:1px solid var(--border);border-radius:15px;padding:14px 15px;
+  transition:border-color .15s,background .15s
+}
+.consent:hover{background:var(--gray)}
+.consent.is-on{border-color:var(--ink)}
+.consent.is-err{border-color:var(--error)}
+.consent input{position:absolute;opacity:0;width:0;height:0}
+.consent__box{
+  width:24px;height:24px;border-radius:7px;border:1.5px solid var(--border);background:#fff;
+  display:grid;place-items:center;flex:none;transition:background .15s,border-color .15s
+}
+.consent__box [data-lucide]{width:15px;height:15px;color:#fff;opacity:0;transition:opacity .15s}
+.consent.is-on .consent__box{background:var(--ink);border-color:var(--ink)}
+.consent.is-on .consent__box [data-lucide]{opacity:1}
+.consent span{font-size:13px;line-height:1.5;color:var(--ink-2)}
+.consent a{color:var(--ink);text-decoration:underline;text-underline-offset:2px}
+
+/* ---------- Confirmation ---------- */
+.done{text-align:center}
+.done__badge{
+  width:58px;height:58px;border-radius:50%;background:var(--shop);color:var(--on-shop);
+  display:grid;place-items:center;margin:0 auto 14px
+}
+.done__badge [data-lucide]{width:28px;height:28px}
+.done h2{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.done p{font-size:14px;color:var(--ink-2);margin-top:8px}
+
+.wallet-btns{display:grid;gap:10px}
+/* Les marques Apple et Google gardent leurs couleurs : on n'applique
+   aucune teinte à ces deux glyphes. */
+.wallet-mark{width:21px;height:21px;flex:none;display:block}
+.wallet-mark--apple{width:19px;height:19px;margin-top:-2px}
+
+/* Le code de la carte : c'est tout ce qui identifie son porteur, il a
+   donc droit au plus gros caractère de la page. */
+.code-box{
+  background:var(--gray);border-radius:17px;padding:20px;display:grid;justify-items:center;gap:10px;
+  margin-top:16px;text-align:center
+}
+.code-box .section-label{margin:0}
+.code-big{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:27px;font-weight:700;letter-spacing:.12em;line-height:1.2
+}
+.code-box small{font-size:12.5px;color:var(--ink-2);line-height:1.5}
+
+.rules{font-size:12.5px;color:var(--ink-2);line-height:1.55;margin-top:16px}
+.rules b{color:var(--ink)}
+
+.foot{text-align:center;font-size:12px;color:var(--ink-2);margin-top:22px;line-height:1.7}
+.foot a{text-decoration:underline;text-underline-offset:2px}
+.foot__by{display:inline-flex;align-items:center;gap:6px;margin-top:6px}
+.foot__by img{height:15px;width:auto;opacity:.7}
+
+/* ---------- Toast ---------- */
+.toasts{position:fixed;left:0;right:0;bottom:18px;display:grid;justify-items:center;gap:8px;z-index:60;pointer-events:none}
+.toast{
+  background:var(--ink);color:#fff;border-radius:var(--r-pill);padding:11px 18px;font-size:13.5px;
+  display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);
+  max-width:calc(100vw - 32px);animation:toastIn .25s var(--ease)
+}
+.toast [data-lucide]{width:15px;height:15px;flex:none}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+
+<header class="hero" id="hero"></header>
+<main class="wrap" id="app"></main>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="https://unpkg.com/lucide@0.445.0/dist/umd/lucide.min.js"></script>
+<script>
+/* ============================================================
+   Outils
+   ============================================================ */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const icons = () => window.lucide && lucide.createIcons();
+const num = n => new Intl.NumberFormat('fr-FR').format(n);
+
+function toast(msg, icon = 'check-circle-2') {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<i data-lucide="${icon}"></i><span>${esc(msg)}</span>`;
+  $('#toasts').appendChild(t);
+  icons();
+  setTimeout(() => t.remove(), 3400);
+}
+
+const slugify = str => str.toLowerCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+/* Texte lisible sur la couleur de l'établissement. */
+function onColor(hex) {
+  const v = hex.replace('#', '');
+  const f = v.length === 3 ? v.split('').map(c => c + c).join('') : v;
+  const [r, g, b] = [0, 2, 4].map(i => parseInt(f.slice(i, i + 2), 16) / 255)
+    .map(c => c <= .03928 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4));
+  return (.2126 * r + .7152 * g + .0722 * b) > .42 ? '#1D1D1F' : '#FFFFFF';
+}
+
+/* ============================================================
+   Les commerces de la démonstration
+   ------------------------------------------------------------
+   La page est appelée avec l'établissement dans l'adresse
+   (carte.html?c=salon-belle-allure), comme le ferait le lien
+   derrière le QR code posé sur le comptoir.
+   ============================================================ */
+const SHOPS = [
+  {
+    id: 's1', name: 'Salon Belle Allure', activity: 'Salon de coiffure', city: 'Dakar',
+    color: '#2E2A4F', letter: 'B', prefix: 'BA',
+    program: {
+      name: 'Club Belle Allure', type: 'stamps', cells: 8, icon: 'scissors', cellStyle: 'outline',
+      welcomeStamp: true, birthdayStamp: false,
+      rewards: [{ cell: 8, label: 'Brushing offert' }],
+      rules: '1 tampon par passage, 1 tampon maximum par jour. Récompense valable 30 jours après déblocage.'
+    }
+  },
+  {
+    id: 's2', name: 'Chez Tantie Rose', activity: 'Restaurant', city: 'Abidjan',
+    color: '#8C2F18', letter: 'R', prefix: 'TR',
+    program: {
+      name: 'Club Tantie Rose', type: 'points', unit: 'points', pointsPerUnit: 1, minAmount: 5,
+      welcomePoints: 50, birthdayPoints: 200, expiry: 12,
+      rewards: [
+        { cost: 500,  label: 'Boisson offerte' },
+        { cost: 1500, label: 'Dessert offert' },
+        { cost: 3000, label: 'Repas offert' }
+      ],
+      rules: '1 point par euro dépensé, à partir de 5 € d’achat. Points valables 12 mois.'
+    }
+  },
+  {
+    id: 's3', name: 'Pâtisserie Le Baobab', activity: 'Boulangerie-pâtisserie', city: 'Dakar',
+    color: '#8A5A2B', letter: 'P', prefix: 'LB',
+    program: {
+      name: 'Carte Baobab', type: 'stamps', cells: 10, icon: 'croissant', cellStyle: 'dashed',
+      welcomeStamp: false, birthdayStamp: true,
+      rewards: [{ cell: 10, label: 'Gâteau offert' }],
+      rules: '1 tampon par passage, 1 tampon maximum par jour. Récompense valable 30 jours après déblocage.'
+    }
+  }
+];
+
+function currentShop() {
+  const p = new URLSearchParams(location.search);
+  const c = p.get('c'), id = p.get('shop');
+  return SHOPS.find(s => s.id === id)
+      || SHOPS.find(s => slugify(s.name) === (c || '').toLowerCase())
+      || SHOPS[0];
+}
+
+const SHOP = currentShop();
+const PROG = SHOP.program;
+const STAMPS = PROG.type === 'stamps';
+
+document.title = `${SHOP.name} — Votre carte de fidélité`;
+document.documentElement.style.setProperty('--shop', SHOP.color);
+document.documentElement.style.setProperty('--on-shop', onColor(SHOP.color));
+$('meta[name="theme-color"]').content = SHOP.color;
+
+/* ============================================================
+   Le code unique : c'est lui, et lui seul, qui identifie la carte
+   ============================================================ */
+const ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'; /* sans I, O, 0, 1 : illisibles */
+function newCardCode() {
+  const pick = n => Array.from({ length: n }, () =>
+    ALPHABET[Math.floor(Math.random() * ALPHABET.length)]).join('');
+  return `${SHOP.prefix}-${pick(4)}-${pick(2)}`;
+}
+
+/* Copie du code, avec repli pour les navigateurs qui refusent le
+   presse-papiers asynchrone. */
+function copyText(text) {
+  const done = () => toast('Code copié', 'copy');
+  const legacy = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch { ok = false; }
+    ta.remove();
+    ok ? done() : toast('Copie impossible · notez le code', 'alert-triangle');
+  };
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done, legacy);
+  else legacy();
+}
+
+/* ============================================================
+   Marques Apple et Google
+   ------------------------------------------------------------
+   Les deux glyphes officiels, dessinés en SVG : ce sont eux que
+   les gens cherchent du regard sur ce genre de bouton. Ils ne
+   prennent aucune teinte de la page.
+   ============================================================ */
+const APPLE_MARK = `
+  <svg class="wallet-mark wallet-mark--apple" viewBox="0 0 384 512" fill="#fff" aria-hidden="true">
+    <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM262.1 104.5c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+  </svg>`;
+
+const GOOGLE_MARK = `
+  <svg class="wallet-mark" viewBox="0 0 48 48" aria-hidden="true">
+    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+  </svg>`;
+
+/* ============================================================
+   Aperçu de la carte
+   ============================================================ */
+
+/* Solde de départ : ce que le programme offre à l'inscription. */
+const welcomeBalance = () => STAMPS ? (PROG.welcomeStamp ? 1 : 0) : (PROG.welcomePoints || 0);
+
+const nextReward = balance => STAMPS
+  ? PROG.rewards[PROG.rewards.length - 1]
+  : [...PROG.rewards].sort((a, b) => a.cost - b.cost).find(r => r.cost > balance) || PROG.rewards[0];
+
+function walletCardHtml(balance, code = null) {
+  const r = nextReward(balance);
+  let body;
+
+  if (STAMPS) {
+    const cells = Array.from({ length: PROG.cells }, (_, i) => {
+      const full = i < balance;
+      const isReward = PROG.rewards.some(x => x.cell === i + 1);
+      return `<span class="wstamp ${full ? 'is-full' : ''} ${PROG.cellStyle === 'dashed' && !full ? 'wstamp--dashed' : ''}">
+                <i data-lucide="${isReward ? 'gift' : PROG.icon}"></i>
+              </span>`;
+    }).join('');
+    body = `
+      <div class="wcard__label">Tampons</div>
+      <div class="wcard__value">${balance} / ${PROG.cells}</div>
+      <div class="wcard__stamps">${cells}</div>`;
+  } else {
+    const pct = Math.min(100, Math.round(balance / r.cost * 100));
+    body = `
+      <div class="wcard__label">Solde</div>
+      <div class="wcard__value">${num(balance)} ${esc(PROG.unit)}</div>
+      <div class="wcard__bar"><i style="width:${pct}%"></i></div>`;
+  }
+
+  return `
+    <div class="wcard" style="background:${SHOP.color};color:${onColor(SHOP.color)}">
+      <div class="wcard__top">
+        <span class="wcard__logo" style="color:${SHOP.color}">${esc(SHOP.letter)}</span>
+        <span>
+          <span class="wcard__name">${esc(SHOP.name)}</span>
+          <span class="wcard__prog">${esc(PROG.name)}</span>
+        </span>
+      </div>
+      ${body}
+      <div class="wcard__foot">
+        <span>${code ? 'Carte ' : ''}${code ? `<b class="wcard__code">${esc(code)}</b>` : esc(SHOP.city)}</span>
+        <span>${STAMPS ? esc(r.label) : 'Palier suivant · ' + esc(r.label)}</span>
+      </div>
+    </div>`;
+}
+
+/* Le slogan du bandeau : la récompense, dite en quatre mots. */
+function claimText() {
+  if (STAMPS) {
+    const r = PROG.rewards[PROG.rewards.length - 1];
+    return `${PROG.cells} passages = ${r.label.toLowerCase()}`;
+  }
+  const r = [...PROG.rewards].sort((a, b) => a.cost - b.cost)[0];
+  return `${num(r.cost)} ${PROG.unit} = ${r.label.toLowerCase()}`;
+}
+
+function renderHero() {
+  $('#hero').innerHTML = `
+    <div class="hero__logo">${esc(SHOP.letter)}</div>
+    <h1>${esc(SHOP.name)}</h1>
+    <p class="hero__sub">${esc(SHOP.activity)} · ${esc(SHOP.city)}</p>
+    <p class="hero__claim"><i data-lucide="gift" aria-hidden="true"></i>${esc(claimText())}</p>`;
+}
+
+/* ============================================================
+   Écran 1 — obtenir sa carte
+   ============================================================ */
+function birthdayHint() {
+  if (STAMPS) {
+    return PROG.birthdayStamp
+      ? 'Un tampon vous est offert le jour de votre anniversaire. Rien d’autre n’en est fait.'
+      : 'Pour recevoir une attention le jour de votre anniversaire. Rien d’autre n’en est fait.';
+  }
+  return PROG.birthdayPoints
+    ? `${num(PROG.birthdayPoints)} ${PROG.unit} vous sont offerts le jour de votre anniversaire. Rien d’autre n’en est fait.`
+    : 'Pour recevoir une attention le jour de votre anniversaire. Rien d’autre n’en est fait.';
+}
+
+function renderForm() {
+  $('#app').innerHTML = `
+    <div class="card card--card">${walletCardHtml(welcomeBalance())}</div>
+
+    <div class="card">
+      <p class="section-label">Votre carte en 30 secondes</p>
+
+      <form id="form" novalidate>
+        <div class="field" id="f-dob">
+          <label for="dob">Date de naissance <em>facultatif</em></label>
+          <input class="input" id="dob" name="dob" type="date" autocomplete="bday" max="">
+          <span class="field__err">Cette date ne peut pas être dans le futur.</span>
+          <span class="field__hint">${esc(birthdayHint())}</span>
+        </div>
+
+        <label class="consent" id="consent">
+          <input type="checkbox" id="cgu">
+          <span class="consent__box" aria-hidden="true"><i data-lucide="check"></i></span>
+          <span>J’accepte les <a href="#cgu" id="openCgu">conditions générales d’utilisation</a>
+                et la <a href="#conf" id="openConf">politique de confidentialité</a>.</span>
+        </label>
+
+        <button class="btn btn--shop btn--block" type="submit" id="go" style="margin-top:16px" disabled>
+          <i data-lucide="wallet-cards"></i> Obtenir ma carte
+        </button>
+      </form>
+    </div>
+
+    ${footHtml()}`;
+
+  $('#dob').max = new Date().toISOString().slice(0, 10);
+
+  const box = $('#consent'), cb = $('#cgu');
+  const sync = () => {
+    box.classList.toggle('is-on', cb.checked);
+    box.classList.remove('is-err');
+    $('#go').disabled = !cb.checked;
+  };
+  cb.addEventListener('change', sync);
+  sync();
+
+  $('#dob').addEventListener('input', () => $('#f-dob').classList.remove('is-err'));
+  $('#openCgu').addEventListener('click', e => { e.preventDefault(); openTerms('cgu'); });
+  $('#openConf').addEventListener('click', e => { e.preventDefault(); openTerms('conf'); });
+
+  $('#form').addEventListener('submit', e => { e.preventDefault(); submit(); });
+  icons();
+}
+
+function footHtml() {
+  return `
+    <p class="foot">
+      Aucune donnée personnelle n’est collectée.<br>
+      <a href="#cgu" data-terms="cgu">Conditions d’utilisation</a> ·
+      <a href="#conf" data-terms="conf">Confidentialité</a>
+      <span class="foot__by">Propulsé par
+        <img src="assets/marque/logo-sur-clair.svg" alt="Backino" onerror="this.outerHTML='Backino'">
+      </span>
+    </p>`;
+}
+
+/* Les textes légaux, affichés sans quitter la page. */
+function openTerms(which) {
+  const cgu = `
+    <b>Conditions générales d’utilisation</b>
+    <p>Votre carte de fidélité ${esc(SHOP.name)} est gratuite et sans engagement.
+       Elle n’est valable que dans cet établissement. ${esc(PROG.rules)}</p>
+    <p>La carte reste la propriété de l’établissement, qui peut mettre fin au programme
+       en prévenant ses porteurs. Les récompenses ne sont ni échangeables ni remboursables
+       en argent. Aucun paiement ne transite par ce service.</p>`;
+  const conf = `
+    <b>Politique de confidentialité</b>
+    <p>Votre carte est identifiée par un code unique. Aucun nom, aucune adresse e-mail,
+       aucun numéro de téléphone ne vous est demandé.</p>
+    <p>Si vous renseignez votre date de naissance, elle sert uniquement à vous offrir
+       une attention le jour de votre anniversaire. Elle n’est ni revendue, ni partagée.</p>
+    <p>Sont enregistrés vos passages dans cet établissement et le solde de votre carte,
+       le temps du programme. Vous pouvez demander la suppression de votre carte à tout
+       moment, directement au comptoir.</p>`;
+
+  $('#app').insertAdjacentHTML('beforeend', `
+    <div class="card" id="termsCard" style="margin-top:14px">
+      <div class="rules">${which === 'cgu' ? cgu : conf}</div>
+      <button class="btn btn--secondary btn--block" id="termsClose" style="margin-top:14px">Fermer</button>
+    </div>`);
+  const node = $('#termsCard');
+  $('#termsClose').addEventListener('click', () => node.remove());
+  node.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  icons();
+}
+
+/* ============================================================
+   Validation et génération
+   ============================================================ */
+function submit() {
+  const dob = $('#dob').value;
+
+  if (dob && new Date(dob) > new Date()) {
+    $('#f-dob').classList.add('is-err');
+    $('#f-dob').scrollIntoView({ block: 'center', behavior: 'smooth' });
+    return;
+  }
+  if (!$('#cgu').checked) {
+    $('#consent').classList.add('is-err');
+    return;
+  }
+
+  const btn = $('#go');
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader-2"></i> Création…';
+  icons();
+
+  setTimeout(() => renderDone(dob), 650);
+}
+
+/* ============================================================
+   Écran 2 — carte générée
+   ============================================================ */
+function renderDone(dob) {
+  const balance = welcomeBalance();
+  const code = newCardCode();
+  const bday = dob
+    ? new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' }).format(new Date(dob))
+    : null;
+
+  $('#app').innerHTML = `
+    <div class="card done">
+      <span class="done__badge"><i data-lucide="check" aria-hidden="true"></i></span>
+      <h2>Votre carte est prête</h2>
+      <p>${balance
+        ? (STAMPS ? 'Votre premier tampon est déjà crédité.' : `${num(balance)} ${esc(PROG.unit)} vous attendent déjà.`)
+        : 'Elle se remplira dès votre premier passage.'}</p>
+    </div>
+
+    <div class="card card--card">${walletCardHtml(balance, code)}</div>
+
+    <div class="card">
+      <p class="section-label">Ajoutez-la à votre téléphone</p>
+      <div class="wallet-btns">
+        <button class="btn btn--dark btn--block" data-wallet="Apple Wallet">
+          ${APPLE_MARK} Ajouter à Apple Wallet
+        </button>
+        <button class="btn btn--secondary btn--block" data-wallet="Google Wallet">
+          ${GOOGLE_MARK} Ajouter à Google Wallet
+        </button>
+        <button class="btn btn--secondary btn--block" data-wallet="Carte web">
+          <i data-lucide="globe"></i> Ouvrir la carte web
+        </button>
+      </div>
+
+      <div class="code-box">
+        <p class="section-label">Code de votre carte</p>
+        <div class="code-big">${esc(code)}</div>
+        <button class="btn btn--secondary btn--sm" id="copyCode"><i data-lucide="copy"></i> Copier le code</button>
+        <small>À conserver : c’est lui qui identifie votre carte en caisse.</small>
+      </div>
+
+      <p class="rules">
+        <b>Comment ça marche :</b> ${esc(PROG.rules)}
+        ${bday
+          ? `Votre anniversaire est noté au ${esc(bday)}.`
+          : 'Vous pourrez ajouter votre date de naissance plus tard, depuis votre carte.'}
+      </p>
+
+      <button class="btn btn--secondary btn--block" id="again" style="margin-top:16px">
+        <i data-lucide="rotate-ccw"></i> Recommencer la démonstration
+      </button>
+    </div>
+
+    ${footHtml()}`;
+
+  $$('[data-wallet]').forEach(b => b.addEventListener('click', () => {
+    const w = b.dataset.wallet;
+    toast(w === 'Carte web'
+      ? 'Démonstration · la carte web s’ouvrirait dans votre navigateur'
+      : `Démonstration · la carte s’ajouterait à ${w}`, w === 'Carte web' ? 'globe' : 'wallet-cards');
+  }));
+  $('#copyCode').addEventListener('click', () => copyText(code));
+  $$('[data-terms]').forEach(a => a.addEventListener('click', e => {
+    e.preventDefault(); openTerms(a.dataset.terms);
+  }));
+  $('#again').addEventListener('click', () => { renderForm(); scrollTo({ top: 0, behavior: 'instant' }); });
+
+  icons();
+  scrollTo({ top: 0, behavior: 'instant' });
+  toast(`Carte ${code} créée`, 'party-popper');
+}
+
+renderHero();
+renderForm();
+</script>
+</body>
+</html>
