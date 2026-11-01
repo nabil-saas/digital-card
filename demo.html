@@ -818,17 +818,67 @@ td .who b{font-weight:600}
 .rule__stats{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
 .rule__stats b{color:var(--ink);font-weight:600}
 
+/* Règle repliée : le titre et sa cible suffisent, le réglage se déplie.
+   C'est ce qui rend la liste tenable sur un écran de téléphone. */
+.rule__head{
+  flex:1;min-width:0;display:block;text-align:left;background:none;border:0;padding:0;
+  font:inherit;color:inherit;cursor:pointer
+}
+.rule__head:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:8px}
+.rule__acts{display:flex;align-items:center;gap:2px;flex:none}
+.rule__chev{color:var(--ink-2);transition:transform .2s var(--ease)}
+.rule__chev [data-lucide]{width:17px;height:17px}
+.rule.is-open .rule__chev{transform:rotate(180deg)}
+.rule__body[hidden]{display:none}
+.rule__foot{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.rule__foot .btn{flex:none}
+.param-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.param-row .input{width:84px}
+@media (max-width:560px){
+  .rule{padding:14px}
+  .rule__ico{width:32px;height:32px;border-radius:10px}
+  .rule__txt b{font-size:14.5px}
+}
+
 /* ============================================================
    5.5 Mes cartes
    ============================================================ */
-.prog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+/* Les cartes s'élargissent au lieu de se multiplier : il faut la place
+   d'aligner les deux boutons d'action sous chacune. */
+.prog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px}
 .prog-card{
   background:#fff;border:1px solid var(--border);border-radius:var(--r-card);padding:16px;
-  display:flex;flex-direction:column;gap:14px;cursor:pointer;text-align:left;
-  transition:border-color .18s,transform .18s var(--ease)
+  display:flex;flex-direction:column;gap:14px;text-align:left;
+  transition:border-color .18s
 }
-.prog-card:hover{border-color:var(--ink);transform:translateY(-2px)}
+.prog-card:hover{border-color:var(--ink)}
 .prog-card__foot{display:flex;align-items:center;gap:9px;margin-top:auto}
+/* Les récompenses se règlent souvent : le bouton est posé sur la carte,
+   sans passer par le parcours complet de l'éditeur. */
+/* Les deux actions côte à côte, à portée de pouce : régler les
+   récompenses, ou ouvrir la carte en entier. */
+.prog-card__acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.prog-card__acts .btn{justify-content:center;padding:0 10px;min-width:0}
+.prog-card__acts .btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Volet des récompenses : il occupe toute la largeur de la grille et
+   se glisse sous la carte qu'il concerne. */
+.prog-rewards{
+  grid-column:1/-1;background:#fff;border:1px solid var(--ink);border-radius:var(--r-card);
+  padding:18px;display:grid;gap:14px;align-content:start
+}
+.prog-rewards__head{display:flex;align-items:flex-start;gap:12px}
+.prog-rewards__txt{flex:1;min-width:0}
+.prog-rewards__txt>b{display:block;font-size:16px;font-weight:600}
+.prog-rewards__txt>span{display:block;font-size:13px;color:var(--ink-2);margin-top:2px}
+.prog-rewards__list{display:grid;gap:8px}
+.prog-rewards .rail{margin:0}
+.prog-rewards .btn{justify-self:start}
+/* Cadeaux automatiques : bienvenue et anniversaire, réglés sur place. */
+.rew-opts{border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.rew-opts .cap-row{padding:12px 14px;border-bottom:none}
+.rew-opts .cap-row+.cap-row{border-top:1px solid var(--border)}
+.rew-opts--grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;padding:14px}
 .prog-card__foot .prog-card__txt{flex:1;min-width:0}
 .prog-card__txt b{display:block;font-size:15px;font-weight:600}
 .prog-card__txt span{display:block;font-size:12px;color:var(--ink-2)}
@@ -863,7 +913,16 @@ td .who b{font-weight:600}
 .wcard__code{background:#fff;border-radius:8px;padding:5px;margin:12px auto 0;width:66px;height:66px}
 .wcard__back{font-size:11px;line-height:1.5;opacity:.85;white-space:pre-line;margin-top:12px}
 
-.support-table .code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;letter-spacing:.04em}
+/* Partage d'une carte : lien d'inscription et QR code à emporter. */
+.share-qr{
+  background:var(--gray);border-radius:16px;padding:18px;display:grid;justify-items:center;gap:10px
+}
+.share-qr .qr{width:148px;height:148px}
+.share-qr small{font-size:12px;color:var(--ink-2);text-align:center;line-height:1.45}
+.copy-row{display:flex;gap:8px;align-items:center}
+.copy-row .input{flex:1;min-width:0;font-size:13px}
+.share-foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.share-foot .btn{flex:1 1 auto;justify-content:center}
 
 /* ============================================================
    Éditeur de carte (plein écran)
@@ -1312,7 +1371,8 @@ const CAPS = [
   { id: 'dashboard.view',     group: 'Pilotage',    label: 'Voir les statistiques',                desc: 'Chiffre d’affaires, fréquentation, taux de retour.' },
   { id: 'campaigns.manage',   group: 'Pilotage',    label: 'Créer et envoyer des campagnes',       desc: 'Notifications push et relances ponctuelles.' },
   { id: 'automations.manage', group: 'Pilotage',    label: 'Régler les automatisations',           desc: 'Bienvenue, relances, anniversaire, avis Google.' },
-  { id: 'cards.manage',       group: 'Programme',   label: 'Modifier les cartes existantes',       desc: 'Paliers, couleurs, supports physiques. La création passe par notre équipe.', superOnly: true },
+  { id: 'cards.manage',       group: 'Programme',   label: 'Régler récompenses et règles',         desc: 'Paliers, coûts en points, limites, supports physiques. La création passe par notre équipe.' },
+  { id: 'cards.design',       group: 'Programme',   label: 'Modifier le design de la carte',       desc: 'Couleurs, logo, nom affiché. Un gérant d’un seul établissement garde la main sur le sien.', superOnly: true },
   { id: 'team.view',          group: 'Équipe',      label: 'Voir l’équipe',                        desc: 'Consulter la liste des accès.' },
   { id: 'team.manage',        group: 'Équipe',      label: 'Gérer les accès de l’équipe',          desc: 'Inviter, changer un rôle, révoquer un accès, définir les droits des rôles.', superOnly: true },
   { id: 'settings.view',      group: 'Compte',      label: 'Ouvrir les paramètres',                desc: 'Informations du compte, de l’établissement et notifications internes.' }
@@ -1339,7 +1399,7 @@ const ROLES = {
     icon: 'briefcase', cls: 'pill--ok', allShops: false,
     caps: ['scan.earn', 'scan.redeem', 'scan.correct', 'clients.view', 'clients.export',
            'clients.edit', 'dashboard.view', 'campaigns.manage', 'automations.manage',
-           'team.view', 'settings.view']
+           'cards.manage', 'team.view', 'settings.view']
   },
   employee: {
     id: 'employee', label: 'Employé', short: 'Employé',
@@ -1716,14 +1776,14 @@ const AUTOMATIONS = [
     stats: { s1: { sent: 38, returned: 12 }, s2: { sent: 31, returned: 9 }, s3: { sent: 22, returned: 7 } } },
 
   { id: 'a2', icon: 'user-minus',  on: true,  trigger: 'absent', param: 30, channel: 'wallet', bonus: 'none',
-    title: 'Client absent depuis X jours', delayKey: 'delay', delay: 30,
+    title: 'Relance des clients absents',
     desc: 'Relance les clients qui ne sont pas revenus.',
     message: 'Vous nous manquez ! Votre carte vous attend avec vos points déjà acquis.',
     shops: ['s1', 's2'],
     stats: { s1: { sent: 64, returned: 19 }, s2: { sent: 41, returned: 13 } } },
 
   { id: 'a3', icon: 'gift',        on: true,  trigger: 'unused', param: 7, channel: 'wallet', bonus: 'none',
-    title: 'Récompense disponible et non utilisée depuis 7 jours',
+    title: 'Rappel de récompense non utilisée',
     desc: 'Rappelle au client qu’une récompense l’attend.',
     message: 'Votre récompense est toujours disponible, pensez à en profiter.',
     shops: ['s1', 's3'],
@@ -1737,7 +1797,7 @@ const AUTOMATIONS = [
     stats: { s2: { sent: 0, returned: 0 } } },
 
   { id: 'a5', icon: 'star',        on: true,  trigger: 'visit', param: 3, channel: 'wallet', bonus: 'none',
-    title: 'Demande d’avis Google après la 3ᵉ visite',
+    title: 'Demande d’avis Google',
     desc: 'Sans contrepartie : les règles de Google interdisent de récompenser un avis.',
     message: 'Merci pour votre fidélité. Votre avis sur Google nous aiderait beaucoup.',
     noReward: true,
@@ -1771,16 +1831,6 @@ function automationStats(a) {
   }, { sent: 0, returned: 0 });
 }
 
-const SUPPORT_CARDS = [
-  { code: 'BA-QR-0147', shopId: 's1', place: 'Comptoir principal', scans: 312, status: 'active' },
-  { code: 'BA-NFC-0218', shopId: 's1', place: 'Poste de coiffage 2', scans: 96, status: 'active' },
-  { code: 'TR-NFC-0051', shopId: 's2', place: 'Caisse', scans: 274, status: 'active' },
-  { code: 'TR-QR-0052', shopId: 's2', place: 'Terrasse', scans: 58, status: 'active' },
-  { code: 'LB-NFC-0310', shopId: 's3', place: 'Comptoir', scans: 181, status: 'active' },
-  { code: 'LB-QR-0311', shopId: 's3', place: 'Vitrine', scans: 0, status: 'pending' },
-  { code: 'BA-NFC-0099', shopId: 's1', place: 'Ancien comptoir', scans: 44, status: 'disabled' }
-];
-
 /* ============================================================
    État de l'application
    ============================================================ */
@@ -1798,7 +1848,16 @@ if (!memberById(STATE.userId)) STATE.userId = 'u1';
 const me = () => memberById(STATE.userId);
 /* Les droits se définissent par rôle (écran Paramètres → Gestion des
    rôles), jamais membre par membre : un membre hérite de son rôle. */
-const can = cap => ROLES[me().role].caps.includes(cap);
+const can = cap => {
+  if (ROLES[me().role].caps.includes(cap)) return true;
+  /* Exception assumée : le design de la carte se décide à un seul
+     endroit dès qu'un programme est partagé par plusieurs points de
+     vente. Un gérant qui n'a qu'un établissement est seul concerné par
+     sa carte : il garde donc la main sur son allure. */
+  if (cap === 'cards.design')
+    return me().role === 'manager' && can('cards.manage') && myShops().length === 1;
+  return false;
+};
 
 /* Périmètre d'établissements du membre connecté. */
 const myShops = () => roleOf(me()).allShops
@@ -1868,19 +1927,33 @@ function qrHtml(seed = 7) {
    correspondant n'apparaît ni dans la barre latérale, ni dans les
    onglets, ni par son ancre. */
 const ROUTES = {
-  /* Le comptoir est un écran de caisse : comme le scanner, il n'existe
-     qu'en dessous de 1024 px. En desktop il disparaît de la navigation. */
-  comptoir:     { label: 'Comptoir',        icon: 'scan-line',        cap: 'scan.earn',          tab: 'Comptoir',   tabIcon: 'store',       mobileOnly: true, render: () => renderCounter() },
+  /* Écran de caisse de l'employé : scanner et derniers passages. Il
+     n'existe qu'en dessous de 1024 px et ne figure dans aucune
+     navigation — le bouton Scanner de la barre d'onglets joue déjà ce
+     rôle, l'y répéter sous le nom de « comptoir » faisait doublon. */
+  poste:        { label: 'Mon poste',       icon: 'scan-line',        cap: 'scan.earn',          mobileOnly: true, hidden: true, render: () => renderCounter() },
   dashboard:    { label: 'Tableau de bord', icon: 'layout-dashboard', cap: 'dashboard.view',     tab: 'Accueil',    tabIcon: 'home',        render: () => renderDashboard() },
   clients:      { label: 'Clients',         icon: 'users',            cap: 'clients.view',       tab: 'Clients',    tabIcon: 'users',       render: () => renderClients() },
-  campagnes:    { label: 'Campagnes',       icon: 'megaphone',        cap: 'campaigns.manage',   tab: 'Campagnes',  tabIcon: 'megaphone',   render: () => renderCampaigns() },
+  /* Un seul établissement, une seule carte : « Carte ». Plusieurs
+     établissements, autant de cartes à piloter : « Mes cartes ». */
+  cartes:       { label: () => canSeeAllShops() ? 'Mes cartes' : 'Carte',
+                  icon: 'credit-card',      cap: 'cards.manage',
+                  tab: () => canSeeAllShops() ? 'Cartes' : 'Carte',
+                  tabIcon: 'credit-card',   render: () => renderCards() },
+  campagnes:    { label: 'Campagnes',       icon: 'megaphone',        cap: 'campaigns.manage',   render: () => renderCampaigns() },
   automatisations: { label: 'Automatisations', icon: 'repeat',        cap: 'automations.manage', render: () => renderAutomations() },
-  cartes:       { label: 'Mes cartes',      icon: 'credit-card',      cap: 'cards.manage',       tab: 'Cartes',     tabIcon: 'credit-card', render: () => renderCards() },
-  equipe:       { label: 'Équipe',          icon: 'users-round',      cap: 'team.view',          tab: 'Équipe',     tabIcon: 'users-round', render: () => renderTeam() },
+  equipe:       { label: 'Équipe',          icon: 'users-round',      cap: 'team.view',          render: () => renderTeam() },
   /* Écran du pied de la barre latérale : il a son propre bouton,
      on ne le répète pas dans la liste de navigation. */
   parametres:   { label: 'Paramètres',      icon: 'settings',         cap: 'settings.view',      foot: true,        render: () => renderSettings() }
 };
+
+/* Un libellé peut dépendre du rôle : on le résout à l'affichage. */
+const txt = v => typeof v === 'function' ? v() : v;
+
+/* Ordre des onglets du bas, en mobile : deux écrans, le bouton Scanner,
+   puis un troisième. Le reste part dans « Plus ». */
+const TAB_ORDER = ['dashboard', 'clients', 'cartes'];
 
 const isDesktop = () => matchMedia('(min-width:1024px)').matches;
 
@@ -1889,9 +1962,9 @@ const allowedRoutes = () => Object.entries(ROUTES)
 
 /* Écran d'arrivée : le tableau de bord pour qui a droit aux
    statistiques, sinon le premier écran autorisé. Un employé en desktop
-   n'a aucun écran : on retombe sur le comptoir, qui lui explique que
+   n'a aucun écran : on retombe sur son poste, qui lui explique que
    la caisse se tient depuis un téléphone ou une tablette. */
-const homeRoute = () => can('dashboard.view') ? 'dashboard' : allowedRoutes()[0]?.[0] || 'comptoir';
+const homeRoute = () => can('dashboard.view') ? 'dashboard' : allowedRoutes()[0]?.[0] || 'poste';
 
 const navDesktop = $('#navDesktop');
 const tabbar = $('#tabbar');
@@ -1900,8 +1973,8 @@ function buildNav() {
   const routes = allowedRoutes();
 
   navDesktop.innerHTML = '';
-  routes.filter(([, r]) => !r.foot).forEach(([key, r]) => {
-    const b = el('button', 'nav-item', `<i data-lucide="${r.icon}" aria-hidden="true"></i> ${r.label}`);
+  routes.filter(([, r]) => !r.foot && !r.hidden).forEach(([key, r]) => {
+    const b = el('button', 'nav-item', `<i data-lucide="${r.icon}" aria-hidden="true"></i> ${txt(r.label)}`);
     b.type = 'button';
     b.dataset.route = key;
     b.addEventListener('click', () => go(key));
@@ -1916,29 +1989,31 @@ function buildNav() {
   /* Les écrans réservés au super gérant restent visibles mais verrouillés :
      mieux vaut dire pourquoi un accès manque que de le faire disparaître. */
   Object.entries(ROUTES)
-    .filter(([, r]) => SUPER_ONLY.includes(r.cap) && !can(r.cap) && !(r.mobileOnly && isDesktop()))
+    .filter(([, r]) => SUPER_ONLY.includes(r.cap) && !can(r.cap) && !(r.mobileOnly && isDesktop()) && !r.hidden)
     .forEach(([, r]) => {
       const b = el('button', 'nav-item nav-item--locked',
-        `<i data-lucide="${r.icon}" aria-hidden="true"></i> ${r.label}
+        `<i data-lucide="${r.icon}" aria-hidden="true"></i> ${txt(r.label)}
          <i data-lucide="lock" class="nav-item__lock" aria-hidden="true"></i>`);
       b.type = 'button';
-      b.title = `${r.label} — réservé au super gérant`;
+      b.title = `${txt(r.label)} — réservé au super gérant`;
       b.addEventListener('click', () =>
-        toast(`${r.label} : réservé au super gérant`, 'lock'));
+        toast(`${txt(r.label)} : réservé au super gérant`, 'lock'));
       navDesktop.appendChild(b);
     });
 
-  /* Barre d'onglets : trois écrans directs autour du bouton Scanner,
-     le reste derrière « Plus ». Sans ce dernier, les écrans au-delà du
-     quatrième deviendraient inatteignables en mobile. */
-  const tabbed = routes.filter(([, r]) => r.tab);
-  const direct = tabbed.slice(0, 3);
-  const overflow = tabbed.slice(3).concat(routes.filter(([, r]) => !r.tab));
+  /* Barre d'onglets : Accueil, Clients, le bouton Scanner, puis l'écran
+     du programme. Le reste passe derrière « Plus » — sans ce dernier,
+     les écrans suivants deviendraient inatteignables en mobile. */
+  const visible = routes.filter(([, r]) => !r.hidden);
+  const direct = TAB_ORDER
+    .map(k => visible.find(([key]) => key === k))
+    .filter(Boolean);
+  const overflow = visible.filter(([key]) => !TAB_ORDER.includes(key));
   const withScan = can('scan.earn');
 
   tabbar.innerHTML = '';
   const addTab = ([key, r]) => {
-    const b = el('button', 'tab', `<i data-lucide="${r.tabIcon}" aria-hidden="true"></i><span>${r.tab}</span>`);
+    const b = el('button', 'tab', `<i data-lucide="${r.tabIcon || r.icon}" aria-hidden="true"></i><span>${txt(r.tab) || txt(r.label)}</span>`);
     b.type = 'button';
     b.dataset.route = key;
     b.addEventListener('click', () => go(key));
@@ -1979,7 +2054,7 @@ function openMoreMenu(anchor, routes) {
   routes.forEach(([key, r]) => {
     const b = el('button', 'shop-opt' + (STATE.route === key ? ' is-active' : ''), `
       <span class="more-ico"><i data-lucide="${r.icon}" aria-hidden="true"></i></span>
-      <span class="shop-opt__txt"><b>${r.label}</b></span>
+      <span class="shop-opt__txt"><b>${txt(r.label)}</b></span>
       ${STATE.route === key ? '<i data-lucide="check" aria-hidden="true"></i>' : ''}`);
     b.type = 'button';
     b.setAttribute('role', 'option');
@@ -2271,12 +2346,12 @@ const myRecentScans = () => allTxs(STATE.shopId)
   .sort((a, b) => b.date - a.date);
 
 function renderCounter() {
-  /* En desktop, le comptoir n'existe pas : on explique où il se trouve. */
+  /* En desktop, cet écran de caisse n'existe pas : on explique où il se trouve. */
   if (isDesktop()) {
     $('#view').innerHTML = `
       <div class="counter-away">
         <div class="counter-away__qr">${qrHtml(7)}</div>
-        <h1>Le comptoir se tient depuis un téléphone ou une tablette</h1>
+        <h1>La caisse se tient depuis un téléphone ou une tablette</h1>
         <p>Scanner une carte, créditer un passage ou corriger une erreur se fait en caisse,
            sur un écran de moins de 1024 px de large. Sur ordinateur, cet écran n’est pas affiché.</p>
         <p class="counter-away__who">
@@ -2293,7 +2368,7 @@ function renderCounter() {
   $('#view').innerHTML = `
     <div class="view__head">
       <div>
-        <h1>Comptoir</h1>
+        <h1>Mon poste</h1>
         <p>${esc(me().name)} · ${roleOf(me()).label} · ${esc(shopLabel())}</p>
       </div>
     </div>
@@ -2984,7 +3059,7 @@ function renderDashboard() {
   view.innerHTML = `
     <div class="view__head">
       <div>
-        <h1>Bonjour Aïssatou</h1>
+        <h1>Bonjour ${esc(me().name.split(' ')[0])}</h1>
         <p>${esc(shopLabel())}${currentShop() ? ' · ' + esc(currentShop().city) : ''} · ${longFmt.format(new Date())}</p>
       </div>
       <div class="view__actions">
@@ -3604,7 +3679,8 @@ function scanFooterHtml() {
       <span>Mode hors ligne</span>
       <button class="switch" id="offlineSwitch" role="switch" aria-checked="${STATE.offline}" aria-label="Mode hors ligne"></button>
     </div>
-    <button class="scanner__link" id="phoneLookup">Rechercher par téléphone</button>`;
+    <button class="scanner__link" id="phoneLookup">Rechercher par téléphone</button>
+    ${can('scan.correct') ? '<button class="scanner__link" id="toCounter">Mes derniers passages</button>' : ''}`;
 }
 
 function bindScanFooter() {
@@ -3617,6 +3693,10 @@ function bindScanFooter() {
     }
     scanIdle();
   });
+  /* Le poste de caisse n'a plus d'onglet — le bouton Scanner le
+     remplaçait en doublon. On y accède d'ici, là où l'on en a besoin :
+     relire ses derniers passages et corriger une erreur. */
+  $('#toCounter')?.addEventListener('click', () => { closeScanner(); go('poste'); });
   $('#phoneLookup').addEventListener('click', () => {
     const pool = clientsOf(STATE.shopId);
     openModal(`
@@ -4252,6 +4332,22 @@ function shopChips(ids) {
     : '');
 }
 
+/* Version courte, pour une ligne de liste : au-delà de deux cibles, le
+   compte suffit — le détail est à un dépliage de là. */
+function shopChipsShort(ids) {
+  const mine = myShops().map(s => s.id);
+  const visible = ids.filter(id => mine.includes(id));
+  if (!visible.length) return '<span class="pill pill--warn">Aucun établissement</span>';
+  if (visible.length > 2)
+    return `<span class="pill"><i data-lucide="store"></i>${visible.length} établissements</span>`;
+  /* Les cibles hors périmètre ne sont pas mentionnées ici : elles ne
+     disent rien à qui ne les voit pas. Le dépliage reste explicite. */
+  return visible.map(id => {
+    const s = shopById(id);
+    return `<span class="pill"><span class="legend__dot" style="background:${s.color}"></span>${esc(s.name)}</span>`;
+  }).join('');
+}
+
 /* ---------- Éditeur d'automatisation ---------- */
 const AUTO_EDIT = { open: false, id: null, device: 'android', touched: false, draft: null };
 const AUTO_MSG_MAX = 160;
@@ -4467,16 +4563,21 @@ function renderAutoEditor() {
   icons();
 }
 
+/* Quelles règles sont dépliées. Tout est replié au départ : la liste
+   doit se lire d'un coup d'œil, y compris sur un téléphone. */
+const AUTO_OPEN = new Set();
+
 function renderAutomations() {
   if (AUTO_EDIT.open) return renderAutoEditor();
   const list = automationsInScope();
   const multi = myShops().length > 1;
+  const on = list.filter(a => a.on).length;
 
   $('#view').innerHTML = `
     <div class="view__head">
       <div>
         <h1>Automatisations</h1>
-        <p>${list.filter(a => a.on).length} règle${list.filter(a => a.on).length > 1 ? 's' : ''} active${list.filter(a => a.on).length > 1 ? 's' : ''} sur ${list.length} · ${esc(shopLabel())}</p>
+        <p>${on} règle${on > 1 ? 's' : ''} active${on > 1 ? 's' : ''} sur ${list.length} · ${esc(shopLabel())}</p>
       </div>
       <div class="view__actions">
         ${can('campaigns.manage') ? '<button class="btn btn--secondary" id="toCampaigns"><i data-lucide="arrow-left"></i> Campagnes</button>' : ''}
@@ -4484,12 +4585,10 @@ function renderAutomations() {
       </div>
     </div>
 
-    ${multi ? `
+    ${multi && STATE.shopId !== 'all' ? `
       <p class="field__hint" style="margin-bottom:16px">
         <i data-lucide="info" style="width:13px;height:13px;vertical-align:-2px"></i>
-        ${STATE.shopId === 'all'
-          ? 'Vue consolidée : toutes vos règles, avec les établissements qu’elles ciblent et les résultats cumulés.'
-          : `Seules les règles qui ciblent ${esc(shopLabel())} sont affichées. Basculez sur « Tous les établissements » pour les voir toutes.`}
+        Seules les règles qui ciblent ${esc(shopLabel())} sont affichées.
       </p>` : ''}
 
     <div id="rules"></div>`;
@@ -4502,54 +4601,49 @@ function renderAutomations() {
   }
 
   list.forEach(a => {
+    const t = triggerById(a.trigger);
+    const p = t && t.param;
     const st = automationStats(a);
+    const open = AUTO_OPEN.has(a.id);
     const targeted = a.shops.filter(id => myShops().some(s => s.id === id));
 
-    const node = el('div', 'rule', `
+    /* Replié, on ne montre que l'essentiel : le nom de la règle, son
+       déclencheur et — s'il y a plusieurs établissements — ceux qu'elle
+       touche. Le reste se déplie. */
+    const node = el('div', 'rule' + (open ? ' is-open' : ''), `
       <div class="rule__top">
         <span class="rule__ico"><i data-lucide="${a.icon}" aria-hidden="true"></i></span>
-        <span class="rule__txt">
-          <b>${esc(a.title)}${a.custom ? '<span class="pill pill--yellow">Personnalisée</span>' : ''}</b>
-          <p>${a.desc}</p>
-          <span class="rule__chips">
-            ${a.trigger ? `<span class="pill"><i data-lucide="${triggerById(a.trigger).icon}"></i>${triggerLabel(a)}</span>` : ''}
-            ${a.bonus && a.bonus !== 'none'
-              ? `<span class="pill pill--ok"><i data-lucide="gift"></i>${a.bonus === 'stamp' ? '1 tampon offert' : num(a.bonusQty) + ' points offerts'}</span>`
-              : ''}
+        <button class="rule__head" data-rule-head aria-expanded="${open}">
+          <span class="rule__txt">
+            <b>${esc(a.title)}</b>
+            <span class="rule__chips">
+              ${t ? `<span class="pill"><i data-lucide="${t.icon}"></i>${triggerLabel(a)}</span>` : ''}
+              ${a.bonus && a.bonus !== 'none'
+                ? `<span class="pill pill--ok"><i data-lucide="gift"></i>${a.bonus === 'stamp' ? '1 tampon' : num(a.bonusQty) + ' points'}</span>`
+                : ''}
+              ${multi ? shopChipsShort(a.shops) : ''}
+              ${a.on ? '' : '<span class="pill pill--warn">En pause</span>'}
+            </span>
           </span>
-          <span class="rule__chips">${shopChips(a.shops)}</span>
+        </button>
+        <span class="rule__acts">
+          <span class="rule__chev" aria-hidden="true"><i data-lucide="chevron-down"></i></span>
+          <button class="switch" role="switch" aria-checked="${a.on}" aria-label="Activer : ${esc(a.title)}"></button>
         </span>
-        ${a.custom ? `
-          <button class="icon-btn icon-btn--plain" data-auto-edit="${a.id}" aria-label="Modifier" title="Modifier"><i data-lucide="pencil"></i></button>
-          <button class="icon-btn icon-btn--plain" data-auto-del="${a.id}" aria-label="Supprimer" title="Supprimer"><i data-lucide="trash-2"></i></button>`
-          : ''}
-        <button class="switch" role="switch" aria-checked="${a.on}" aria-label="Activer : ${esc(a.title)}"></button>
       </div>
-      <div class="rule__body">
-        <div class="field" style="margin:0">
-          <label>Établissements ciblés</label>
-          <div class="check-list check-list--inline">
-            ${myShops().map(s => `
-              <label class="check-row">
-                <input type="checkbox" data-rule-shop="${s.id}" ${a.shops.includes(s.id) ? 'checked' : ''}>
-                <span class="shop-logo shop-logo--sm" style="background:${s.color}" aria-hidden="true">${s.letter}</span>
-                <span class="check-row__txt">
-                  <b>${esc(s.name)}</b>
-                  <span>${esc(s.city)} · ${a.stats[s.id] ? num(a.stats[s.id].sent) + ' envois sur 30 j' : 'aucun envoi'}</span>
-                </span>
-              </label>`).join('')}
-          </div>
-          ${!targeted.length
-            ? '<span class="field__err" style="display:block">Aucun établissement ciblé : cette règle ne s’applique nulle part.</span>'
-            : ''}
-        </div>
 
-        ${a.delayKey ? `
+      <div class="rule__body" ${open ? '' : 'hidden'}>
+        ${p ? `
           <div class="field" style="margin:0">
-            <label for="d-${a.id}">Déclencher après</label>
-            <select class="select" id="d-${a.id}" style="max-width:220px">
-              ${[15, 30, 60].map(d => `<option value="${d}"${a.delay === d ? ' selected' : ''}>${d} jours sans passage</option>`).join('')}
-            </select>
+            <label for="p-${a.id}">${p.label}</label>
+            <div class="param-row">
+              <input class="input" id="p-${a.id}" type="number" min="1" step="1" value="${a.param}">
+              <span style="font-size:13px;color:var(--ink-2)">${p.fmt(a.param)}</span>
+            </div>
+            ${p.options ? `
+              <div class="seg seg--wrap" style="margin-top:9px">
+                ${p.options.map(o => `<button type="button" data-rule-param="${o}" aria-pressed="${+a.param === o}">${o}</button>`).join('')}
+              </div>` : ''}
           </div>` : ''}
 
         <div class="field" style="margin:0">
@@ -4557,26 +4651,68 @@ function renderAutomations() {
           <textarea class="textarea" id="m-${a.id}" style="min-height:64px">${esc(a.message)}</textarea>
         </div>
 
+        ${multi ? `
+          <div class="field" style="margin:0">
+            <label>Établissements ciblés</label>
+            <div class="check-list check-list--inline">
+              ${myShops().map(s => `
+                <label class="check-row">
+                  <input type="checkbox" data-rule-shop="${s.id}" ${a.shops.includes(s.id) ? 'checked' : ''}>
+                  <span class="shop-logo shop-logo--sm" style="background:${s.color}" aria-hidden="true">${s.letter}</span>
+                  <span class="check-row__txt"><b>${esc(s.name)}</b><span>${esc(s.city)}</span></span>
+                </label>`).join('')}
+            </div>
+            ${!targeted.length
+              ? '<span class="field__err" style="display:block">Aucun établissement ciblé : cette règle ne s’applique nulle part.</span>'
+              : ''}
+          </div>` : ''}
+
         ${a.noReward ? `
           <p class="field__hint"><i data-lucide="info" style="width:13px;height:13px;vertical-align:-2px"></i>
-          Aucune récompense n’est associée : les règles de Google interdisent de récompenser un avis.</p>` : ''}
+          Aucune récompense associée : les règles de Google interdisent de récompenser un avis.</p>` : ''}
         ${a.pointsOnly ? `
           <p class="field__hint"><i data-lucide="info" style="width:13px;height:13px;vertical-align:-2px"></i>
-          Sans effet sur un établissement à carte à tampons.</p>` : ''}
+          Sans effet sur une carte à tampons.</p>` : ''}
 
         <div class="rule__stats">
-          <span>${STATE.shopId === 'all' && targeted.length > 1 ? 'Cumul sur 30 jours' : 'Sur 30 jours'} : <b>${num(st.sent)}</b> envois</span>
+          <span>Sur 30 jours : <b>${num(st.sent)}</b> envois</span>
           <span><b>${num(st.returned)}</b> clients revenus</span>
-          ${st.sent ? `<span>Taux de retour : <b>${Math.round(st.returned / st.sent * 100)} %</b></span>` : ''}
+          ${st.sent ? `<span>Retour : <b>${Math.round(st.returned / st.sent * 100)} %</b></span>` : ''}
+        </div>
+
+        <div class="rule__foot">
+          <button class="btn btn--secondary btn--sm" data-auto-edit="${a.id}"><i data-lucide="sliders-horizontal"></i> Réglages avancés</button>
+          <button class="btn btn--ghost btn--sm" data-auto-del="${a.id}"><i data-lucide="trash-2"></i> Supprimer</button>
         </div>
       </div>`);
     wrap.appendChild(node);
 
+    /* Dépliage : on ne reconstruit pas la liste, on bascule le volet. */
+    $('[data-rule-head]', node).addEventListener('click', () => {
+      const now = !AUTO_OPEN.has(a.id);
+      now ? AUTO_OPEN.add(a.id) : AUTO_OPEN.delete(a.id);
+      node.classList.toggle('is-open', now);
+      $('.rule__body', node).hidden = !now;
+      $('[data-rule-head]', node).setAttribute('aria-expanded', String(now));
+    });
+
     $('.switch', node).addEventListener('click', e => {
       a.on = !a.on;
       e.currentTarget.setAttribute('aria-checked', String(a.on));
-      toast(`${a.title} · ${a.on ? 'activée' : 'désactivée'}`, a.on ? 'check-circle-2' : 'circle-off');
+      render();
+      toast(`${a.title} · ${a.on ? 'activée' : 'mise en pause'}`, a.on ? 'check-circle-2' : 'circle-off');
     });
+
+    /* Le délai, le rang de visite ou le seuil se règlent ici : valeurs
+       courantes proposées, mais toute valeur entière reste acceptée. */
+    const setParam = v => {
+      a.param = Math.max(1, Math.round(+v) || 1);
+      render();
+      toast(`${a.title} · ${p.fmt(a.param)}`, t.icon);
+    };
+    $(`#p-${a.id}`, node)?.addEventListener('change', e => setParam(e.target.value));
+    $$('[data-rule-param]', node).forEach(b =>
+      b.addEventListener('click', () => setParam(b.dataset.ruleParam)));
 
     /* Un gérant ne peut cibler que ses propres établissements : la liste
        ne lui en propose pas d'autres, et les cibles hors périmètre
@@ -4597,10 +4733,6 @@ function renderAutomations() {
       a.message = e.target.value;
       toast('Message enregistré', 'save');
     });
-    $(`#d-${a.id}`, node)?.addEventListener('change', e => {
-      a.delay = +e.target.value;
-      toast(`Relance réglée sur ${a.delay} jours`, 'timer');
-    });
   });
 
   $('#newAuto').addEventListener('click', () => openAutoEditor());
@@ -4610,6 +4742,9 @@ function renderAutomations() {
     e.stopPropagation();
     openAutoEditor(b.dataset.autoEdit);
   }));
+
+  /* Toute règle est supprimable, y compris celles livrées avec le
+     compte : ce qui ne sert pas n'a pas à encombrer la liste. */
   $$('[data-auto-del]').forEach(b => b.addEventListener('click', e => {
     e.stopPropagation();
     const a = AUTOMATIONS.find(x => x.id === b.dataset.autoDel);
@@ -4622,6 +4757,7 @@ function renderAutomations() {
       </div>`);
     $('#autoDelGo').addEventListener('click', () => {
       AUTOMATIONS.splice(AUTOMATIONS.indexOf(a), 1);
+      AUTO_OPEN.delete(a.id);
       closeModal(); render();
       toast('Automatisation supprimée', 'trash-2');
     });
@@ -4728,7 +4864,8 @@ function cfgFromShop(shop) {
     type: p.type, cells: p.cells || 10, stampIcon: p.icon || 'star', cellStyle: p.cellStyle || 'outline',
     unit: p.unit || 'points', pointsPerUnit: p.pointsPerUnit || 1, minAmount: p.minAmount || 0,
     showProgress: p.showProgress !== false, banner: false,
-    welcomeStamp: !!p.welcomeStamp, welcomePoints: p.welcomePoints || 0, birthdayPoints: p.birthdayPoints || 0,
+    welcomeStamp: !!p.welcomeStamp, birthdayStamp: !!p.birthdayStamp,
+    welcomePoints: p.welcomePoints || 0, birthdayPoints: p.birthdayPoints || 0,
     expiry: p.expiry || 0, maxPerPeriod: p.maxPerPeriod || 'day',
     rewards: p.rewards.map(r => ({ ...r })),
     back: p.back, contact: 'contact@exemple.com'
@@ -4740,121 +4877,326 @@ function cfgFromShop(shop) {
    ============================================================ */
 function activeCardsOf(shopId) { return clientsOf(shopId).length; }
 
-function renderCards() {
-  const ordered = [...myShops()].sort((a, b) => (a.id === STATE.shopId ? -1 : b.id === STATE.shopId ? 1 : 0));
-  const supports = SUPPORT_CARDS.filter(s => STATE.shopId === 'all' || s.shopId === STATE.shopId);
-  const SUP_STATUS = {
-    active:   { label: 'Active',       cls: 'pill--ok' },
-    pending:  { label: 'Non activée',  cls: 'pill--warn' },
-    disabled: { label: 'Désactivée',   cls: '' }
-  };
+/* ---------- Volet « Récompenses » ----------
+   Les récompenses bougent souvent, bien plus que le reste de la carte.
+   Elles se modifient donc ici même, sous la carte concernée, et chaque
+   changement est écrit aussitôt : pas de parcours à dérouler jusqu'au
+   bout pour qu'un libellé soit enregistré. */
+const REWARDS = { shopId: null, cfg: null };
 
+function openRewardsPanel(shopId) {
+  REWARDS.shopId = shopId;
+  REWARDS.cfg = cfgFromShop(shopById(shopId));
+  render();
+  $(`[data-rewards="${shopId}"]`)?.scrollIntoView({ block: 'center', behavior: 'instant' });
+}
+
+function closeRewardsPanel() {
+  REWARDS.shopId = null;
+  REWARDS.cfg = null;
+  render();
+}
+
+/* Contexte passé à la fenêtre de récompense : on écrit dans le
+   programme de l'établissement dès la validation. */
+const panelRewardCtx = () => ({
+  cfg: REWARDS.cfg,
+  after: () => {
+    const shop = shopById(REWARDS.shopId);
+    shop.program.rewards = REWARDS.cfg.rewards.map(r => ({ ...r }));
+    const errs = validateRewards(REWARDS.cfg);
+    render();
+    toast(errs.rewards ? 'Enregistré · un réglage reste à revoir' : 'Récompenses enregistrées',
+          errs.rewards ? 'alert-triangle' : 'check-circle-2');
+  }
+});
+
+/* Écrit un réglage du programme et le confirme. Même principe que les
+   récompenses : rien n'attend une publication. */
+function setProgramOption(patch, label) {
+  const shop = shopById(REWARDS.shopId);
+  Object.assign(shop.program, patch);
+  REWARDS.cfg = cfgFromShop(shop);
+  render();
+  toast(label, 'save');
+}
+
+function rewardsPanelHtml(shop) {
+  const cfg = REWARDS.cfg;
+  const stamps = cfg.type === 'stamps';
+  const errs = validateRewards(cfg);
+  const rows = stamps
+    ? [...cfg.rewards].sort((a, b) => a.cell - b.cell)
+    : [...cfg.rewards].sort((a, b) => a.cost - b.cost);
+
+  return `
+    <div class="prog-rewards" id="rewPanel">
+      <div class="prog-rewards__head">
+        <span class="prog-rewards__txt">
+          <b>Récompenses · ${esc(shop.name)}</b>
+          <span>${stamps
+            ? `Carte à tampons de ${cfg.cells} cases · 1 tampon par passage`
+            : `Carte à points · ${cfg.pointsPerUnit} ${esc(cfg.unit)} par ${CURRENCY.code === 'EUR' ? 'euro' : CURRENCY.code} dépensé`}</span>
+        </span>
+        <button class="icon-btn" id="rewClose" aria-label="Fermer les récompenses"><i data-lucide="x"></i></button>
+      </div>
+
+      ${stamps ? `
+        <div class="rail">
+          ${Array.from({ length: cfg.cells }, (_, i) => {
+            const c = i + 1;
+            const r = cfg.rewards.find(x => x.cell === c);
+            return `<button class="rail__cell ${r ? 'has-reward' : ''} ${c === cfg.cells ? 'is-last' : ''}" data-rew-cell="${c}"
+                      aria-label="Case ${c}${r ? ' : ' + esc(r.label) : ''}">
+                      ${r ? '<i data-lucide="gift"></i>' : c}
+                      <small>${c}</small>
+                    </button>`;
+          }).join('')}
+        </div>
+        <p class="field__hint">Cliquez sur une case pour y poser, modifier ou retirer une récompense.</p>` : ''}
+
+      ${rows.length ? `<div class="prog-rewards__list">
+        ${rows.map(r => `
+          <div class="reward-row">
+            <span class="reward-row__ico"><i data-lucide="gift"></i></span>
+            <span class="reward-row__txt">
+              <b>${stamps ? 'Case ' + r.cell : num(r.cost) + ' ' + esc(cfg.unit)} · ${esc(r.label)}</b>
+              <span>${REWARD_KINDS.find(k => k.id === r.kind).label} · validité ${r.validity ? r.validity + ' jours' : 'illimitée'}${r.once ? ' · 1 fois par client' : ''}</span>
+            </span>
+            <button class="icon-btn icon-btn--plain" data-rew-edit="${stamps ? r.cell : r.id}" aria-label="Modifier"><i data-lucide="pencil"></i></button>
+            <button class="icon-btn icon-btn--plain" data-rew-del="${stamps ? r.cell : r.id}" aria-label="Supprimer"><i data-lucide="trash-2"></i></button>
+          </div>`).join('')}
+      </div>` : `<p class="empty" style="margin:0"><i data-lucide="gift"></i>Aucune récompense pour l’instant.</p>`}
+
+      ${stamps ? '' : '<button class="btn btn--secondary btn--sm" id="rewAdd"><i data-lucide="plus"></i> Ajouter une récompense</button>'}
+
+      ${errs.rewards ? `<p class="field__err" style="display:block">${errs.rewards}</p>` : ''}
+
+      <p class="section-label" style="margin:4px 0 0">Offerts automatiquement</p>
+      ${stamps ? `
+        <div class="rew-opts">
+          <div class="cap-row">
+            <span class="cap-row__txt">
+              <b>Tampon de bienvenue</b>
+              <span>Un tampon crédité dès que le client ajoute sa carte.</span>
+            </span>
+            <button class="switch" role="switch" data-rew-opt="welcomeStamp"
+                    aria-checked="${!!cfg.welcomeStamp}" aria-label="Tampon de bienvenue"></button>
+          </div>
+          <div class="cap-row">
+            <span class="cap-row__txt">
+              <b>Tampon d’anniversaire</b>
+              <span>Un tampon offert le jour dit, si la date de naissance est connue.</span>
+            </span>
+            <button class="switch" role="switch" data-rew-opt="birthdayStamp"
+                    aria-checked="${!!cfg.birthdayStamp}" aria-label="Tampon d’anniversaire"></button>
+          </div>
+        </div>` : `
+        <div class="rew-opts rew-opts--grid">
+          <div class="field" style="margin:0">
+            <label for="rewWelcome">Points de bienvenue</label>
+            <input class="input" id="rewWelcome" type="number" min="0" step="10" value="${cfg.welcomePoints}" style="max-width:150px">
+            <span class="field__hint">Crédités à l’inscription. 0 pour ne rien offrir.</span>
+          </div>
+          <div class="field" style="margin:0">
+            <label for="rewBirthday">Points d’anniversaire</label>
+            <input class="input" id="rewBirthday" type="number" min="0" step="10" value="${cfg.birthdayPoints}" style="max-width:150px">
+            <span class="field__hint">Offerts le jour dit, si la date est connue.</span>
+          </div>
+        </div>`}
+
+      <p class="field__hint" style="margin:0">
+        <i data-lucide="info" style="width:13px;height:13px;vertical-align:-2px"></i>
+        Chaque modification est enregistrée aussitôt et s’applique aux ${num(activeCardsOf(shop.id))} cartes déjà distribuées. Les soldes sont conservés.
+      </p>
+    </div>`;
+}
+
+function renderCards() {
+  /* Le volet suit la carte qu'il concerne : si elle sort du périmètre
+     visible, il se referme de lui-même. */
+  if (REWARDS.shopId && !myShops().some(s => s.id === REWARDS.shopId)) {
+    REWARDS.shopId = null; REWARDS.cfg = null;
+  }
+  /* Rien n'est en attente dans le volet : tout est déjà écrit dans le
+     programme. On repart donc de lui à chaque rendu, ce qui garantit
+     que le volet et la carte disent la même chose. */
+  if (REWARDS.shopId) REWARDS.cfg = cfgFromShop(shopById(REWARDS.shopId));
+  const open = REWARDS.shopId;
+  const ordered = [...myShops()].sort((a, b) => (a.id === STATE.shopId ? -1 : b.id === STATE.shopId ? 1 : 0));
   $('#view').innerHTML = `
     <div class="view__head">
       <div>
-        <h1>Mes cartes</h1>
-        <p>${ordered.length} programme${ordered.length > 1 ? 's' : ''} · ${num(clientsOf('all').length)} cartes distribuées</p>
+        <h1>${txt(ROUTES.cartes.label)}</h1>
+        <p>${ordered.length} carte${ordered.length > 1 ? 's' : ''} · ${num(clientsOf('all').length)} cartes distribuées</p>
       </div>
       <div class="view__actions">
         <button class="btn btn--primary" id="askNew"><i data-lucide="life-buoy"></i> Demander une carte ou un établissement</button>
       </div>
     </div>
 
-    <div class="managed-note">
-      <span class="managed-note__ico"><i data-lucide="life-buoy" aria-hidden="true"></i></span>
-      <div>
-        <b>La création est prise en charge par l’équipe ${esc(BRAND.name)}</b>
-        <p>Ouvrir un établissement ou lancer une nouvelle carte change le montant de votre abonnement :
-           nous le faisons avec vous, puis le programme apparaît ici. Vous gardez la main sur tout le reste —
-           couleurs, paliers, messages, équipe.</p>
-      </div>
-      <button class="btn btn--secondary" id="askNew2">Nous écrire</button>
-    </div>
+    ${can('cards.design') ? '' : `
+      <p class="field__hint" style="margin-bottom:16px">
+        <i data-lucide="info" style="width:13px;height:13px;vertical-align:-2px"></i>
+        Vous réglez les récompenses et les règles de ${ordered.length > 1
+          ? 'chacune de vos cartes — basculez d’établissement en haut de l’écran pour passer de l’une à l’autre'
+          : 'votre carte'}. Le design reste entre les mains du super gérant.
+      </p>`}
 
-    <p class="section-label">Programmes</p>
+    <p class="section-label">${ordered.length > 1 ? 'Vos cartes' : 'Votre carte'}</p>
     <div class="prog-grid" style="margin-bottom:28px">
       ${ordered.map(s => {
         const cfg = cfgFromShop(s);
-        return `<button class="prog-card" data-prog="${s.id}">
+        const n = s.program.rewards.length;
+        return `<div class="prog-card">
           ${walletCardHtml(cfg, { variant: 'google' })}
-          <span class="prog-card__foot">
+          <div class="prog-card__foot">
             <span class="shop-logo shop-logo--sm" style="background:${s.color}" aria-hidden="true">${s.letter}</span>
             <span class="prog-card__txt">
               <b>${esc(s.name)}</b>
               <span>${s.program.type === 'stamps' ? 'Tampons' : 'Points'} · ${num(activeCardsOf(s.id))} cartes actives</span>
             </span>
             <span class="pill pill--ok">Publiée</span>
-          </span>
-        </button>`;
+            <button class="icon-btn icon-btn--plain" data-share="${s.id}"
+                    title="Partager la carte" aria-label="Partager la carte de ${esc(s.name)}">
+              <i data-lucide="share-2"></i>
+            </button>
+          </div>
+          <div class="prog-card__acts">
+            <button class="btn btn--primary btn--sm" data-rewards="${s.id}" aria-expanded="${open === s.id}">
+              <i data-lucide="${open === s.id ? 'chevron-up' : 'gift'}"></i> <span>Récompenses · ${n}</span>
+            </button>
+            <button class="btn btn--secondary btn--sm" data-prog="${s.id}">
+              <i data-lucide="sliders-horizontal"></i> <span>Modifier la carte</span>
+            </button>
+          </div>
+        </div>
+        ${open === s.id ? rewardsPanelHtml(s) : ''}`;
       }).join('')}
-    </div>
-
-    <p class="section-label">Supports physiques</p>
-    <div class="table-wrap support-table" style="margin-bottom:12px">
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Code</th><th>Emplacement</th><th>Établissement</th><th>Scans</th><th>Statut</th><th></th></tr></thead>
-          <tbody>
-            ${supports.map(s => {
-              const st = SUP_STATUS[s.status];
-              return `<tr>
-                <td class="code">${s.code}</td>
-                <td>${esc(s.place)}</td>
-                <td>${esc(shopById(s.shopId).name)}</td>
-                <td>${num(s.scans)}</td>
-                <td><span class="pill ${st.cls}">${st.label}</span></td>
-                <td><button class="btn btn--secondary btn--sm" data-qr-dl="${s.code}"><i data-lucide="download"></i> QR</button></td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>
-        ${supports.length ? '' : '<p class="empty"><i data-lucide="nfc"></i>Aucun support pour cet établissement.</p>'}
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn--secondary" id="activateCard"><i data-lucide="nfc"></i> Activer une carte</button>
-      <button class="btn btn--secondary" id="dlAllQr"><i data-lucide="download"></i> Télécharger le QR code</button>
     </div>`;
 
   $('#askNew').addEventListener('click', openRequest);
-  $('#askNew2').addEventListener('click', openRequest);
   $$('[data-prog]').forEach(b => b.addEventListener('click', () => openEditor(b.dataset.prog)));
-  $$('[data-qr-dl]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); downloadQrSvg(b.dataset.qrDl); }));
-  $('#dlAllQr').addEventListener('click', () => downloadQrSvg((currentShop()?.letter || 'ALL') + '-INSCRIPTION'));
-  $('#activateCard').addEventListener('click', () => {
-    openModal(`
-      <h2>Activer une carte</h2>
-      <p class="modal__lead">Saisissez le code imprimé au dos de la carte NFC ou du chevalet QR.</p>
-      <div class="field">
-        <label for="actCode">Code imprimé</label>
-        <input class="input" id="actCode" placeholder="BA-NFC-0000" style="font-family:ui-monospace,Menlo,monospace">
-        <span class="field__err">Code invalide.</span>
+
+  /* Volet des récompenses : il s'ouvre sous la carte, pas dans l'éditeur. */
+  $$('[data-rewards]').forEach(b => b.addEventListener('click', () =>
+    REWARDS.shopId === b.dataset.rewards ? closeRewardsPanel() : openRewardsPanel(b.dataset.rewards)));
+  $('#rewClose')?.addEventListener('click', closeRewardsPanel);
+  $$('[data-rew-cell]').forEach(b => b.addEventListener('click', () => openRewardModal(+b.dataset.rewCell, panelRewardCtx())));
+  $('#rewAdd')?.addEventListener('click', () => openRewardModal(null, panelRewardCtx()));
+  $$('[data-rew-edit]').forEach(b => b.addEventListener('click', () => {
+    const stamps = REWARDS.cfg.type === 'stamps';
+    openRewardModal(stamps ? +b.dataset.rewEdit : b.dataset.rewEdit, panelRewardCtx());
+  }));
+  $$('[data-rew-del]').forEach(b => b.addEventListener('click', () => {
+    const cfg = REWARDS.cfg, stamps = cfg.type === 'stamps', key = b.dataset.rewDel;
+    cfg.rewards = stamps ? cfg.rewards.filter(r => r.cell !== +key) : cfg.rewards.filter(r => r.id !== key);
+    panelRewardCtx().after();
+  }));
+
+  /* Bienvenue et anniversaire : les deux cadeaux automatiques du
+     programme, réglés ici plutôt que dans l'éditeur complet. */
+  $$('[data-rew-opt]').forEach(b => b.addEventListener('click', () => {
+    const key = b.dataset.rewOpt;
+    const on = !REWARDS.cfg[key];
+    setProgramOption({ [key]: on },
+      `${key === 'welcomeStamp' ? 'Tampon de bienvenue' : 'Tampon d’anniversaire'} · ${on ? 'activé' : 'désactivé'}`);
+  }));
+  $('#rewWelcome')?.addEventListener('change', e =>
+    setProgramOption({ welcomePoints: Math.max(0, Math.round(+e.target.value) || 0) },
+      'Points de bienvenue enregistrés'));
+  $('#rewBirthday')?.addEventListener('change', e =>
+    setProgramOption({ birthdayPoints: Math.max(0, Math.round(+e.target.value) || 0) },
+      'Points d’anniversaire enregistrés'));
+  /* Partage : lien d'inscription et QR code, par carte. */
+  $$('[data-share]').forEach(b => b.addEventListener('click', () => openShare(b.dataset.share)));
+}
+
+/* ---------- Partage d'une carte ----------
+   Un commerçant partage sa carte toute la journée : par message, ou en
+   imprimant le QR pour le comptoir. Les deux gestes sont au même
+   endroit, à un clic depuis chaque carte. */
+const slugify = str => str.toLowerCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+const shopLink = shop => `backino.app/c/${slugify(shop.name)}`;
+
+function copyText(text, label = 'Lien copié') {
+  const done = () => toast(label, 'copy');
+
+  /* Repli pour les contextes où le presse-papiers asynchrone est refusé
+     (page non sécurisée, permission absente) : la vieille méthode passe
+     encore partout. */
+  const legacy = () => {
+    const ta = el('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch { ok = false; }
+    ta.remove();
+    ok ? done() : toast('Copie impossible · sélectionnez le lien', 'alert-triangle');
+  };
+
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done, legacy);
+  else legacy();
+}
+
+function openShare(shopId) {
+  const shop = shopById(shopId);
+  if (!shop) return;
+  const link = shopLink(shop);
+  const url = 'https://' + link;
+
+  openModal(`
+    <h2>Partager la carte</h2>
+    <p class="modal__lead">
+      ${esc(shop.name)} · vos clients ouvrent le lien, ajoutent la carte dans leur téléphone
+      et cumulent dès le premier passage.
+    </p>
+
+    <div class="share-qr">
+      ${qrHtml(shop.id.charCodeAt(1) + 3)}
+      <small>À imprimer pour le comptoir, la vitrine<br>ou le dos d’une carte de visite.</small>
+    </div>
+
+    <div class="field" style="margin-top:18px">
+      <label for="shLink">Lien d’inscription</label>
+      <div class="copy-row">
+        <input class="input" id="shLink" value="${esc(url)}" readonly>
+        <button class="btn btn--secondary" id="shCopy"><i data-lucide="copy"></i> Copier</button>
       </div>
-      <div class="field">
-        <label for="actPlace">Emplacement</label>
-        <input class="input" id="actPlace" placeholder="Comptoir principal">
-      </div>
-      <div class="modal__foot">
-        <button class="btn btn--secondary" data-close>Annuler</button>
-        <button class="btn btn--primary" id="actGo">Activer</button>
-      </div>`);
-    $('#actGo').addEventListener('click', () => {
-      const code = $('#actCode').value.trim().toUpperCase();
-      if (code.length < 4) {
-        $('#actCode').closest('.field').classList.add('is-err');
-        return;
-      }
-      SUPPORT_CARDS.unshift({ code, shopId: currentShop()?.id || SHOPS[0].id,
-        place: $('#actPlace').value.trim() || 'Comptoir', scans: 0, status: 'active' });
-      closeModal(); render();
-      toast(`Carte ${code} activée`, 'nfc');
-    });
-    $$('[data-close]').forEach(b => b.addEventListener('click', closeModal));
+      <span class="field__hint">Le même lien pour WhatsApp, Instagram, un SMS ou un e-mail.</span>
+    </div>
+
+    <div class="share-foot">
+      <button class="btn btn--primary" id="shDl"><i data-lucide="download"></i> Télécharger le QR</button>
+      <button class="btn btn--secondary" id="shSend"><i data-lucide="share-2"></i> Partager le lien</button>
+      <button class="btn btn--ghost" data-close>Fermer</button>
+    </div>`);
+
+  $('#shCopy').addEventListener('click', () => { $('#shLink').select(); copyText(url); });
+  $('#shDl').addEventListener('click', () => downloadQrSvg(slugify(shop.name), link));
+  $('#shSend').addEventListener('click', () => {
+    /* Sur mobile, la feuille de partage du système fait le travail.
+       Ailleurs, on retombe sur la copie du lien. */
+    if (navigator.share) {
+      navigator.share({
+        title: `Carte de fidélité · ${shop.name}`,
+        text: `Ajoutez votre carte de fidélité ${shop.name} :`,
+        url
+      }).catch(() => {});
+    } else {
+      copyText(url, 'Lien copié · collez-le où vous voulez');
+    }
   });
+  $$('[data-close]').forEach(b => b.addEventListener('click', closeModal));
 }
 
 /* Génère un vrai fichier SVG téléchargeable. */
-function downloadQrSvg(code) {
+function downloadQrSvg(code, caption = code) {
   const N = 11, cell = 16, pad = 24, size = N * cell + pad * 2;
   const on = (r, c) => {
     const corner = (r < 3 && c < 3) || (r < 3 && c > N - 4) || (r > N - 4 && c < 3);
@@ -4867,14 +5209,14 @@ function downloadQrSvg(code) {
   }
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size + 34}" viewBox="0 0 ${size} ${size + 34}">
 <rect width="100%" height="100%" fill="#FFFFFF"/>${rects}
-<text x="${size / 2}" y="${size + 20}" text-anchor="middle" font-family="Inter,-apple-system,sans-serif" font-size="14" fill="#6E6E73">${code}</text>
+<text x="${size / 2}" y="${size + 20}" text-anchor="middle" font-family="Inter,-apple-system,sans-serif" font-size="${Math.max(9, Math.min(14, Math.floor(size / (caption.length * .56))))}" fill="#6E6E73">${esc(caption)}</text>
 </svg>`;
   const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-  const a = el('a'); a.href = url; a.download = `qr-${code.toLowerCase()}.svg`;
+  const a = el('a'); a.href = url; a.download = `qr-${code.toLowerCase().replace(/[^a-z0-9-]+/g, '-')}.svg`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  toast(`QR code ${code} téléchargé`, 'download');
+  toast('QR code téléchargé', 'download');
 }
 
 /* ---------- Demande d'ouverture (carte ou établissement) ----------
@@ -4926,7 +5268,22 @@ function openRequest() {
 /* ============================================================
    Éditeur de carte
    ============================================================ */
-const EDITOR_STEPS = ['Type', 'Design', 'Récompenses', 'Informations', 'Publication'];
+/* L'étape Design demande le droit `cards.design` : quand il manque,
+   elle disparaît du parcours et les numéros se resserrent. Le gérant
+   garde les récompenses, les règles et le verso. */
+const EDITOR_STEPS = [
+  { n: 1, label: 'Type' },
+  { n: 2, label: 'Design', design: true },
+  { n: 3, label: 'Récompenses' },
+  { n: 4, label: 'Informations' },
+  { n: 5, label: 'Publication' }
+];
+const editorSteps = () => EDITOR_STEPS.filter(s => !s.design || can('cards.design'));
+const stepIndex = n => Math.max(0, editorSteps().findIndex(s => s.n === n));
+const stepAt = i => {
+  const list = editorSteps();
+  return list[Math.max(0, Math.min(list.length - 1, i))].n;
+};
 
 const STAMP_ICONS = ['coffee','scissors','croissant','star','heart','droplet','utensils','shopping-bag','shirt','car-front','cake','flower-2'];
 const COLOR_SUGGESTIONS = ['#1D1D1F','#2E2A4F','#8C2F18','#1B4D3E','#8A5A2B','#2B4C7E','#6B2D5C','#3F4A3C'];
@@ -4953,11 +5310,13 @@ const VALIDITIES = [[7, '7 jours'], [30, '30 jours'], [90, '90 jours'], [0, 'Ill
 const EDIT = { open: false, step: 1, maxStep: 5, cfg: null, errors: {},
                preview: { variant: 'google', side: 'front', sim: null }, template: null };
 
-function openEditor(shopId) {
+/* `step` permet d'entrer directement sur une étape — les récompenses,
+   par exemple, qui se retouchent bien plus souvent que le reste. */
+function openEditor(shopId, step = 1) {
   const shop = shopById(shopId);
   if (!shop) return;
   EDIT.open = true;
-  EDIT.step = 1;
+  EDIT.step = step;
   EDIT.maxStep = 5;
   EDIT.errors = {};
   EDIT.template = null;
@@ -5030,10 +5389,10 @@ function renderEditor() {
     <div class="editor__bar">
       <h2>Modifier la carte</h2>
       <div class="steps-head">
-        ${EDITOR_STEPS.map((s, i) => `
-          <button class="step-chip ${EDIT.step === i + 1 ? 'is-active' : ''} ${EDIT.step > i + 1 ? 'is-done' : ''}"
-                  data-estep="${i + 1}" ${i + 1 > EDIT.maxStep ? 'disabled' : ''}>
-            <b>${EDIT.step > i + 1 ? '✓' : i + 1}</b> ${s}
+        ${editorSteps().map((s, i) => `
+          <button class="step-chip ${EDIT.step === s.n ? 'is-active' : ''} ${stepIndex(EDIT.step) > i ? 'is-done' : ''}"
+                  data-estep="${s.n}" ${s.n > EDIT.maxStep ? 'disabled' : ''}>
+            <b>${stepIndex(EDIT.step) > i ? '✓' : i + 1}</b> ${s.label}
           </button>`).join('')}
       </div>
       <div class="editor__actions">
@@ -5111,7 +5470,7 @@ function editorStepHtml() {
   /* ---------- 1. Type ---------- */
   if (EDIT.step === 1) return `
     <h3>Quel type de carte ?</h3>
-    <p class="editor__lead">Ce choix détermine les étapes Design et Récompenses.</p>
+    <p class="editor__lead">Ce choix détermine ${can('cards.design') ? 'les étapes Design et Récompenses' : 'la façon de régler vos récompenses'}.</p>
     <div class="tiles">
       <button class="tile ${cfg.type === 'stamps' ? 'is-sel' : ''}" data-type="stamps" ${locked ? 'disabled title="Le type ne peut pas changer une fois la carte publiée : les soldes de vos clients ne seraient plus interprétables."' : ''}>
         <div class="tile__art">
@@ -5135,6 +5494,9 @@ function editorStepHtml() {
     </div>
     ${locked ? `<p class="field__hint" style="margin-top:14px"><i data-lucide="lock" style="width:13px;height:13px;vertical-align:-2px"></i>
       Le type ne peut plus être modifié : les soldes déjà acquis par vos clients ne seraient plus interprétables.</p>` : ''}
+    ${can('cards.design') ? '' : `<p class="field__hint" style="margin-top:8px"><i data-lucide="lock" style="width:13px;height:13px;vertical-align:-2px"></i>
+      Le design de la carte — couleurs, logo, nom affiché — est réservé au super gérant : la carte est partagée par plusieurs établissements.
+      Vous réglez ici les récompenses, les règles et le verso.</p>`}
     ${errHtml('type')}`;
 
   /* ---------- 2. Design ---------- */
@@ -5288,6 +5650,12 @@ function editorStepHtml() {
           <div style="display:flex;align-items:center;gap:12px">
             <button class="switch" role="switch" id="edWelcome" aria-checked="${cfg.welcomeStamp}" aria-label="Tampon de bienvenue"></button>
             <span>Offrir un tampon de bienvenue à l’inscription</span>
+          </div>
+        </div>
+        <div class="field">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button class="switch" role="switch" id="edBirthdayStamp" aria-checked="${cfg.birthdayStamp}" aria-label="Tampon d’anniversaire"></button>
+            <span>Offrir un tampon le jour de l’anniversaire</span>
           </div>
         </div>
         <div class="field">
@@ -5491,6 +5859,7 @@ function bindEditor() {
   $('#edBanner')?.addEventListener('click', () => { cfg.banner = !cfg.banner; refreshEditor(); });
   $('#edProgress')?.addEventListener('click', () => { cfg.showProgress = !cfg.showProgress; refreshEditor(); });
   $('#edWelcome')?.addEventListener('click', () => { cfg.welcomeStamp = !cfg.welcomeStamp; refreshEditor(); });
+  $('#edBirthdayStamp')?.addEventListener('click', () => { cfg.birthdayStamp = !cfg.birthdayStamp; refreshEditor(); });
   $('#edCellStyle')?.addEventListener('change', e => { cfg.cellStyle = e.target.value; refreshEditor(); });
   $('#edLogo')?.addEventListener('click', () => toast('Téléversement et recadrage simulés', 'crop'));
   $('#edIconUp')?.addEventListener('click', () => toast('Téléversement d’icône simulé', 'upload'));
@@ -5532,25 +5901,39 @@ function bindEditor() {
   if (!$('#edNav')) {
     const nav = el('div', '', `
       <div id="edNav" style="display:flex;gap:8px;margin-top:28px;flex-wrap:wrap">
-        ${EDIT.step > 1 ? '<button class="btn btn--secondary" id="edPrev"><i data-lucide="arrow-left"></i> Retour</button>' : ''}
-        ${EDIT.step < 5 ? '<button class="btn btn--primary" id="edNext">Continuer <i data-lucide="arrow-right"></i></button>' : ''}
+        ${stepIndex(EDIT.step) > 0 ? '<button class="btn btn--secondary" id="edPrev"><i data-lucide="arrow-left"></i> Retour</button>' : ''}
+        ${stepIndex(EDIT.step) < editorSteps().length - 1 ? '<button class="btn btn--primary" id="edNext">Continuer <i data-lucide="arrow-right"></i></button>' : ''}
       </div>`);
     $('#edLeft').appendChild(nav.firstElementChild);
     icons();
   }
-  $('#edPrev')?.addEventListener('click', () => { EDIT.step--; EDIT.errors = {}; renderEditor(); });
+  $('#edPrev')?.addEventListener('click', () => {
+    EDIT.step = stepAt(stepIndex(EDIT.step) - 1); EDIT.errors = {}; renderEditor();
+  });
   $('#edNext')?.addEventListener('click', () => {
     EDIT.errors = validateStep(EDIT.step);
     if (Object.keys(EDIT.errors).length) { refreshEditor(); return; }
-    EDIT.step++;
+    EDIT.step = stepAt(stepIndex(EDIT.step) + 1);
     EDIT.maxStep = Math.max(EDIT.maxStep, EDIT.step);
     renderEditor();
   });
 }
 
 /* ---------- Ajouter / modifier une récompense ---------- */
-function openRewardModal(key) {
-  const cfg = EDIT.cfg;
+/* La fenêtre de récompense sert à deux endroits : l'éditeur complet et
+   le volet rapide de l'écran Programme. `ctx` dit sur quelle
+   configuration elle travaille et quoi faire une fois validée. */
+const editorRewardCtx = () => ({
+  cfg: EDIT.cfg,
+  after: () => {
+    EDIT.errors = validateRewards(EDIT.cfg);
+    EDIT.preview.sim = null;
+    refreshEditor();
+  }
+});
+
+function openRewardModal(key, ctx = editorRewardCtx()) {
+  const cfg = ctx.cfg;
   const stamps = cfg.type === 'stamps';
   const existing = stamps
     ? cfg.rewards.find(r => r.cell === key)
@@ -5604,8 +5987,7 @@ function openRewardModal(key) {
   $('#rDelete')?.addEventListener('click', () => {
     cfg.rewards = stamps ? cfg.rewards.filter(r => r.cell !== key) : cfg.rewards.filter(r => r.id !== key);
     closeModal();
-    EDIT.errors = validateRewards(cfg);
-    refreshEditor();
+    ctx.after();
   });
 
   $('#rSave').addEventListener('click', () => {
@@ -5633,9 +6015,7 @@ function openRewardModal(key) {
     else cfg.rewards.push({ id: 'r' + Date.now(), ...payload });
 
     closeModal();
-    EDIT.errors = validateRewards(cfg);
-    EDIT.preview.sim = null;
-    refreshEditor();
+    ctx.after();
   });
   $$('[data-close]').forEach(b => b.addEventListener('click', closeModal));
 }
@@ -5646,22 +6026,27 @@ function publishCard() {
   const errs = { ...validateStep(2), ...validateRewards(cfg) };
   if (Object.keys(errs).length) {
     EDIT.errors = errs;
-    EDIT.step = errs.rewards ? 3 : 2;
+    EDIT.step = (errs.rewards || !can('cards.design')) ? 3 : 2;
     renderEditor();
     return;
   }
 
   const target = shopById(cfg.shopId);
   if (target) {
-    target.name = cfg.shopName;
-    target.color = cfg.bg;
-    target.textColor = cfg.text;
-    target.letter = cfg.logoLetter;
+    /* Sans le droit au design, l'identité visuelle n'est pas réécrite :
+       seuls les réglages du programme le sont. */
+    if (can('cards.design')) {
+      target.name = cfg.shopName;
+      target.color = cfg.bg;
+      target.textColor = cfg.text;
+      target.letter = cfg.logoLetter;
+    }
     Object.assign(target.program, {
-      name: cfg.programName, type: cfg.type, cells: cfg.cells, icon: cfg.stampIcon,
+      name: can('cards.design') ? cfg.programName : target.program.name,
+      type: cfg.type, cells: cfg.cells, icon: cfg.stampIcon,
       cellStyle: cfg.cellStyle, unit: cfg.unit, pointsPerUnit: cfg.pointsPerUnit,
       minAmount: cfg.minAmount, showProgress: cfg.showProgress,
-      welcomeStamp: cfg.welcomeStamp, welcomePoints: cfg.welcomePoints,
+      welcomeStamp: cfg.welcomeStamp, birthdayStamp: cfg.birthdayStamp, welcomePoints: cfg.welcomePoints,
       birthdayPoints: cfg.birthdayPoints, expiry: cfg.expiry, maxPerPeriod: cfg.maxPerPeriod,
       rewards: cfg.rewards.map(r => ({ ...r })), back: cfg.back
     });
@@ -5691,7 +6076,7 @@ addEventListener('resize', () => {
   closeShopMenu();
   if (now) closeScanner();
   buildNav();
-  /* Le comptoir disparaît en desktop : on bascule sur un écran autorisé. */
+  /* L'écran de caisse disparaît en desktop : on bascule sur un écran autorisé. */
   const r = ROUTES[STATE.route];
   if (r && r.mobileOnly && now && allowedRoutes().length) go(homeRoute(), { replace: true });
   else { render(); }
