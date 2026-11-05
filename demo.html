@@ -150,6 +150,14 @@ h1,h2,h3,h4,p{margin:0}
 .avatar--gray{background:var(--gray);border-color:var(--border);color:var(--ink-2)}
 .avatar--sm{width:28px;height:28px;font-size:11px}
 .avatar--lg{width:56px;height:56px;font-size:19px}
+/* Pastille d'une carte : il n'y a pas d'initiales à afficher, un
+   client n'est qu'un code. */
+.avatar--card{background:var(--gray);border-color:var(--border);color:var(--ink-2)}
+.avatar--card [data-lucide]{width:17px;height:17px;stroke-width:1.8}
+.avatar--sm.avatar--card [data-lucide]{width:14px;height:14px}
+.avatar--lg.avatar--card [data-lucide]{width:24px;height:24px}
+/* Un code de carte se lit caractère par caractère : chasse fixe. */
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.94em;letter-spacing:.04em}
 
 .empty{padding:48px 20px;text-align:center;color:var(--ink-2)}
 .empty [data-lucide]{width:32px;height:32px;margin:0 auto 12px;stroke-width:1.5;display:block}
@@ -1089,7 +1097,10 @@ input[type=range]::-moz-range-thumb{
   .grid--3{grid-template-columns:1fr}
   .prog-grid{grid-template-columns:1fr 1fr}
   .editor__body{grid-template-columns:1fr}
-  .editor__right{border-left:none;border-top:1px solid var(--border);order:-1;padding:18px}
+  /* L'aperçu de la carte disparaît sous 1024 px : sur un écran étroit,
+     il repoussait les réglages hors de vue et chargeait l'écran pour
+     rien. Il reste le formulaire, et lui seul. */
+  .editor__right{display:none}
   .editor__bar{padding:10px 14px}
   /* flex:none annule le flex-basis:0 posé par la règle desktop,
      sinon width:100% reste sans effet. */
@@ -1450,7 +1461,7 @@ const EMPLOYEES = TEAM.map(m => m.name);
 const SHOPS = [
   {
     id: 's1', name: 'Salon Belle Allure', activity: 'Salon de coiffure', city: 'Dakar',
-    country: 'SN', currency: 'EUR', color: '#2E2A4F', textColor: '#FFFFFF', letter: 'B',
+    country: 'SN', currency: 'EUR', color: '#2E2A4F', textColor: '#FFFFFF', letter: 'B', prefix: 'BA',
     clientCount: 60,
     program: {
       name: 'Club Belle Allure', type: 'stamps', cells: 8, icon: 'scissors', cellStyle: 'outline',
@@ -1461,7 +1472,7 @@ const SHOPS = [
   },
   {
     id: 's2', name: 'Chez Tantie Rose', activity: 'Restaurant', city: 'Abidjan',
-    country: 'CI', currency: 'EUR', color: '#8C2F18', textColor: '#FFFFFF', letter: 'R',
+    country: 'CI', currency: 'EUR', color: '#8C2F18', textColor: '#FFFFFF', letter: 'R', prefix: 'TR',
     clientCount: 55,
     program: {
       name: 'Club Tantie Rose', type: 'points', unit: 'points', pointsPerUnit: 1, minAmount: 5,
@@ -1476,7 +1487,7 @@ const SHOPS = [
   },
   {
     id: 's3', name: 'Pâtisserie Le Baobab', activity: 'Boulangerie-pâtisserie', city: 'Dakar',
-    country: 'SN', currency: 'EUR', color: '#8A5A2B', textColor: '#FFFFFF', letter: 'P',
+    country: 'SN', currency: 'EUR', color: '#8A5A2B', textColor: '#FFFFFF', letter: 'P', prefix: 'LB',
     clientCount: 35,
     program: {
       name: 'Carte Baobab', type: 'stamps', cells: 10, icon: 'croissant', cellStyle: 'dashed',
@@ -1492,12 +1503,16 @@ const shopById = id => SHOPS.find(s => s.id === id);
 /* ============================================================
    Données fictives — clients et historique
    ============================================================ */
-const FIRST_SN = ['Aminata','Fatou','Awa','Mariama','Khadija','Ndeye','Sokhna','Bineta','Coumba','Adama',
-                  'Moussa','Ibrahima','Cheikh','Ousmane','Mamadou','Abdoulaye','Babacar','Serigne','Modou','Pape'];
-const FIRST_CI = ['Akissi','Affoué','Adjoua','Mariam','Aya','Rokia','Nafissatou','Clarisse','Prisca','Djeneba',
-                  'Kouamé','Konan','Yao','Seydou','Bakary','Aboubacar','Franck','Arsène','Désiré','Brahima'];
-const LAST_SN  = ['Ndiaye','Diop','Fall','Sow','Ba','Sarr','Gueye','Diallo','Faye','Mbaye','Seck','Cissé','Thiam','Niang','Sy'];
-const LAST_CI  = ['Kouassi','Koné','Touré','Bamba','Traoré','Yao','Coulibaly','Ouattara','Kouamé','Diomandé','Gnagne','Assi'];
+/* Les clients n'ont ni nom, ni e-mail, ni téléphone : la carte est
+   identifiée par un code unique, et c'est tout ce que le commerçant
+   voit d'eux. Seule la date de naissance peut être renseignée, parce
+   qu'elle sert au cadeau d'anniversaire — et elle reste facultative. */
+const CODE_ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'; /* ni I, ni O, ni 0, ni 1 */
+function cardCodeFor(shop) {
+  const pick = n => Array.from({ length: n }, () =>
+    CODE_ALPHABET[Math.floor(rnd() * CODE_ALPHABET.length)]).join('');
+  return `${shop.prefix}-${pick(4)}-${pick(2)}`;
+}
 
 const SUPPORTS = [
   { id: 'google', label: 'Google Wallet', icon: 'smartphone', share: 65 },
@@ -1510,13 +1525,6 @@ function pickSupport() {
   return r < 65 ? 'google' : r < 85 ? 'web' : 'apple';
 }
 
-function phoneFor(shop) {
-  if (shop.country === 'CI') {
-    return `+225 07 ${between(10, 99)} ${between(10, 99)} ${between(10, 99)} ${between(10, 99)}`;
-  }
-  return `+221 ${pick(['77', '78', '76'])} ${between(100, 999)} ${between(10, 99)} ${between(10, 99)}`;
-}
-
 /* Fréquentation : samedi et vendredi chargés, lundi creux. */
 const DAY_WEIGHT = [0.7, 0.6, 0.8, 0.9, 1.3, 1.8, 1.1]; // dimanche → samedi
 
@@ -1524,10 +1532,7 @@ function makeClients() {
   const out = [];
   let n = 1;
   for (const shop of SHOPS) {
-    const firsts = shop.country === 'CI' ? FIRST_CI : FIRST_SN;
-    const lasts  = shop.country === 'CI' ? LAST_CI : LAST_SN;
     for (let i = 0; i < shop.clientCount; i++) {
-      const name = `${pick(firsts)} ${pick(lasts)}`;
       /* Les programmes tournent depuis plusieurs mois ; seuls les
          90 derniers jours d'historique sont détaillés (voir buildHistory).
          La distribution penche vers les inscriptions récentes : un
@@ -1537,12 +1542,13 @@ function makeClients() {
       const c = {
         id: 'c' + (n++),
         shopId: shop.id,
-        name,
-        phone: phoneFor(shop),
+        code: cardCodeFor(shop),
         support: pickSupport(),
-        consent: rnd() < 0.86,
         joined: new Date(Date.now() - joinedDays * DAY),
-        birthday: new Date(1980 + between(0, 25), between(0, 11), between(1, 28)),
+        /* Deux clients sur trois donnent leur date de naissance. */
+        birthday: rnd() < 0.66
+          ? new Date(1980 + between(0, 25), between(0, 11), between(1, 28))
+          : null,
         txs: [],
         balance: 0,
         available: null   // récompense débloquée non utilisée
@@ -1652,6 +1658,15 @@ const clientsOf = shopId => shopId === 'all'
   : CLIENTS.filter(c => c.shopId === shopId);
 const isInactive = c => daysAgo(c.lastVisit) > 30;
 
+/* La pastille et le libellé d'une carte : partout où un nom
+   apparaissait, c'est le code qui s'affiche. */
+const cardAvatar = (cls = '') =>
+  `<span class="avatar avatar--card ${cls}" aria-hidden="true"><i data-lucide="credit-card"></i></span>`;
+const cardLabel = c => `<span class="code">${esc(c.code)}</span>`;
+const birthdayLabel = c => c.birthday
+  ? new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' }).format(c.birthday)
+  : 'Non renseignée';
+
 /* État d'un client, tel qu'affiché dans la base. */
 function statusOf(c) {
   if (c.available) return { key: 'reward', label: 'Récompense disponible', cls: 'pill--yellow' };
@@ -1683,11 +1698,13 @@ const AUDIENCES = [
   { id: 'manual',   label: 'Sélection manuelle',            desc: 'Vous choisissez les clients un par un' }
 ];
 
+/* Un seul canal possible : la notification Wallet. Sans numéro ni
+   adresse e-mail, il n'y a ni SMS, ni WhatsApp, ni e-mailing — et
+   c'est voulu. */
 const CHANNELS = [
-  { id: 'wallet',   label: 'Notification Wallet', desc: 'Arrive sur la carte, dans Google Wallet ou Apple Wallet', icon: 'wallet' },
-  { id: 'whatsapp', label: 'WhatsApp',            desc: 'Pour les clients qui ont accepté d’être contactés',       icon: 'message-circle' },
-  { id: 'sms',      label: 'SMS',                 desc: 'Secours pour les téléphones sans Wallet ni WhatsApp',     icon: 'message-square' }
+  { id: 'wallet', label: 'Notification Wallet', desc: 'Arrive sur la carte, dans Google Wallet ou Apple Wallet', icon: 'wallet' }
 ];
+const channelOf = id => CHANNELS.find(c => c.id === id) || CHANNELS[0];
 
 function audienceCount(shopId, audience) {
   const list = clientsOf(shopId);
@@ -1696,7 +1713,7 @@ function audienceCount(shopId, audience) {
     case 'near':     return list.filter(c => { const p = progressOf(c); return p.target && p.current / p.target >= 0.75; }).length;
     case 'new':      return list.filter(c => daysAgo(c.joined) <= 30).length;
     case 'manual':   return 0;
-    default:         return list.filter(c => c.consent).length;
+    default:         return list.length;
   }
 }
 
@@ -1708,7 +1725,7 @@ const CAMPAIGNS = [
   { id: 'k3', shopId: 's2', title: 'Le thiéboudienne est de retour', body: 'Tous les vendredis midi. Vos points comptent double ce jour-là.',
     audience: 'all', channel: 'wallet', date: new Date(Date.now() - 3 * DAY), status: 'sent', recipients: 47, opened: 31 },
   { id: 'k4', shopId: 's2', title: 'Votre dessert est débloqué', body: 'Vous avez dépassé 1 500 points : le dessert est offert à votre prochaine visite.',
-    audience: 'near', channel: 'whatsapp', date: new Date(Date.now() - 12 * DAY), status: 'sent', recipients: 11, opened: 9 },
+    audience: 'near', channel: 'wallet', date: new Date(Date.now() - 12 * DAY), status: 'sent', recipients: 11, opened: 9 },
   { id: 'k5', shopId: 's3', title: 'Les croissants sortent à 7 h', body: 'Un tampon par passage, et le dixième gâteau est offert.',
     audience: 'all', channel: 'wallet', date: new Date(Date.now() - 8 * DAY), status: 'sent', recipients: 29, opened: 18 },
   { id: 'k6', shopId: 's1', title: 'Offre de fin de mois', body: 'Passez avant samedi et repartez avec un tampon bonus.',
@@ -2386,9 +2403,9 @@ function renderCounter() {
         <div class="list">
           ${scans.length ? scans.slice(0, 8).map(t => `
             <div class="list__row">
-              <span class="avatar avatar--sm avatar--gray" aria-hidden="true">${initials(t.client.name)}</span>
+              ${cardAvatar('avatar--sm')}
               <span class="list__txt">
-                <b>${esc(t.client.name)}</b>
+                <b>${cardLabel(t.client)}</b>
                 <span>${timeFmt.format(t.date)} · ${dayFmt.format(t.date)}${t.amount ? ' · ' + money(t.amount) : ''}</span>
               </span>
               <span class="pill ${t.type === 'redeem' ? '' : 'pill--yellow'}">
@@ -2422,8 +2439,8 @@ function confirmUndo(client, ts) {
   openModal(`
     <h2>Corriger ce passage ?</h2>
     <p class="modal__lead">
-      ${esc(client.name)} · ${timeFmt.format(tx.date)}<br>
-      <b>${unit}</b> seront retirés de son solde, qui repassera à
+      Carte ${esc(client.code)} · ${timeFmt.format(tx.date)}<br>
+      <b>${unit}</b> ${tx.qty > 1 ? 'seront retirés' : 'sera retiré'} du solde de la carte, qui repassera à
       <b>${prog.type === 'stamps' ? Math.max(0, client.balance - tx.qty) + ' / ' + prog.cells : num(Math.max(0, client.balance - tx.qty)) + ' ' + prog.unit}</b>.
     </p>
     <div class="field">
@@ -3115,9 +3132,9 @@ function renderDashboard() {
         <div class="list">
           ${recent.length ? recent.map(t => `
             <div class="list__row">
-              <span class="avatar avatar--sm" aria-hidden="true">${initials(t.client.name)}</span>
+              ${cardAvatar('avatar--sm')}
               <span class="list__txt">
-                <b>${esc(t.client.name)}</b>
+                <b>${cardLabel(t.client)}</b>
                 <span>${timeFmt.format(t.date)} · ${dayFmt.format(t.date)} · ${esc(t.employee)}${shopId === 'all' ? ' · ' + esc(shopById(t.client.shopId).name) : ''}</span>
               </span>
               <span class="pill pill--yellow">+ ${shopById(t.client.shopId).program.type === 'stamps' ? '1 tampon' : num(t.qty) + ' pts'}</span>
@@ -3134,9 +3151,9 @@ function renderDashboard() {
         <div class="list">
           ${toReactivate.length ? toReactivate.map(c => `
             <div class="list__row">
-              <span class="avatar avatar--sm avatar--gray" aria-hidden="true">${initials(c.name)}</span>
+              ${cardAvatar('avatar--sm')}
               <span class="list__txt">
-                <b>${esc(c.name)}</b>
+                <b>${cardLabel(c)}</b>
                 <span>Dernier passage il y a ${daysAgo(c.lastVisit)} jours${shopId === 'all' ? ' · ' + esc(shopById(c.shopId).name) : ''}</span>
               </span>
               ${can('campaigns.manage') ? `<button class="btn btn--secondary btn--sm" data-relance="${c.id}">Relancer</button>` : ''}
@@ -3270,8 +3287,8 @@ const CLIENT_FILTERS = { q: '', type: '', support: '', status: '', period: '', s
 const PAGE_SIZE = 20;
 
 const COLUMNS = [
-  { key: 'name',      label: 'Client' },
-  { key: 'phone',     label: 'Téléphone' },
+  { key: 'code',      label: 'Carte' },
+  { key: 'birthday',  label: 'Anniversaire' },
   { key: 'type',      label: 'Type' },
   { key: 'support',   label: 'Support' },
   { key: 'balance',   label: 'Solde' },
@@ -3283,8 +3300,9 @@ const COLUMNS = [
 function clientValue(c, key) {
   const prog = shopById(c.shopId).program;
   switch (key) {
-    case 'name':      return c.name;
-    case 'phone':     return c.phone;
+    case 'code':      return c.code;
+    /* Les cartes sans date de naissance se rangent après les autres. */
+    case 'birthday':  return c.birthday ? c.birthday.getMonth() * 100 + c.birthday.getDate() : 9999;
     case 'type':      return prog.type === 'stamps' ? 'Tampons' : 'Points';
     case 'support':   return SUPPORTS.find(s => s.id === c.support).label;
     case 'balance':   return c.balance;
@@ -3299,7 +3317,7 @@ function filteredClients() {
   const f = CLIENT_FILTERS;
   const q = f.q.trim().toLowerCase();
   let list = clientsOf(STATE.shopId).filter(c => {
-    if (q && !c.name.toLowerCase().includes(q) && !c.phone.replace(/\s/g, '').includes(q.replace(/\s/g, ''))) return false;
+    if (q && !c.code.toLowerCase().replace(/-/g, '').includes(q.replace(/-/g, ''))) return false;
     if (f.type && shopById(c.shopId).program.type !== f.type) return false;
     if (f.support && c.support !== f.support) return false;
     if (f.status && statusOf(c).key !== f.status) return false;
@@ -3348,7 +3366,7 @@ function renderClients() {
     <div class="toolbar">
       <div class="search">
         <i data-lucide="search" aria-hidden="true"></i>
-        <input class="input" id="cq" type="search" placeholder="Rechercher par nom ou téléphone" value="${esc(f.q)}" aria-label="Rechercher un client">
+        <input class="input" id="cq" type="search" placeholder="Rechercher un code de carte" value="${esc(f.q)}" aria-label="Rechercher une carte">
       </div>
       <select class="select" id="cType" aria-label="Type de carte">
         <option value="">Tous les types</option>
@@ -3390,8 +3408,8 @@ function renderClients() {
               const st = statusOf(c);
               return `<tr tabindex="0" data-client="${c.id}">
                 ${showShop ? `<td><span class="pill"><span class="legend__dot" style="background:${shopById(c.shopId).color}"></span>${esc(shopById(c.shopId).name)}</span></td>` : ''}
-                <td><span class="who"><span class="avatar avatar--sm avatar--gray" aria-hidden="true">${initials(c.name)}</span><b>${esc(c.name)}</b></span></td>
-                <td>${esc(c.phone)}</td>
+                <td><span class="who">${cardAvatar('avatar--sm')}<b>${cardLabel(c)}</b></span></td>
+                <td>${c.birthday ? esc(birthdayLabel(c)) : '<span style="color:var(--ink-2)">—</span>'}</td>
                 <td>${shopById(c.shopId).program.type === 'stamps' ? 'Tampons' : 'Points'}</td>
                 <td>${supportCell(c)}</td>
                 <td><b>${balanceLabel(c)}</b></td>
@@ -3417,10 +3435,10 @@ function renderClients() {
       ${rows.map(c => {
         const st = statusOf(c);
         return `<button class="client-card" data-client="${c.id}">
-          <span class="avatar avatar--gray" aria-hidden="true">${initials(c.name)}</span>
+          ${cardAvatar()}
           <span class="client-card__txt">
-            <b>${esc(c.name)}</b>
-            <span>${esc(c.phone)}</span>
+            <b>${cardLabel(c)}</b>
+            <span>${shopById(c.shopId).program.type === 'stamps' ? 'Carte à tampons' : 'Carte à points'}</span>
             <span class="client-card__meta">
               <span class="pill"><i data-lucide="${SUPPORTS.find(s => s.id === c.support).icon}"></i>${balanceLabel(c)}</span>
               <span class="pill ${st.cls}">${st.label}</span>
@@ -3480,19 +3498,20 @@ function renderClients() {
 
 /* ---------- Export CSV (vrai fichier) ---------- */
 function exportCsv(list) {
-  const header = ['Nom', 'Téléphone', 'Établissement', 'Ville', 'Type de carte', 'Support',
-                  'Solde', 'Consentement marketing', 'Dernier passage', 'Date d’inscription', 'Statut'];
+  /* L'export ne contient aucune donnée personnelle : il n'y en a pas. */
+  const header = ['Code de carte', 'Établissement', 'Ville', 'Type de carte', 'Support',
+                  'Solde', 'Anniversaire', 'Dernier passage', 'Date d’inscription', 'Statut'];
   const cell = v => `"${String(v).replace(/"/g, '""')}"`;
   const lines = [header.map(cell).join(';')];
 
   for (const c of list) {
     const shop = shopById(c.shopId);
     lines.push([
-      c.name, c.phone, shop.name, shop.city,
+      c.code, shop.name, shop.city,
       shop.program.type === 'stamps' ? 'Tampons' : 'Points',
       SUPPORTS.find(s => s.id === c.support).label,
       balanceLabel(c),
-      c.consent ? 'Oui' : 'Non',
+      c.birthday ? birthdayLabel(c) : '',
       dateFmt.format(c.lastVisit),
       dateFmt.format(c.joined),
       statusOf(c).label
@@ -3507,7 +3526,7 @@ function exportCsv(list) {
   a.download = `clients-${(currentShop()?.name || 'tous-etablissements').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.csv`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  toast(`${num(list.length)} clients exportés en CSV`, 'download');
+  toast(`${num(list.length)} cartes exportées en CSV`, 'download');
 }
 
 /* ---------- Fiche client ---------- */
@@ -3534,12 +3553,12 @@ function openClient(id) {
     <div class="progress"><i style="width:${Math.min(100, Math.round(p.current / p.target * 100))}%"></i></div>
     <p class="field__hint">${num(p.current)} / ${num(p.target)} ${prog.unit} vers « ${esc(p.next)} »</p>`;
 
-  openPanel(c.name, `
+  openPanel('Carte ' + c.code, `
     <div style="display:flex;align-items:center;gap:13px;margin-bottom:18px">
-      <span class="avatar avatar--lg" aria-hidden="true">${initials(c.name)}</span>
+      ${cardAvatar('avatar--lg')}
       <div>
-        <div style="font-size:18px;font-weight:700;letter-spacing:-.02em">${esc(c.name)}</div>
-        <div style="font-size:13px;color:var(--ink-2)">${esc(c.phone)}</div>
+        <div class="code" style="font-size:18px;font-weight:700">${esc(c.code)}</div>
+        <div style="font-size:13px;color:var(--ink-2)">${esc(shop.name)}</div>
         <div style="margin-top:7px"><span class="pill ${st.cls}">${st.label}</span></div>
       </div>
     </div>
@@ -3550,7 +3569,7 @@ function openClient(id) {
       <div class="kv__row"><span>Établissement</span><b>${esc(shop.name)}</b></div>
       <div class="kv__row"><span>Programme</span><b>${esc(prog.name)}</b></div>
       <div class="kv__row"><span>Support de carte</span><b>${supp.label}</b></div>
-      <div class="kv__row"><span>Consentement marketing</span><b>${c.consent ? 'Accordé' : 'Refusé'}</b></div>
+      <div class="kv__row"><span>Anniversaire</span><b>${esc(birthdayLabel(c))}</b></div>
       <div class="kv__row"><span>Inscrit le</span><b>${dateFmt.format(c.joined)}</b></div>
       <div class="kv__row"><span>Dernier passage</span><b>${dateFmt.format(c.lastVisit)} · il y a ${daysAgo(c.lastVisit)} j</b></div>
     </div>
@@ -3591,11 +3610,11 @@ function openClient(id) {
   $('#pMessage')?.addEventListener('click', () => {
     closePanel();
     go('campagnes');
-    openCampaignWizard({ title: 'Un mot pour vous', body: `Bonjour ${c.name.split(' ')[0]}, …`, audience: 'manual' });
+    openCampaignWizard({ title: 'Un mot pour vous', body: 'Bonjour, …', audience: 'manual' });
   });
   $('#pDisable')?.addEventListener('click', () => {
     openModal(`
-      <h2>Désactiver la carte de ${esc(c.name)} ?</h2>
+      <h2>Désactiver la carte ${esc(c.code)} ?</h2>
       <p class="modal__lead">La carte disparaît du Wallet du client et ne peut plus être scannée. Son solde est conservé et la carte peut être réactivée.</p>
       <div class="modal__foot">
         <button class="btn btn--secondary" data-close>Annuler</button>
@@ -3603,7 +3622,7 @@ function openClient(id) {
       </div>`);
     $('#confirmDisable').addEventListener('click', () => {
       closeModal(); closePanel();
-      toast(`Carte de ${c.name} désactivée`, 'ban');
+      toast(`Carte ${c.code} désactivée`, 'ban');
     });
     $$('[data-close]').forEach(b => b.addEventListener('click', closeModal));
   });
@@ -3614,7 +3633,7 @@ function openAdjust(c) {
   const unit = prog.type === 'stamps' ? 'tampons' : prog.unit;
   openModal(`
     <h2>Ajuster le solde</h2>
-    <p class="modal__lead">${esc(c.name)} · solde actuel : <b>${balanceLabel(c)}</b></p>
+    <p class="modal__lead">Carte ${esc(c.code)} · solde actuel : <b>${balanceLabel(c)}</b></p>
     <div class="field">
       <label for="adjVal">Nouveau solde en ${unit}</label>
       <input class="input" id="adjVal" type="number" min="0" ${prog.type === 'stamps' ? `max="${prog.cells}"` : ''} value="${c.balance}">
@@ -3679,7 +3698,7 @@ function scanFooterHtml() {
       <span>Mode hors ligne</span>
       <button class="switch" id="offlineSwitch" role="switch" aria-checked="${STATE.offline}" aria-label="Mode hors ligne"></button>
     </div>
-    <button class="scanner__link" id="phoneLookup">Rechercher par téléphone</button>
+    <button class="scanner__link" id="codeLookup">Saisir un code de carte</button>
     ${can('scan.correct') ? '<button class="scanner__link" id="toCounter">Mes derniers passages</button>' : ''}`;
 }
 
@@ -3697,23 +3716,26 @@ function bindScanFooter() {
      remplaçait en doublon. On y accède d'ici, là où l'on en a besoin :
      relire ses derniers passages et corriger une erreur. */
   $('#toCounter')?.addEventListener('click', () => { closeScanner(); go('poste'); });
-  $('#phoneLookup').addEventListener('click', () => {
+  /* Le code imprimé sur la carte remplace la recherche par nom : c'est
+     le seul identifiant qui existe. */
+  $('#codeLookup').addEventListener('click', () => {
     const pool = clientsOf(STATE.shopId);
     openModal(`
-      <h2>Rechercher par téléphone</h2>
-      <p class="modal__lead">Solution de secours quand la carte du client ne peut pas être scannée.</p>
+      <h2>Saisir un code de carte</h2>
+      <p class="modal__lead">Solution de secours quand le QR code du client ne peut pas être scanné.</p>
       <div class="field">
-        <label for="lookupPhone">Numéro du client</label>
-        <input class="input" id="lookupPhone" type="tel" inputmode="tel" placeholder="${esc(pool[0] ? pool[0].phone : '+221 77 000 00 00')}">
-        <span class="field__hint">Exemple présent dans la démo : ${esc(pool[0] ? pool[0].phone : '—')}</span>
+        <label for="lookupCode">Code de la carte</label>
+        <input class="input" id="lookupCode" placeholder="${esc(pool[0] ? pool[0].code : 'BA-0000-00')}"
+               style="font-family:ui-monospace,Menlo,monospace;text-transform:uppercase">
+        <span class="field__hint">Exemple présent dans la démo : ${esc(pool[0] ? pool[0].code : '—')}</span>
       </div>
       <div class="modal__foot">
         <button class="btn btn--secondary" data-close>Annuler</button>
-        <button class="btn btn--primary" id="lookupGo">Rechercher</button>
+        <button class="btn btn--primary" id="lookupGo">Ouvrir la carte</button>
       </div>`);
     $('#lookupGo').addEventListener('click', () => {
-      const v = $('#lookupPhone').value.replace(/\s/g, '');
-      const found = pool.find(c => c.phone.replace(/\s/g, '') === v) || pool[0];
+      const v = $('#lookupCode').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const found = pool.find(c => c.code.replace(/-/g, '') === v) || pool[0];
       closeModal();
       showScanClient(found);
     });
@@ -3750,9 +3772,9 @@ function scanHeader(c) {
   const p = progressOf(c);
   return `
     <div class="scan-sheet__who">
-      <span class="avatar avatar--lg" aria-hidden="true">${initials(c.name)}</span>
+      ${cardAvatar('avatar--lg')}
       <div class="scan-sheet__txt">
-        <b>${esc(c.name)}</b>
+        <b class="code">${esc(c.code)}</b>
         <span>${esc(shop.name)} · ${balanceLabel(c)}</span>
         <span>Prochaine récompense : ${esc(p.next)}</span>
       </div>
@@ -3961,7 +3983,7 @@ function scanDone(c, label) {
     <div class="scan-sheet scan-done">
       <div class="scan-done__check" aria-hidden="true"><i data-lucide="check"></i></div>
       <div style="font-size:19px;font-weight:700;letter-spacing:-.02em">${esc(label)}</div>
-      <p style="font-size:14px;color:var(--ink-2);margin-top:6px">${esc(c.name)} · nouveau solde : <b>${balanceLabel(c)}</b></p>
+      <p style="font-size:14px;color:var(--ink-2);margin-top:6px">Carte ${esc(c.code)} · nouveau solde : <b>${balanceLabel(c)}</b></p>
       ${c.available ? `<div class="reward-banner" style="margin-top:16px"><i data-lucide="gift"></i> Récompense débloquée : ${esc(c.available)}</div>` : ''}
       ${STATE.offline ? `<p class="field__hint" style="margin-top:12px"><i data-lucide="cloud-off" style="width:13px;height:13px;vertical-align:-2px"></i> Enregistré hors ligne, sera synchronisé au retour du réseau.</p>` : ''}
     </div>`;
@@ -4023,7 +4045,7 @@ function renderCampaigns() {
             ${list.map(k => {
               const st = STATUS_LABEL[k.status];
               const aud = AUDIENCES.find(a => a.id === k.audience);
-              const ch = CHANNELS.find(c => c.id === k.channel);
+              const ch = channelOf(k.channel);
               return `<tr tabindex="0" data-campaign="${k.id}">
                 ${showShop ? `<td><span class="pill"><span class="legend__dot" style="background:${shopById(k.shopId).color}"></span>${esc(shopById(k.shopId).name)}</span></td>` : ''}
                 <td><b>${k.title ? esc(k.title) : '<span style="color:var(--ink-2)">Sans titre</span>'}</b></td>
@@ -4044,7 +4066,7 @@ function renderCampaigns() {
       ${list.map(k => {
         const st = STATUS_LABEL[k.status];
         return `<button class="client-card" data-campaign="${k.id}">
-          <span class="avatar avatar--gray" aria-hidden="true"><i data-lucide="${CHANNELS.find(c => c.id === k.channel).icon}" style="width:17px;height:17px"></i></span>
+          <span class="avatar avatar--gray" aria-hidden="true"><i data-lucide="${channelOf(k.channel).icon}" style="width:17px;height:17px"></i></span>
           <span class="client-card__txt">
             <b>${k.title ? esc(k.title) : 'Sans titre'}</b>
             <span>${dateFmt.format(k.date)} · ${k.recipients ? num(k.recipients) + ' destinataires' : 'non envoyée'}</span>
@@ -4074,7 +4096,7 @@ function openCampaignDetail(id) {
       <div class="kv__row"><span>Établissement</span><b>${esc(shopById(k.shopId).name)}</b></div>
       <div class="kv__row"><span>Date</span><b>${dateFmt.format(k.date)}</b></div>
       <div class="kv__row"><span>Audience</span><b>${aud.label}</b></div>
-      <div class="kv__row"><span>Canal</span><b>${CHANNELS.find(c => c.id === k.channel).label}</b></div>
+      <div class="kv__row"><span>Canal</span><b>${channelOf(k.channel).label}</b></div>
       <div class="kv__row"><span>Destinataires</span><b>${k.recipients ? num(k.recipients) : '—'}</b></div>
       ${k.status === 'sent' ? `<div class="kv__row"><span>Ouvertures</span><b>${num(k.opened)} · ${Math.round(k.opened / k.recipients * 100)} %</b></div>` : ''}
     </div>
@@ -4169,13 +4191,14 @@ function renderWizard() {
     body = `
       <h3>Par quel canal ?</h3>
       <p class="editor__lead">La notification Wallet arrive directement sur la carte, sans coût d’envoi.</p>
-      <div class="radio-list">
-        ${CHANNELS.map(c => `
-          <button class="radio-opt ${WIZ.channel === c.id ? 'is-sel' : ''}" data-chan="${c.id}">
-            <span class="radio-opt__mark" aria-hidden="true"></span>
-            <span class="radio-opt__txt"><b>${c.label}</b><span>${c.desc}</span></span>
-            ${c.id === 'wallet' ? '<span class="pill pill--yellow">Par défaut</span>' : ''}
-          </button>`).join('')}
+      <div class="fixed-row">
+        <span class="fixed-row__ico"><i data-lucide="wallet" aria-hidden="true"></i></span>
+        <div>
+          <b>Notification Wallet</b>
+          <p>C’est le seul canal possible, et c’est voulu : vos clients ne vous laissent
+             ni numéro, ni adresse e-mail. Le message s’affiche sur la carte, dans Google
+             Wallet ou Apple Wallet, sans coût d’envoi.</p>
+        </div>
       </div>`;
   } else {
     body = `
@@ -4208,7 +4231,7 @@ function renderWizard() {
         <div class="recap__row"><span>Titre</span><b>${esc(WIZ.title) || '—'}</b></div>
         <div class="recap__row"><span>Audience</span><b>${AUDIENCES.find(a => a.id === WIZ.audience).label}</b></div>
         <div class="recap__row"><span>Destinataires estimés</span><b>${WIZ.audience === 'manual' ? 'sélection manuelle' : num(count)}</b></div>
-        <div class="recap__row"><span>Canal</span><b>${CHANNELS.find(c => c.id === WIZ.channel).label}</b></div>
+        <div class="recap__row"><span>Canal</span><b>${channelOf(WIZ.channel).label}</b></div>
       </div>`;
   }
 
@@ -4453,13 +4476,13 @@ function renderAutoEditor() {
         </div>
 
         <p class="section-label">Canal</p>
-        <div class="radio-list">
-          ${CHANNELS.map(c => `
-            <button class="radio-opt ${d.channel === c.id ? 'is-sel' : ''}" data-ae-chan="${c.id}">
-              <span class="radio-opt__mark" aria-hidden="true"></span>
-              <span class="radio-opt__txt"><b>${c.label}</b><span>${c.desc}</span></span>
-              ${c.id === 'wallet' ? '<span class="pill pill--yellow">Par défaut</span>' : ''}
-            </button>`).join('')}
+        <div class="fixed-row">
+          <span class="fixed-row__ico"><i data-lucide="wallet" aria-hidden="true"></i></span>
+          <div>
+            <b>Notification Wallet</b>
+            <p>Seul canal possible : la carte est le seul lien avec votre client,
+               vous n’avez ni son numéro ni son adresse e-mail.</p>
+          </div>
         </div>
 
         <p class="section-label">Avantage accordé</p>
@@ -5510,7 +5533,7 @@ function editorStepHtml() {
     const ratio = contrastRatio(cfg.bg, cfg.text);
     return `
       <h3>L’allure de votre carte</h3>
-      <p class="editor__lead">Partez d’un modèle, puis ajustez. L’aperçu à droite suit votre saisie.</p>
+      <p class="editor__lead">Partez d’un modèle, puis ajustez.${isDesktop() ? ' L’aperçu à droite suit votre saisie.' : ''}</p>
 
       <p class="section-label">Modèles de départ</p>
       <div class="tmpl-grid" style="margin-bottom:8px">
@@ -5732,7 +5755,7 @@ function editorStepHtml() {
   /* ---------- 4. Informations ---------- */
   if (EDIT.step === 4) return `
     <h3>Le dos de la carte</h3>
-    <p class="editor__lead">Ce texte figure au verso, dans le Wallet du client. Basculez l’aperçu sur « Verso » pour le voir.</p>
+    <p class="editor__lead">Ce texte figure au verso, dans le Wallet du client.${isDesktop() ? ' Basculez l’aperçu sur « Verso » pour le voir.' : ''}</p>
     <div class="field">
       <label for="edBack">Conditions du programme</label>
       <textarea class="textarea" id="edBack" style="min-height:150px" placeholder="Programme réservé aux clients de…">${esc(cfg.back)}</textarea>

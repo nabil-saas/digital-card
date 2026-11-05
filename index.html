@@ -625,6 +625,8 @@ a{color:inherit;text-decoration:none}
 .pill--yellow{background:var(--yellow);color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
 .pill--ok{background:rgba(52,199,89,.14);color:#1c7a36}
 .pill--warn{background:rgba(255,159,10,.16);color:#8a5200}
+/* display:inline-flex l'emporterait sur l'attribut hidden du navigateur. */
+.pill[hidden]{display:none}
 .switch{
   width:42px;height:26px;border-radius:99px;background:var(--border);position:relative;flex:none;
   border:none;cursor:default;padding:0
@@ -719,16 +721,12 @@ a{color:inherit;text-decoration:none}
 }
 .biz-slide__title b{display:block;font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
 .biz-slide__title span{display:block;font-size:13px;opacity:.85;margin-top:4px}
-.biz-slide__body{padding:20px;display:flex;flex-direction:column;flex:1;gap:16px}
+.biz-slide__body{padding:18px 20px;display:flex;flex-direction:column;flex:1}
 .biz-slide__reward{
-  display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;color:var(--ink)
+  display:flex;gap:10px;align-items:center;font-size:14.5px;line-height:1.4;color:var(--ink);
+  font-weight:500
 }
-.biz-slide__reward [data-lucide]{width:17px;height:17px;flex:none;margin-top:2px}
-.biz-figs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);
-  border-radius:14px;overflow:hidden;margin-top:auto}
-.fig{background:var(--gray);padding:12px 10px;text-align:center}
-.fig span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-2);line-height:1.2}
-.fig b{display:block;font-size:17px;font-weight:700;letter-spacing:-.02em;margin-top:6px;white-space:nowrap}
+.biz-slide__reward [data-lucide]{width:17px;height:17px;flex:none;color:var(--ink-2)}
 
 .biz-dots{display:flex;gap:7px;justify-content:center;margin-top:4px}
 .biz-dots button{
@@ -746,45 +744,91 @@ a{color:inherit;text-decoration:none}
 .slider{padding:18px 0;border-bottom:1px solid var(--border)}
 .slider:last-child{border-bottom:none;padding-bottom:0}
 .slider:first-child{padding-top:0}
-.slider__top{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:14px}
-.slider__top label{font-size:15px;font-weight:600}
-.slider__val{font-size:19px;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
+.slider__top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.slider__top label{
+  font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:9px
+}
+.slider__top label i{
+  width:30px;height:30px;border-radius:9px;background:var(--gray);
+  display:grid;place-items:center;flex:none
+}
+.slider__top label [data-lucide]{width:15px;height:15px;color:var(--ink-2)}
+/* La valeur est la seule chose qui bouge : elle se lit comme un compteur. */
+.slider__val{
+  font-size:17px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;
+  font-variant-numeric:tabular-nums;background:var(--yellow-light);
+  box-shadow:inset 0 0 0 1px rgba(29,29,31,.12);
+  border-radius:var(--r-pill);padding:4px 12px
+}
+/* Piste remplie jusqu'au curseur : --p est posé par le script. */
 input[type=range]{
-  -webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:99px;
-  background:var(--border);outline:none;margin:0;cursor:pointer
+  -webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:99px;outline:none;margin:0;cursor:pointer;
+  background:linear-gradient(to right,
+    var(--ink) 0 calc(var(--p,50) * 1%), var(--border) calc(var(--p,50) * 1%) 100%)
 }
 input[type=range]::-webkit-slider-thumb{
   -webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--yellow);
-  border:1px solid var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.18);cursor:grab
+  border:1px solid var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.22);cursor:grab;
+  transition:transform .15s var(--out)
 }
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12);cursor:grabbing}
 input[type=range]::-moz-range-thumb{
   width:24px;height:24px;border-radius:50%;background:var(--yellow);
   border:1px solid var(--ink);cursor:grab
 }
+input[type=range]:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+
 .calc__out{
   position:sticky;top:88px;overflow:hidden;isolation:isolate;
-  background:var(--ink);color:#fff;border-radius:var(--r-card);padding:36px;
+  background:var(--ink);color:#fff;border-radius:var(--r-card);padding:34px;
   box-shadow:0 30px 60px -32px rgba(29,29,31,.7)
 }
 /* Lueur jaune derrière le chiffre : c'est le point d'arrivée du bloc. */
 .calc__out::before{
-  content:"";position:absolute;top:-120px;left:-80px;width:460px;height:460px;z-index:-1;
-  background:radial-gradient(circle,rgba(255,247,92,.22) 0%,rgba(255,247,92,0) 66%);
+  content:"";position:absolute;top:-140px;right:-100px;width:480px;height:480px;z-index:-1;
+  background:radial-gradient(circle,rgba(255,247,92,.26) 0%,rgba(255,247,92,0) 66%);
   pointer-events:none
 }
+/* Sur fond sombre, la pastille reprend le traitement des sections
+   noires : jaune translucide et texte jaune, jamais jaune sur jaune. */
+.calc__out .eyebrow{
+  background:rgba(255,247,92,.14);box-shadow:inset 0 0 0 1px rgba(255,247,92,.34);
+  color:var(--yellow)
+}
+.calc__out .eyebrow::before{background:var(--yellow)}
+.calc__amount{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .calc__big{
-  transition:transform .35s var(--out);transform-origin:0 50%;
+  font-size:clamp(42px,5.2vw,58px);font-weight:700;letter-spacing:-.035em;line-height:1;color:var(--yellow);
+  font-variant-numeric:tabular-nums;
+  transition:transform .35s var(--out);transform-origin:0 50%
+}
+.calc__unit{font-size:16px;font-weight:600;color:rgba(255,255,255,.55)}
+.calc__out.is-bump .calc__big{transform:scale(1.045)}
+.calc__sub{font-size:14.5px;color:rgba(255,255,255,.7);margin:10px 0 26px;max-width:34ch}
+.calc__tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.calc__tile{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  border-radius:15px;padding:16px
+}
+.calc__tile span{
+  display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.03em;
+  text-transform:uppercase;color:rgba(255,255,255,.6);white-space:nowrap
+}
+.calc__tile [data-lucide]{width:14px;height:14px;flex:none}
+.calc__tile b{
+  display:block;font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:8px;
   font-variant-numeric:tabular-nums
 }
-.calc__out.is-bump .calc__big{transform:scale(1.045)}
-.calc__out .eyebrow{color:var(--yellow)}
-.calc__big{font-size:clamp(44px,5.4vw,62px);font-weight:700;letter-spacing:-.035em;line-height:1;color:var(--yellow)}
-.calc__sub{font-size:15px;color:rgba(255,255,255,.7);margin:8px 0 28px}
-.calc__split{display:grid;gap:1px;background:rgba(255,255,255,.16);border-radius:14px;overflow:hidden}
-.calc__split div{background:var(--ink);padding:18px}
-.calc__split span{display:block;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.6)}
-.calc__split b{display:block;font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:6px}
-.calc__note{font-size:12px;color:rgba(255,255,255,.55);margin:22px 0 0;display:flex;gap:8px}
+/* Le rapport au prix de l'abonnement : l'argument tient en une ligne. */
+.calc__ratio{
+  display:flex;align-items:center;gap:11px;margin-top:10px;
+  background:rgba(255,247,92,.12);border:1px solid rgba(255,247,92,.3);
+  border-radius:15px;padding:14px 16px;font-size:13.5px;line-height:1.4;
+  color:rgba(255,255,255,.85)
+}
+.calc__ratio [data-lucide]{width:17px;height:17px;flex:none;color:var(--yellow)}
+.calc__ratio b{color:var(--yellow);font-weight:700}
+.calc__note{font-size:12px;color:rgba(255,255,255,.5);margin:20px 0 0;display:flex;gap:8px}
 .calc__note [data-lucide]{width:15px;height:15px;flex:none;margin-top:1px}
 
 /* ============================================================
@@ -806,7 +850,8 @@ input[type=range]::-moz-range-thumb{
 }
 .section--dark .container{position:relative;z-index:1}
 
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+/* Trois chiffres clés : la grille suit. */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .stat{
   position:relative;padding:34px 28px;border-radius:var(--r-card);
   background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);
@@ -871,6 +916,11 @@ input[type=range]::-moz-range-thumb{
    ============================================================ */
 .price-toggle{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:48px;flex-wrap:wrap}
 .seg--curr button{font-size:13px;padding:0 14px}
+@media (max-width:560px){
+  .seg--bill,.seg--curr{display:flex;flex-wrap:wrap;justify-content:center;max-width:100%}
+  .seg--bill button{flex:1 1 auto;padding:0 14px;font-size:14px}
+  .seg--curr button{padding:0 11px;height:34px}
+}
 .price-note{
   display:flex;align-items:center;justify-content:center;gap:8px;
   max-width:900px;margin:18px auto 0;text-align:center
@@ -1062,7 +1112,6 @@ input[type=range]::-moz-range-thumb{
   .nfc-box{flex-direction:column;align-items:flex-start}
   .nfc-box__price{text-align:left}
   .hero__cta .btn{flex:1}
-  .fig b{font-size:15px}
   .faq__q{font-size:17px}
   .plan__price b{font-size:38px}
 }
@@ -1271,7 +1320,7 @@ input[type=range]::-moz-range-thumb{
       <div>
         <p class="eyebrow">Pour quels commerces</p>
         <h2 class="h2">Si vos clients reviennent, <span data-brand>Backino</span> est fait pour vous</h2>
-        <p class="lead">Huit activités, huit programmes. Faites défiler pour voir l'exemple chiffré de la vôtre.</p>
+        <p class="lead">Tout commerce où l'on revient, quelle que soit l'activité. Voici quelques exemples — le vôtre se règle de la même façon.</p>
       </div>
       <div class="biz-nav">
         <button class="icon-btn" id="bizPrev" aria-label="Commerce précédent"><i data-lucide="arrow-left"></i></button>
@@ -1301,41 +1350,58 @@ input[type=range]::-moz-range-thumb{
       <div class="calc__panel">
         <div class="slider">
           <div class="slider__top">
-            <label for="cClients">Clients par jour</label>
+            <label for="cClients"><i><i data-lucide="users" aria-hidden="true"></i></i> Clients par jour</label>
             <span class="slider__val" id="cClientsVal">30</span>
           </div>
           <input type="range" id="cClients" min="5" max="300" step="5" value="30" aria-describedby="cClientsVal">
         </div>
         <div class="slider">
           <div class="slider__top">
-            <label for="cPanier">Panier moyen</label>
+            <label for="cPanier"><i><i data-lucide="receipt" aria-hidden="true"></i></i> Panier moyen</label>
             <span class="slider__val" id="cPanierVal">15 €</span>
           </div>
           <input type="range" id="cPanier" min="2" max="150" step="1" value="15" aria-describedby="cPanierVal">
         </div>
         <div class="slider">
           <div class="slider__top">
-            <label for="cJours">Jours d'ouverture par mois</label>
+            <label for="cJours"><i><i data-lucide="calendar-days" aria-hidden="true"></i></i> Jours d'ouverture par mois</label>
             <span class="slider__val" id="cJoursVal">26</span>
           </div>
           <input type="range" id="cJours" min="10" max="31" step="1" value="26" aria-describedby="cJoursVal">
         </div>
         <div class="slider">
           <div class="slider__top">
-            <label for="cGain">Gain de fréquentation</label>
+            <label for="cGain"><i><i data-lucide="trending-up" aria-hidden="true"></i></i> Gain de fréquentation</label>
             <span class="slider__val" id="cGainVal">10 %</span>
           </div>
           <input type="range" id="cGain" min="1" max="40" step="1" value="10" aria-describedby="cGainVal">
         </div>
       </div>
+
       <div class="calc__out">
         <p class="eyebrow">Votre potentiel</p>
-        <div class="calc__big" id="cMois">0 €</div>
-        <p class="calc__sub">de chiffre d'affaires additionnel par mois</p>
-        <div class="calc__split">
-          <div><span>Par an</span><b id="cAn">0 €</b></div>
-          <div><span>Visites supplémentaires par mois</span><b id="cVisites">0</b></div>
+        <p class="calc__amount">
+          <span class="calc__big" id="cMois">0 €</span>
+          <span class="calc__unit">/ mois</span>
+        </p>
+        <p class="calc__sub">de chiffre d'affaires additionnel, à activité égale.</p>
+
+        <div class="calc__tiles">
+          <div class="calc__tile">
+            <span><i data-lucide="calendar-range" aria-hidden="true"></i> Sur un an</span>
+            <b id="cAn">0 €</b>
+          </div>
+          <div class="calc__tile">
+            <span><i data-lucide="footprints" aria-hidden="true"></i> Visites en plus</span>
+            <b id="cVisites">0</b>
+          </div>
         </div>
+
+        <p class="calc__ratio">
+          <i data-lucide="sparkles" aria-hidden="true"></i>
+          <span id="cRatio">Soit l'équivalent de votre abonnement.</span>
+        </p>
+
         <p class="calc__note">
           <i data-lucide="info" aria-hidden="true"></i>
           Estimation indicative, calculée à partir des valeurs que vous avez saisies. Elle ne constitue pas un engagement de résultat.
@@ -1357,11 +1423,7 @@ input[type=range]::-moz-range-thumb{
     <div class="stats" data-stagger="110">
       <div class="stat">
         <b><span data-count="5" data-prefix="× ">× 5</span></b>
-        <p>Conquérir un nouveau client coûte jusqu'à cinq fois plus cher que de fidéliser un client existant.</p>
-      </div>
-      <div class="stat">
-        <b><span data-count="25" data-prefix="+ " data-suffix=" %">+ 25 %</span></b>
-        <p>Cinq points de rétention en plus peuvent augmenter les profits de 25 à 95 %.</p>
+        <p>Convertir un nouveau client coûte jusqu'à cinq fois plus cher que de fidéliser un client existant.</p>
       </div>
       <div class="stat">
         <b><span data-count="67" data-prefix="+ " data-suffix=" %">+ 67 %</span></b>
@@ -1409,11 +1471,8 @@ input[type=range]::-moz-range-thumb{
       <p class="lead">Commencez gratuitement. Passez au Pro quand votre base de clients grandit.</p>
     </div>
     <div class="price-toggle reveal">
-      <div class="seg" role="group" aria-label="Période de facturation">
-        <button id="billMonth" aria-pressed="true">Mensuel</button>
-        <button id="billYear" aria-pressed="false">Annuel</button>
-      </div>
-      <span class="pill pill--yellow"><i data-lucide="tag" aria-hidden="true" style="width:13px;height:13px"></i> −20 % à l'année</span>
+      <div class="seg seg--bill" id="billSeg" role="group" aria-label="Période de facturation"></div>
+      <span class="pill pill--yellow" id="billGift" hidden></span>
       <div class="seg seg--curr" id="priceCurr" role="group" aria-label="Devise d'affichage"></div>
     </div>
     <div class="plans reveal">
@@ -1451,18 +1510,18 @@ input[type=range]::-moz-range-thumb{
     <div class="nfc-box reveal">
       <div class="nfc-box__art" aria-hidden="true"><div class="qr" data-qr></div></div>
       <div class="nfc-box__txt">
-        <h3 class="h3">Carte NFC + QR code pour le comptoir</h3>
-        <p>La carte physique que vos clients approchent ou scannent pour s'inscrire. À commander une seule fois, en option.</p>
+        <h3 class="h3">QR code pour le comptoir</h3>
+        <p>Le chevalet que vos clients scannent pour s'inscrire, à vos couleurs. Compris dans l'abonnement, quelle que soit la formule.</p>
       </div>
       <div class="nfc-box__price">
-        <b id="cardPrice">15 €</b>
-        <span class="caption">paiement unique</span>
+        <b id="cardPrice">Offert</b>
+        <span class="caption">compris dans l'abonnement</span>
       </div>
     </div>
 
-    <p class="caption price-note" id="priceNote" hidden>
+    <p class="caption price-note" id="priceNote">
       <i data-lucide="info" aria-hidden="true"></i>
-      Montants convertis depuis l'euro à titre indicatif. La facturation est établie dans votre devise.
+      Prix hors taxes, par établissement. Chaque devise a son tarif : ce ne sont pas des conversions.
     </p>
   </div>
 </section>
@@ -1605,13 +1664,30 @@ const CURRENCY_PRESETS = {
 };
 const CURRENCY = { ...CURRENCY_PRESETS.EUR };
 
-/* Tarifs, exprimés en devise de base (euro) et convertis à l'affichage.
-   Un seul endroit à modifier pour changer les prix. */
+/* Tarifs. Le prix n'est pas une conversion : chaque devise a le sien,
+   arrondi pour être lisible sur place. Un seul endroit à modifier. */
 const PRICING = {
-  pro: 30,            // par mois et par établissement
-  card: 15,           // carte NFC + QR, paiement unique
-  annualOff: 0.20     // remise appliquée au paiement annuel
+  /* Par mois et par établissement, dans la devise affichée. */
+  pro: { EUR: 30, USD: 35, GBP: 25, MAD: 350, XOF: 20000 },
+  /* Le QR code du comptoir est offert. */
+  card: 0
 };
+
+/* Les périodes de facturation : on paie moins de mois qu'on n'en
+   consomme. Six mois pour le prix de cinq, douze pour le prix de dix. */
+const BILLING = [
+  { id: 'month', label: 'Mensuel',    months: 1,  paid: 1  },
+  { id: 'half',  label: 'Semestriel', months: 6,  paid: 5,  gift: '1 mois offert'  },
+  { id: 'year',  label: 'Annuel',     months: 12, paid: 10, gift: '2 mois offerts' }
+];
+
+/* Prix catalogue de la devise affichée, et mise en forme d'un montant
+   déjà exprimé dans cette devise (sans repasser par l'euro). */
+const proPrice = () => PRICING.pro[CURRENCY.code] ?? PRICING.pro.EUR;
+const priceMoney = v => new Intl.NumberFormat(CURRENCY.locale, {
+  style: 'currency', currency: CURRENCY.code, currencyDisplay: 'narrowSymbol',
+  minimumFractionDigits: 0, maximumFractionDigits: 0
+}).format(Math.round(v));
 
 const money = (v, opts = {}) => {
   let amount = v * CURRENCY.rate;
@@ -1963,13 +2039,13 @@ const STEPS = [
   },
   {
     title: 'Vos clients scannent',
-    text: 'Ils scannent le QR code ou approchent leur téléphone de la carte NFC posée au comptoir. La carte s’ajoute à leur Wallet.',
+    text: 'Ils scannent avec leur appareil photo le QR code posé sur votre comptoir. La carte s’ajoute à leur Wallet, à vos couleurs.',
     art: () => `
       <div class="pin-art">
         <span class="pin-art__label">Au comptoir</span>
         <div class="pin-art__qr">${'<div class="qr" data-qr></div>'}</div>
         <div class="pin-art__nfc"><i data-lucide="nfc"></i></div>
-        <span class="caption">QR code ou puce NFC</span>
+        <span class="caption">Un scan, rien de plus</span>
       </div>`
   },
   {
@@ -2372,11 +2448,6 @@ function renderBiz() {
           <i data-lucide="gift" aria-hidden="true"></i>
           <span>${b.reward}</span>
         </p>
-        <div class="biz-figs">
-          <div class="fig"><span>Ticket moyen</span><b>${money(b.ticket, { maximumFractionDigits: b.ticket < 10 ? 2 : 0 })}</b></div>
-          <div class="fig"><span>Récompense</span><b>${money(b.cost, { maximumFractionDigits: 2 })}</b></div>
-          <div class="fig"><span>Du ticket</span><b>${Math.round(b.cost / b.ticket * 100)} %</b></div>
-        </div>
       </div>
     </article>`).join('');
 
@@ -2477,6 +2548,19 @@ function renderCalc() {
   $('#cMois').textContent    = money(mois);
   $('#cAn').textContent      = money(mois * 12);
   $('#cVisites').textContent = `+ ${num(visites)}`;
+
+  /* Le gain, rapporté au prix de l'abonnement : un rapport, donc
+     valable quelle que soit la devise affichée. */
+  const ratio = mois / PRICING.pro.EUR;
+  $('#cRatio').innerHTML = ratio < 1
+    ? 'Même en dessous du prix de l’abonnement, chaque visite gagnée reste une visite de plus.'
+    : `Soit <b>${num(Math.round(ratio))} fois</b> le prix de votre abonnement Pro, chaque mois.`;
+
+  /* Piste remplie : la part parcourue de chaque curseur. */
+  Object.values(calcInputs).forEach(i => {
+    const pct = (i.value - i.min) / (i.max - i.min) * 100;
+    i.style.setProperty('--p', pct.toFixed(1));
+  });
 }
 /* Petit sursaut du résultat à chaque mouvement de curseur : l'œil
    comprend que le chiffre vient de changer. */
@@ -2540,37 +2624,50 @@ $('#testiNext').addEventListener('click', () => setTesti(testiIdx + 1));
 /* ============================================================
    11. Tarifs — période et devise
    ============================================================ */
-const billMonth = $('#billMonth'), billYear = $('#billYear');
-let annualBilling = false;
+let billing = BILLING[0];
 
-/* Sélecteur de devise propre à la section Tarifs. */
+/* Sélecteurs de période et de devise propres à la section Tarifs. */
+$('#billSeg').innerHTML = BILLING
+  .map(b => `<button data-bill="${b.id}" aria-pressed="${b.id === billing.id}">${b.label}</button>`)
+  .join('');
 $('#priceCurr').innerHTML = Object.entries(CURRENCY_PRESETS)
   .map(([k, c]) => `<button data-curr="${k}" aria-pressed="${k === CURRENCY.code}">${c.label}</button>`)
   .join('');
 
 function renderPricing() {
-  const perMonth = annualBilling ? PRICING.pro * (1 - PRICING.annualOff) : PRICING.pro;
+  /* Le prix mensuel ne bouge pas : la remise ne se prend pas sur le
+     prix, elle se prend en mois offerts. Ce qui change, c'est ce que
+     le commerçant règle en une fois. */
+  const month = proPrice();
+  const total = month * billing.paid;
 
-  $('#freePrice').textContent = money(0);
-  $('#proPrice').textContent = money(perMonth);
-  $('#cardPrice').textContent = money(PRICING.card);
+  $('#freePrice').textContent = priceMoney(0);
+  $('#proPrice').textContent = priceMoney(month);
 
-  $('#proBilled').textContent = annualBilling
-    ? `facturé ${money(perMonth * 12)} par an, remise incluse`
-    : 'facturé chaque mois';
+  $('#proBilled').textContent = billing.id === 'month'
+    ? 'facturé chaque mois'
+    : `${priceMoney(total)} ${billing.id === 'half' ? 'tous les 6 mois' : 'par an'} · ${billing.gift}`;
 
-  billMonth.setAttribute('aria-pressed', String(!annualBilling));
-  billYear.setAttribute('aria-pressed', String(annualBilling));
+  const gift = $('#billGift');
+  gift.hidden = !billing.gift;
+  if (billing.gift) {
+    gift.innerHTML = `<i data-lucide="gift" aria-hidden="true" style="width:13px;height:13px"></i> ${billing.gift}`;
+  }
+
+  $$('#billSeg button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.bill === billing.id)));
   $$('#priceCurr button').forEach(b =>
     b.setAttribute('aria-pressed', String(b.dataset.curr === CURRENCY.code)));
 
-  /* Le choix d'une autre devise que l'euro reste une conversion. */
-  $('#priceNote').hidden = CURRENCY.code === 'EUR';
+  /* Chaque devise a son prix catalogue : rien n'est converti. */
+  $('#priceNote').hidden = false;
+  icons();
 }
 
-const setBilling = annual => { annualBilling = annual; renderPricing(); };
-billMonth.addEventListener('click', () => setBilling(false));
-billYear.addEventListener('click', () => setBilling(true));
+$$('#billSeg button').forEach(b => b.addEventListener('click', () => {
+  billing = BILLING.find(x => x.id === b.dataset.bill) || BILLING[0];
+  renderPricing();
+}));
 
 $$('#priceCurr button').forEach(b => b.addEventListener('click', () => {
   setCurrency(b.dataset.curr);
@@ -2584,17 +2681,17 @@ renderPricing();
    ============================================================ */
 const FAQ = [
   ['Faut-il une application pour mes clients ?',
-   'Non, et c’est le principe. Le client scanne votre QR code ou approche son téléphone de la carte NFC : la carte s’ajoute directement dans Google Wallet ou Apple Wallet, qui sont déjà installés sur son téléphone. Rien à télécharger, rien à mettre à jour.'],
+   'Non, et c’est le principe. Le client scanne votre QR code : la carte s’ajoute directement dans Google Wallet ou Apple Wallet, qui sont déjà installés sur son téléphone. Rien à télécharger, rien à mettre à jour.'],
   ['Est-ce compatible avec tous les téléphones ?',
    'Oui. Android reçoit la carte dans Google Wallet, iPhone dans Apple Wallet. Pour les téléphones plus anciens ou sans Wallet, nous générons une carte web : elle s’ouvre dans le navigateur et le client peut l’épingler sur son écran d’accueil. Les trois supports fonctionnent avec le même scan en caisse.'],
   ['Comment le client ajoute-t-il la carte, concrètement ?',
-   'Vous posez au comptoir une carte qui porte votre QR code et une puce NFC. Le client scanne le QR avec son appareil photo, ou pose son téléphone sur la carte. Une page s’ouvre, il saisit son prénom et son numéro, il valide : la carte est dans son Wallet. Comptez une vingtaine de secondes.'],
+   'Vous posez sur votre comptoir le chevalet qui porte votre QR code, compris dans l’abonnement. Le client le scanne avec son appareil photo. Une page s’ouvre à vos couleurs : il accepte les conditions, et la carte est dans son Wallet. Rien ne lui est demandé — ni nom, ni e-mail, ni numéro. Seule sa date de naissance lui est proposée, facultative, pour le cadeau d’anniversaire. Comptez une vingtaine de secondes.'],
   ['Et si je n’ai pas internet au comptoir ?',
    'Le scan continue de fonctionner. L’application de caisse enregistre les passages en local et affiche le nombre de scans en attente. Dès que la connexion revient, tout se synchronise automatiquement. Aucun passage n’est perdu.'],
   ['Combien d’établissements puis-je gérer, et avec quelle équipe ?',
    'Autant d’établissements que vous le souhaitez, depuis un seul compte. Chacun a son propre programme, ses clients, sa devise et son équipe. Un sélecteur en haut de l’écran vous fait passer de l’un à l’autre, et une vue consolidée additionne les chiffres de tous vos points de vente. L’ouverture d’un nouvel établissement ou le lancement d’une nouvelle carte se fait avec nous : votre abonnement étant facturé par établissement, nous mettons le programme en place et ajustons votre formule au passage. Côté équipe, trois rôles : le super gérant accède à tout et règle les droits de chacun, le gérant pilote le ou les établissements qui lui sont confiés, l’employé se limite au comptoir. Chaque droit s’ouvre ou se ferme membre par membre, et un accès se révoque en un clic.'],
   ['À qui appartiennent mes données clients ?',
-   'À vous. Votre base de clients reste la vôtre : vous pouvez l’exporter en CSV à tout moment, en un clic. Nous ne revendons aucune donnée et nous ne contactons jamais vos clients pour notre propre compte. Le consentement marketing est demandé à l’inscription et reste révocable par le client.']
+   'À vous — et il y en a très peu, volontairement. Une carte est identifiée par un code unique, pas par une identité : nous ne collectons ni nom, ni e-mail, ni numéro de téléphone. Ne restent que les passages, le solde et, si le client l’a voulu, sa date de naissance. Vous exportez cette base en CSV à tout moment, en un clic. Nous ne revendons aucune donnée et ne contactons jamais vos clients pour notre propre compte.']
 ];
 
 $('#faq').innerHTML = FAQ.map(([q, a], i) => `
